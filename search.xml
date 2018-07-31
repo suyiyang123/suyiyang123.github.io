@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title><![CDATA[hexo]]></title>
-    <url>%2F2018%2F07%2F31%2Fhexo%2F</url>
-    <content type="text"></content>
-  </entry>
-  <entry>
-    <title><![CDATA[Hello World]]></title>
-    <url>%2F2018%2F07%2F30%2Fhello-world%2F</url>
-    <content type="text"><![CDATA[Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new "My New Post" More info: Writing Run server1$ hexo server More info: Server Generate static files1$ hexo generate More info: Generating Deploy to remote sites1$ hexo deploy More info: Deployment]]></content>
+    <title><![CDATA[python笔记]]></title>
+    <url>%2F2018%2F07%2F31%2Fpython%E7%AC%94%E8%AE%B0%2F</url>
+    <content type="text"><![CDATA[今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题: 题目要求： 读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”） 我们可以看到filter.txt中内容为: 我们可以写下如下代码： user = input() file = open(&apos;filter.txt&apos;,&apos;r&apos;) newfile = file.read() a = [] for i in newfile: if i == &apos;\n&apos; or i == &apos;，&apos;: pass else: a.append(i) for i in user: for j in a: s = 0 if i == j: s += 1 print(&apos;*&apos;, end = &apos;&apos;) break if s == 0: print(i,end = &apos;&apos;) 先读取敏感词文本文件filter.txt，把这个文件中的内容根据逗号分成一个一个字符串，再让它与输入的内容一个一个字符进行比较，如果相等，就输出’*’，如果不相等就输出原来的字符。]]></content>
+      <tags>
+        <tag>Google编码规范 python小知识</tag>
+      </tags>
   </entry>
 </search>
