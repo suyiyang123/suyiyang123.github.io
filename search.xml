@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title><![CDATA[搭建博客]]></title>
-    <url>%2F2018%2F07%2F31%2F%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%2F</url>
-    <content type="text"><![CDATA[历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接： https://blog.csdn.net/u012150360/article/details/72793482 https://www.cnblogs.com/fengxiongZz/p/7707219.html https://www.jianshu.com/p/863f3f2d1733 还有hexo的next主题个性化教程：打造炫酷网站 根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。 就是在ssh-key配置时总是失败，经常会报这样的错误： The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established. RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件： Are you sure you want to continue connecting (yes/no)? //输入yes，回车]]></content>
-      <tags>
-        <tag>搭建博客</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[python笔记]]></title>
     <url>%2F2018%2F07%2F31%2Fpython%E7%AC%94%E8%AE%B0%2F</url>
     <content type="text"><![CDATA[今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题: 题目要求： 读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”） 我们可以看到filter.txt中内容为: 我们可以写下如下代码： user = input() file = open(&apos;filter.txt&apos;,&apos;r&apos;) newfile = file.read() a = [] for i in newfile: if i == &apos;\n&apos; or i == &apos;，&apos;: pass else: a.append(i) for i in user: for j in a: s = 0 if i == j: s += 1 print(&apos;*&apos;, end = &apos;&apos;) break if s == 0: print(i,end = &apos;&apos;) 先读取敏感词文本文件filter.txt，把这个文件中的内容根据逗号分成一个一个字符串，再让它与输入的内容一个一个字符进行比较，如果相等，就输出’*’，如果不相等就输出原来的字符。]]></content>
@@ -18,6 +10,14 @@
       <tags>
         <tag>Google编码规范</tag>
         <tag>python小知识</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[搭建博客]]></title>
+    <url>%2F2018%2F07%2F31%2F%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%2F</url>
+    <content type="text"><![CDATA[历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接： https://blog.csdn.net/u012150360/article/details/72793482 https://www.cnblogs.com/fengxiongZz/p/7707219.html https://www.jianshu.com/p/863f3f2d1733 还有hexo的next主题个性化教程：打造炫酷网站 根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。 就是在ssh-key配置时总是失败，经常会报这样的错误： The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established. RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件： Are you sure you want to continue connecting (yes/no)? //输入yes，回车]]></content>
+      <tags>
+        <tag>搭建博客</tag>
       </tags>
   </entry>
 </search>
