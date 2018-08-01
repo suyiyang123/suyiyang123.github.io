@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-08-01T03:10:38.823Z</updated>
+  <updated>2018-08-01T03:28:18.243Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,30 +15,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>搭建博客</title>
-    <link href="http://yoursite.com/2018/07/31/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/"/>
-    <id>http://yoursite.com/2018/07/31/搭建博客/</id>
-    <published>2018-07-31T09:04:16.000Z</published>
-    <updated>2018-08-01T03:10:38.823Z</updated>
-    
-    <content type="html"><![CDATA[<p>历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：</p><p><a href="https://blog.csdn.net/u012150360/article/details/72793482" target="_blank" rel="noopener">https://blog.csdn.net/u012150360/article/details/72793482</a></p><p><a href="https://www.cnblogs.com/fengxiongZz/p/7707219.html" target="_blank" rel="noopener">https://www.cnblogs.com/fengxiongZz/p/7707219.html</a></p><p><a href="https://www.jianshu.com/p/863f3f2d1733" target="_blank" rel="noopener">https://www.jianshu.com/p/863f3f2d1733</a></p><p>还有<a href="https://blog.csdn.net/qq_33699981/article/details/72716951" title="hexo的next主题个性化教程：打造炫酷网站" target="_blank" rel="noopener">hexo的next主题个性化教程：打造炫酷网站</a></p><p>根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。</p><p>就是在ssh-key配置时总是失败，经常会报这样的错误：</p><pre><code>The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established.RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 </code></pre><p>Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件：</p><p>  <code>Are you sure you want to continue connecting (yes/no)? //输入yes，回车</code></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：&lt;/p&gt;
-&lt;p&gt;&lt;a href=&quot;https://blog.csdn.net/u012150360/article/details/72793482
-      
-    
-    </summary>
-    
-    
-      <category term="搭建博客" scheme="http://yoursite.com/tags/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/"/>
-    
-  </entry>
   
   <entry>
     <title>python笔记</title>
@@ -64,6 +40,30 @@
       <category term="Google编码规范" scheme="http://yoursite.com/tags/Google%E7%BC%96%E7%A0%81%E8%A7%84%E8%8C%83/"/>
     
       <category term="python小知识" scheme="http://yoursite.com/tags/python%E5%B0%8F%E7%9F%A5%E8%AF%86/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>搭建博客</title>
+    <link href="http://yoursite.com/2018/07/31/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/"/>
+    <id>http://yoursite.com/2018/07/31/搭建博客/</id>
+    <published>2018-07-31T09:04:16.000Z</published>
+    <updated>2018-08-01T03:10:38.823Z</updated>
+    
+    <content type="html"><![CDATA[<p>历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：</p><p><a href="https://blog.csdn.net/u012150360/article/details/72793482" target="_blank" rel="noopener">https://blog.csdn.net/u012150360/article/details/72793482</a></p><p><a href="https://www.cnblogs.com/fengxiongZz/p/7707219.html" target="_blank" rel="noopener">https://www.cnblogs.com/fengxiongZz/p/7707219.html</a></p><p><a href="https://www.jianshu.com/p/863f3f2d1733" target="_blank" rel="noopener">https://www.jianshu.com/p/863f3f2d1733</a></p><p>还有<a href="https://blog.csdn.net/qq_33699981/article/details/72716951" title="hexo的next主题个性化教程：打造炫酷网站" target="_blank" rel="noopener">hexo的next主题个性化教程：打造炫酷网站</a></p><p>根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。</p><p>就是在ssh-key配置时总是失败，经常会报这样的错误：</p><pre><code>The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established.RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 </code></pre><p>Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件：</p><p>  <code>Are you sure you want to continue connecting (yes/no)? //输入yes，回车</code></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://blog.csdn.net/u012150360/article/details/72793482
+      
+    
+    </summary>
+    
+    
+      <category term="搭建博客" scheme="http://yoursite.com/tags/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/"/>
     
   </entry>
   
