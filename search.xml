@@ -13,8 +13,11 @@
       </tags>
   </entry>
   <entry>
-    <title></title>
+    <title><![CDATA[搭建博客]]></title>
     <url>%2F2018%2F07%2F31%2F%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%2F</url>
-    <content type="text"><![CDATA[##建立博客心得历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接： https://blog.csdn.net/u012150360/article/details/72793482 https://www.cnblogs.com/fengxiongZz/p/7707219.html https://www.jianshu.com/p/863f3f2d1733 还有hexo的next主题个性化教程：打造炫酷网站 根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。 就是在ssh-key配置时总是失败，经常会报这样的错误： `The authenticity of host ‘github.com (192.30.255.112)’ can’t be established. RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.` Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件： Are you sure you want to continue connecting (yes/no)? //输入yes，回车]]></content>
+    <content type="text"><![CDATA[历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接： https://blog.csdn.net/u012150360/article/details/72793482 https://www.cnblogs.com/fengxiongZz/p/7707219.html https://www.jianshu.com/p/863f3f2d1733 还有hexo的next主题个性化教程：打造炫酷网站 根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。 就是在ssh-key配置时总是失败，经常会报这样的错误： The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established. RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件： Are you sure you want to continue connecting (yes/no)? //输入yes，回车]]></content>
+      <tags>
+        <tag>搭建博客</tag>
+      </tags>
   </entry>
 </search>
