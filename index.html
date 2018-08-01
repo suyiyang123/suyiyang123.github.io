@@ -309,6 +309,139 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/31/搭建博客/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="biobby">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Su.">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/07/31/搭建博客/" itemprop="url">搭建博客</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-31T17:04:16+08:00">
+                2018-07-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+		  
+		  
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：</p>
+<p><a href="https://blog.csdn.net/u012150360/article/details/72793482" target="_blank" rel="noopener">https://blog.csdn.net/u012150360/article/details/72793482</a></p>
+<p><a href="https://www.cnblogs.com/fengxiongZz/p/7707219.html" target="_blank" rel="noopener">https://www.cnblogs.com/fengxiongZz/p/7707219.html</a></p>
+<p><a href="https://www.jianshu.com/p/863f3f2d1733" target="_blank" rel="noopener">https://www.jianshu.com/p/863f3f2d1733</a></p>
+<p>还有<a href="https://blog.csdn.net/qq_33699981/article/details/72716951" title="hexo的next主题个性化教程：打造炫酷网站" target="_blank" rel="noopener">hexo的next主题个性化教程：打造炫酷网站</a></p>
+<p>根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。</p>
+<p>就是在ssh-key配置时总是失败，经常会报这样的错误：</p>
+<pre><code>The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established.
+
+RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 
+</code></pre><p>Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件：</p>
+<p>  <code>Are you sure you want to continue connecting (yes/no)? //输入yes，回车</code></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/31/python笔记/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -414,139 +547,6 @@
             </a>
           </div>
           <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/31/搭建博客/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="biobby">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/header.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Su.">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/31/搭建博客/" itemprop="url">搭建博客</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-31T17:04:16+08:00">
-                2018-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-		  
-		  
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：</p>
-<p><a href="https://blog.csdn.net/u012150360/article/details/72793482" target="_blank" rel="noopener">https://blog.csdn.net/u012150360/article/details/72793482</a></p>
-<p><a href="https://www.cnblogs.com/fengxiongZz/p/7707219.html" target="_blank" rel="noopener">https://www.cnblogs.com/fengxiongZz/p/7707219.html</a></p>
-<p><a href="https://www.jianshu.com/p/863f3f2d1733" target="_blank" rel="noopener">https://www.jianshu.com/p/863f3f2d1733</a></p>
-<p>还有<a href="https://blog.csdn.net/qq_33699981/article/details/72716951" title="hexo的next主题个性化教程：打造炫酷网站" target="_blank" rel="noopener">hexo的next主题个性化教程：打造炫酷网站</a></p>
-<p>根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。</p>
-<p>就是在ssh-key配置时总是失败，经常会报这样的错误：</p>
-<pre><code>The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established.
-
-RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 
-</code></pre><p>Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件：</p>
-<p>  <code>Are you sure you want to continue connecting (yes/no)? //输入yes，回车</code></p>
-
-          
         
       
     </div>

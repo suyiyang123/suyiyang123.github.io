@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-08-01T01:23:32.081Z</updated>
+  <updated>2018-08-01T03:10:38.823Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,33 +15,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>python笔记</title>
-    <link href="http://yoursite.com/2018/07/31/python%E7%AC%94%E8%AE%B0/"/>
-    <id>http://yoursite.com/2018/07/31/python笔记/</id>
-    <published>2018-07-31T09:04:16.000Z</published>
-    <updated>2018-08-01T01:23:32.081Z</updated>
-    
-    <content type="html"><![CDATA[<font size="4" face="黑体">今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题:</font><p>题目要求：</p><p>读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。<br>（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”）</p><a id="more"></a><p>我们可以看到filter.txt中内容为:</p><p><img src="https://i.imgur.com/1OnpSt1.png" alt=""></p><p>我们可以写下如下代码：</p><pre><code>user = input()file = open(&apos;filter.txt&apos;,&apos;r&apos;)newfile = file.read()a = []for i in newfile:    if i == &apos;\n&apos; or i == &apos;，&apos;:        pass    else:        a.append(i)for i in user:    for j in a:        s = 0        if i == j:            s += 1            print(&apos;*&apos;, end = &apos;&apos;)            break    if s == 0:        print(i,end = &apos;&apos;)</code></pre><p>先读取敏感词文本文件filter.txt，把这个文件中的内容根据逗号分成一个一个字符串，再让它与输入的内容一个一个字符进行比较，如果相等，就输出’*’，如果不相等就输出原来的字符。</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;font size=&quot;4&quot; face=&quot;黑体&quot;&gt;今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题:&lt;/font&gt;
-
-&lt;p&gt;题目要求：&lt;/p&gt;
-&lt;p&gt;读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。&lt;br&gt;（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”）&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="python" scheme="http://yoursite.com/categories/python/"/>
-    
-    
-      <category term="Google编码规范" scheme="http://yoursite.com/tags/Google%E7%BC%96%E7%A0%81%E8%A7%84%E8%8C%83/"/>
-    
-      <category term="python小知识" scheme="http://yoursite.com/tags/python%E5%B0%8F%E7%9F%A5%E8%AF%86/"/>
-    
-  </entry>
   
   <entry>
     <title>搭建博客</title>
@@ -64,6 +37,33 @@
     
     
       <category term="搭建博客" scheme="http://yoursite.com/tags/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>python笔记</title>
+    <link href="http://yoursite.com/2018/07/31/python%E7%AC%94%E8%AE%B0/"/>
+    <id>http://yoursite.com/2018/07/31/python笔记/</id>
+    <published>2018-07-31T09:04:16.000Z</published>
+    <updated>2018-08-01T03:28:18.243Z</updated>
+    
+    <content type="html"><![CDATA[<font size="4" face="黑体">今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题:</font><p>题目要求：</p><p>读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。<br>（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”）</p><a id="more"></a><p>我们可以看到filter.txt中内容为:</p><p><img src="https://i.imgur.com/1OnpSt1.png" alt=""></p><p>我们可以写下如下代码：</p><pre><code>user = input()file = open(&apos;filter.txt&apos;,&apos;r&apos;)newfile = file.read()a = []for i in newfile:    if i == &apos;\n&apos; or i == &apos;，&apos;:        pass    else:        a.append(i)for i in user:    for j in a:        s = 0        if i == j:            s += 1            print(&apos;*&apos;, end = &apos;&apos;)            break    if s == 0:        print(i,end = &apos;&apos;)</code></pre><p>先读取敏感词文本文件filter.txt，把这个文件中的内容根据逗号分成一个一个字符串，再让它与输入的内容一个一个字符进行比较，如果相等，就输出’*’，如果不相等就输出原来的字符。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;font size=&quot;4&quot; face=&quot;黑体&quot;&gt;今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题:&lt;/font&gt;
+
+&lt;p&gt;题目要求：&lt;/p&gt;
+&lt;p&gt;读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。&lt;br&gt;（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”）&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="python" scheme="http://yoursite.com/categories/python/"/>
+    
+    
+      <category term="Google编码规范" scheme="http://yoursite.com/tags/Google%E7%BC%96%E7%A0%81%E8%A7%84%E8%8C%83/"/>
+    
+      <category term="python小知识" scheme="http://yoursite.com/tags/python%E5%B0%8F%E7%9F%A5%E8%AF%86/"/>
     
   </entry>
   
