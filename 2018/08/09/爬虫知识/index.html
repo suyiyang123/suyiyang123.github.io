@@ -94,7 +94,7 @@
 <meta property="og:image" content="https://i.imgur.com/W4lfdim.png">
 <meta property="og:image" content="https://i.imgur.com/t4H6NHv.jpg">
 <meta property="og:image" content="https://i.imgur.com/pqaFrb2.jpg">
-<meta property="og:updated_time" content="2018-08-10T01:54:33.432Z">
+<meta property="og:updated_time" content="2018-08-31T11:53:45.141Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="爬虫知识">
 <meta name="twitter:description" content="##Python2和Python3中urllib库中urlencode的使用注意事项 在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。 详细介绍可以参考https://cuiqingcai.com/947.html">
@@ -420,8 +420,14 @@
 </ul>
 <ul>
 <li><p>例如模拟登陆CSDN网站，示例程序如下：</p>
-<p>  import urllib2<br>  values = {“username”:”<a href="mailto:962457839@qq.com" target="_blank" rel="noopener">962457839@qq.com</a>“,”password”:”XXXX”}<br>  data = urllib.urlencode(values)<br>  url = “<a href="https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&quot;" target="_blank" rel="noopener">https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&quot;</a><br>  request = urllib2.Request(url,data)<br>  response = urllib2.urlopen(request)<br>  print response.read()</p>
-</li>
+<pre><code>import urllib2
+values = {&quot;username&quot;:&quot;962457839@qq.com&quot;,&quot;password&quot;:&quot;XXXX&quot;}
+data = urllib.urlencode(values) 
+url = &quot;https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&quot;
+request = urllib2.Request(url,data)
+response = urllib2.urlopen(request)
+print response.read()
+</code></pre></li>
 </ul>
 <p>###对于Python3</p>
 <p>Python3中也有urllib和urllib3两个库，其中urllib几乎是Python2中urllib和urllib2两个模块的集合，所以我们最常用的urllib模块，而urllib3则作为一个拓展模块使用。</p>
@@ -430,8 +436,16 @@
 <p>  <code>urllib.parse.urlencode(values)</code></p>
 </li>
 <li><p>例如模拟登陆CSDN网站，示例程序如下:</p>
-<p>  from urllib import request<br>  from urllib import parse<br>  from urllib.request import urlopen<br>  values = {‘username’: <a href="mailto:&#39;962457839@qq.com" target="_blank" rel="noopener">&#39;962457839@qq.com</a>‘, ‘password’: ‘XXXX’}<br>  data = parse.urlencode(values).encode(‘utf-8’)  # 提交类型不能为str，需要为byte类型<br>  url = ‘<a href="https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&#39;" target="_blank" rel="noopener">https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&#39;</a><br>  request = request.Request(url, data)<br>  response = urlopen(request)<br>  print(response.read().decode())</p>
-</li>
+<pre><code>from urllib import request
+from urllib import parse
+from urllib.request import urlopen
+values = {&apos;username&apos;: &apos;962457839@qq.com&apos;, &apos;password&apos;: &apos;XXXX&apos;}
+data = parse.urlencode(values).encode(&apos;utf-8&apos;)  # 提交类型不能为str，需要为byte类型
+url = &apos;https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&apos;
+request = request.Request(url, data)
+response = urlopen(request)
+print(response.read().decode())
+</code></pre></li>
 </ul>
 <p>##正则表达式</p>
 <p>详细指南可以参考<a href="http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html" target="_blank" rel="noopener">http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html</a></p>
@@ -446,7 +460,7 @@ print p.findall(&apos;one1two2three3four4&apos;)
 
 ### output ###
 # [&apos;1&apos;, &apos;2&apos;, &apos;3&apos;, &apos;4&apos;]
-</code></pre><p>或:<br>    str = re.findall(r’密码错误’,html)<br>    输出：<br>    [‘密码错误’]</p>
+</code></pre><p>或:<br>            str = re.findall(r’密码错误’,html)<br>            输出：<br>            [‘密码错误’]</p>
 <p>##Python find()方法</p>
 <p>Python find() 方法检测字符串中是否包含子字符串 str ，如果指定 beg（开始） 和 end（结束） 范围，则检查是否包含在指定范围内，如果包含子字符串返回开始的索引值，否则返回-1。</p>
 <p>find()方法语法：</p>
