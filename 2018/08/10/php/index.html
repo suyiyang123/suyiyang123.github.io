@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="php," />
 
 
 
@@ -81,16 +81,18 @@
 
 
 
-<meta name="description" content="有些事情想着想着就错过了，做着做着就成功了">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Su.">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="php的详细使用可以参考http://php.net/manual/zh/ php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。">
+<meta name="keywords" content="php">
+<meta property="og:type" content="article">
+<meta property="og:title" content="php">
+<meta property="og:url" content="http://yoursite.com/2018/08/10/php/index.html">
 <meta property="og:site_name" content="Su.">
-<meta property="og:description" content="有些事情想着想着就错过了，做着做着就成功了">
+<meta property="og:description" content="php的详细使用可以参考http://php.net/manual/zh/ php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-08-10T01:55:02.023Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Su.">
-<meta name="twitter:description" content="有些事情想着想着就错过了，做着做着就成功了">
+<meta name="twitter:title" content="php">
+<meta name="twitter:description" content="php的详细使用可以参考http://php.net/manual/zh/ php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。">
 
 
 
@@ -120,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/08/10/php/"/>
 
 
 
 
 
-  <title>Su.</title>
+  <title>php | Su.</title>
   
 
 
@@ -145,8 +147,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 	<a href="https://github.com/suyiyang123/suyiyang123.github.io.git"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
 
@@ -294,9 +295,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -326,9 +327,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/10/php/" itemprop="url">php</a></h1>
+          <h1 class="post-title" itemprop="name headline">php</h1>
         
 
         <div class="post-meta">
@@ -402,17 +401,43 @@
       
 
       
-        
-          <p>php的详细使用可以参考<a href="http://php.net/manual/zh/" target="_blank" rel="noopener">http://php.net/manual/zh/</a></p>
+        <p>php的详细使用可以参考<a href="http://php.net/manual/zh/" target="_blank" rel="noopener">http://php.net/manual/zh/</a></p>
 <p>php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/08/10/php/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+<a id="more"></a>
+<pre><code>0e545993274517709034328855841020
+</code></pre><p>这是一个整数，在php里是理解为0*10^4549…20的意思，那么其值是0</p>
+<p>同样</p>
+<pre><code>0e342768416822451524974117254469
+</code></pre><p>这是一个整数，在php里是理解为0*10^34..69的意思，那么其值是0，两者就相等了</p>
+<p>举一个反面的例子</p>
+<p>1e1和1e2</p>
+<p>这里1e1=1<em>10^1=10，1e2=1</em>10^2=100</p>
+<p>所以1e1 == 1e2这是false，但是</p>
+<p>100 == 1e2 这是true，为什么呢，因为1e2先转为整型，是100</p>
+<p>注意，对于e是指幂次。而其他26字符并不具有此能力。</p>
+<p>参考：</p>
+<p><a href="http://php.net/manual/zh/language.operators.comparison.php" target="_blank" rel="noopener">http://php.net/manual/zh/language.operators.comparison.php</a></p>
+<pre><code>&lt;?php
+var_dump(0 == &quot;all&quot;); // 0 == 0 -&gt; true
+var_dump(&quot;1&quot; == &quot;01&quot;); // 1 == 1 -&gt; true
+var_dump(&quot;10&quot; == &quot;1e1&quot;); // 10 == 10 -&gt; true
+var_dump(100 == &quot;1e2&quot;); // 100 == 100 -&gt; true
+
+switch (&quot;a&quot;) {
+case 0:
+    echo &quot;0&quot;;
+    break;
+case &quot;a&quot;: // never reached because &quot;a&quot; is already matched with 0
+    echo &quot;a&quot;;
+    break;
+}
+?&gt;
+</code></pre><p>做比较，会先转换类型， all字符串转换成数字类型(int)就是 0 ， 所以中间成立返回真。</p>
+<pre><code>var_dump(08==8)这个结果返回是false，
+var_dump(09==9)这个结果返回也是false，
+而var_dump(07===7)返回true（var_dump(07==7)同样返回true。）
+</code></pre><p>php手册上有详细说明，整形以0开头的为八进制数，如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略，即09实际上为0，08也同理</p>
+
       
     </div>
     
@@ -427,316 +452,36 @@
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/09/爬虫知识/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="biobby">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/header.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Su.">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/09/爬虫知识/" itemprop="url">爬虫知识</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-09T09:46:43+08:00">
-                2018-08-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/爬虫/" itemprop="url" rel="index">
-                    <span itemprop="name">爬虫</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
+            <a href="/tags/php/" rel="tag"><i class="fa fa-tag"></i> php</a>
           
-
-          
-            
-          
-
-          
-          
-
-          
-		  
-		  
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          <p>##Python2和Python3中urllib库中urlencode的使用注意事项</p>
-<p>在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是<br>在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。</p>
-<p>详细介绍可以参考<a href="https://cuiqingcai.com/947.html" target="_blank" rel="noopener">https://cuiqingcai.com/947.html</a></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/08/09/爬虫知识/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/09/爬虫知识/" rel="next" title="爬虫知识">
+                <i class="fa fa-chevron-left"></i> 爬虫知识
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/06/ctf总结/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="biobby">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/header.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Su.">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/06/ctf总结/" itemprop="url">爬虫知识点</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+          <div class="post-nav-prev post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-06T15:13:52+08:00">
-                2018-08-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/爬虫/" itemprop="url" rel="index">
-                    <span itemprop="name">爬虫</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-		  
-		  
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <p>##文件夹创建与切换</p>
-<p>os.makedirs(os.path.join(“E:\name”, filename))</p>
-<p>在目录E:\name下创建名为filename的文件夹</p>
-<p>os.chdir(“E:\name\“ + filename)</p>
-<p>切换工作路径到E:\name\filename下</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/08/06/ctf总结/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -746,294 +491,11 @@
   </article>
 
 
-    
-      
 
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/31/python笔记/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="biobby">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/header.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Su.">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/31/python笔记/" itemprop="url">python笔记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-31T17:04:16+08:00">
-                2018-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/python/" itemprop="url" rel="index">
-                    <span itemprop="name">python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-		  
-		  
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <font size="4" face="黑体">今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题:</font>
-
-<p>题目要求：</p>
-<p>读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。<br>（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”）</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/07/31/python笔记/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+    <div class="post-spread">
       
     </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
   </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/31/搭建博客/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="biobby">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/header.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Su.">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/31/搭建博客/" itemprop="url">搭建博客</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-31T17:04:16+08:00">
-                2018-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-		  
-		  
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：</p>
-<p><a href="https://blog.csdn.net/u012150360/article/details/72793482" target="_blank" rel="noopener">https://blog.csdn.net/u012150360/article/details/72793482</a></p>
-<p><a href="https://www.cnblogs.com/fengxiongZz/p/7707219.html" target="_blank" rel="noopener">https://www.cnblogs.com/fengxiongZz/p/7707219.html</a></p>
-<p><a href="https://www.jianshu.com/p/863f3f2d1733" target="_blank" rel="noopener">https://www.jianshu.com/p/863f3f2d1733</a></p>
-<p>还有<a href="https://blog.csdn.net/qq_33699981/article/details/72716951" title="hexo的next主题个性化教程：打造炫酷网站" target="_blank" rel="noopener">hexo的next主题个性化教程：打造炫酷网站</a></p>
-<p>根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。</p>
-<p>就是在ssh-key配置时总是失败，经常会报这样的错误：</p>
-<pre><code>The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established.
-
-RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 
-</code></pre><p>Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件：</p>
-<p>  <code>Are you sure you want to continue connecting (yes/no)? //输入yes，回车</code></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-  </section>
-
-  
 
 
           </div>
@@ -1041,6 +503,10 @@ RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8
 
 
           
+
+  
+
+
 
         </div>
         
@@ -1288,6 +754,10 @@ RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 

@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-08-01T03:28:18.243Z</updated>
+  <updated>2018-08-10T01:55:02.023Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,81 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>php</title>
+    <link href="http://yoursite.com/2018/08/10/php/"/>
+    <id>http://yoursite.com/2018/08/10/php/</id>
+    <published>2018-08-10T01:31:50.000Z</published>
+    <updated>2018-08-10T01:55:02.023Z</updated>
+    
+    <content type="html"><![CDATA[<p>php的详细使用可以参考<a href="http://php.net/manual/zh/" target="_blank" rel="noopener">http://php.net/manual/zh/</a></p><p>php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。</p><a id="more"></a><pre><code>0e545993274517709034328855841020</code></pre><p>这是一个整数，在php里是理解为0*10^4549…20的意思，那么其值是0</p><p>同样</p><pre><code>0e342768416822451524974117254469</code></pre><p>这是一个整数，在php里是理解为0*10^34..69的意思，那么其值是0，两者就相等了</p><p>举一个反面的例子</p><p>1e1和1e2</p><p>这里1e1=1<em>10^1=10，1e2=1</em>10^2=100</p><p>所以1e1 == 1e2这是false，但是</p><p>100 == 1e2 这是true，为什么呢，因为1e2先转为整型，是100</p><p>注意，对于e是指幂次。而其他26字符并不具有此能力。</p><p>参考：</p><p><a href="http://php.net/manual/zh/language.operators.comparison.php" target="_blank" rel="noopener">http://php.net/manual/zh/language.operators.comparison.php</a></p><pre><code>&lt;?phpvar_dump(0 == &quot;all&quot;); // 0 == 0 -&gt; truevar_dump(&quot;1&quot; == &quot;01&quot;); // 1 == 1 -&gt; truevar_dump(&quot;10&quot; == &quot;1e1&quot;); // 10 == 10 -&gt; truevar_dump(100 == &quot;1e2&quot;); // 100 == 100 -&gt; trueswitch (&quot;a&quot;) {case 0:    echo &quot;0&quot;;    break;case &quot;a&quot;: // never reached because &quot;a&quot; is already matched with 0    echo &quot;a&quot;;    break;}?&gt;</code></pre><p>做比较，会先转换类型， all字符串转换成数字类型(int)就是 0 ， 所以中间成立返回真。</p><pre><code>var_dump(08==8)这个结果返回是false，var_dump(09==9)这个结果返回也是false，而var_dump(07===7)返回true（var_dump(07==7)同样返回true。）</code></pre><p>php手册上有详细说明，整形以0开头的为八进制数，如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略，即09实际上为0，08也同理</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;php的详细使用可以参考&lt;a href=&quot;http://php.net/manual/zh/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;http://php.net/manual/zh/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="php" scheme="http://yoursite.com/categories/php/"/>
+    
+    
+      <category term="php" scheme="http://yoursite.com/tags/php/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>爬虫知识</title>
+    <link href="http://yoursite.com/2018/08/09/%E7%88%AC%E8%99%AB%E7%9F%A5%E8%AF%86/"/>
+    <id>http://yoursite.com/2018/08/09/爬虫知识/</id>
+    <published>2018-08-09T01:46:43.000Z</published>
+    <updated>2018-08-10T01:54:33.432Z</updated>
+    
+    <content type="html"><![CDATA[<p>##Python2和Python3中urllib库中urlencode的使用注意事项</p><p>在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是<br>在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。</p><p>详细介绍可以参考<a href="https://cuiqingcai.com/947.html" target="_blank" rel="noopener">https://cuiqingcai.com/947.html</a></p><a id="more"></a><p>###对于Python2</p><p>Python2中提供了urllib和urllib2两个模块。</p><ul><li><p>urlencode方法所在位置为：</p><p>  <code>urllib.urlencode(values)    # 其中values为所需要编码的数据，并且只能为字典</code></p></li></ul><ul><li><p>例如模拟登陆CSDN网站，示例程序如下：</p><p>  import urllib2<br>  values = {“username”:”<a href="mailto:962457839@qq.com" target="_blank" rel="noopener">962457839@qq.com</a>“,”password”:”XXXX”}<br>  data = urllib.urlencode(values)<br>  url = “<a href="https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&quot;" target="_blank" rel="noopener">https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&quot;</a><br>  request = urllib2.Request(url,data)<br>  response = urllib2.urlopen(request)<br>  print response.read()</p></li></ul><p>###对于Python3</p><p>Python3中也有urllib和urllib3两个库，其中urllib几乎是Python2中urllib和urllib2两个模块的集合，所以我们最常用的urllib模块，而urllib3则作为一个拓展模块使用。</p><ul><li><p>urlencode方法所在位置</p><p>  <code>urllib.parse.urlencode(values)</code></p></li><li><p>例如模拟登陆CSDN网站，示例程序如下:</p><p>  from urllib import request<br>  from urllib import parse<br>  from urllib.request import urlopen<br>  values = {‘username’: <a href="mailto:&#39;962457839@qq.com" target="_blank" rel="noopener">&#39;962457839@qq.com</a>‘, ‘password’: ‘XXXX’}<br>  data = parse.urlencode(values).encode(‘utf-8’)  # 提交类型不能为str，需要为byte类型<br>  url = ‘<a href="https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&#39;" target="_blank" rel="noopener">https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&#39;</a><br>  request = request.Request(url, data)<br>  response = urlopen(request)<br>  print(response.read().decode())</p></li></ul><p>##正则表达式</p><p>详细指南可以参考<a href="http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html" target="_blank" rel="noopener">http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html</a></p><p>findall(string[, pos[, endpos]]) | re.findall(pattern, string[, flags]):</p><p>搜索string，以列表形式返回全部能匹配的子串。 </p><p>例如：</p><pre><code>import rep = re.compile(r&apos;\d+&apos;)# 使用Pattern匹配文本，获得匹配结果，无法匹配时将返回Noneprint p.findall(&apos;one1two2three3four4&apos;)### output #### [&apos;1&apos;, &apos;2&apos;, &apos;3&apos;, &apos;4&apos;]</code></pre><p>或:<br>    str = re.findall(r’密码错误’,html)<br>    输出：<br>    [‘密码错误’]</p><p>##Python find()方法</p><p>Python find() 方法检测字符串中是否包含子字符串 str ，如果指定 beg（开始） 和 end（结束） 范围，则检查是否包含在指定范围内，如果包含子字符串返回开始的索引值，否则返回-1。</p><p>find()方法语法：</p><pre><code>`str.find(str, beg=0, end=len(string))`</code></pre><p>str – 指定检索的字符串</p><p>beg – 开始索引，默认为0。</p><p>end – 结束索引，默认为字符串的长度。</p><p>###实例</p><pre><code>&gt;&gt;&gt;info = &apos;abca&apos;&gt;&gt;&gt; print info.find(&apos;a&apos;)    # 从下标0开始，查找在字符串里第一个出现的子串，返回结果：00&gt;&gt;&gt; print info.find(&apos;a&apos;,1)  # 从下标1开始，查找在字符串里第一个出现的子串：返回结果33&gt;&gt;&gt; print info.find(&apos;3&apos;)    # 查找不到返回-1-1&gt;&gt;&gt;</code></pre><p>##BeautifulSoup</p><p>详细的使用可以参考<a href="https://www.cnblogs.com/zhaof/p/6930955.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhaof/p/6930955.html</a></p><p>###标签选择器</p><p>print(soup.title)</p><p>print(type(soup.title))</p><p>通过这种soup.标签名 我们就可以获得这个标签的内容</p><p>这里有个问题需要注意，通过这种方式获取标签，如果文档中有多个这样的标签，返回的结果是第一个标签的内容，如上面我们通过soup.p获取p标签，而文档中有多个p标签，但是只返回了第一个p标签内容，例如：</p><pre><code>print(soup.h3)结果为：&lt;h3&gt;你需要在网址后输入数字77456&lt;/h3&gt;</code></pre><p>###find_all</p><p>find_all(name,attrs,recursive,text,**kwargs)</p><p>可以根据标签名，属性，内容查找文档，结果返回的是一个列表的方式</p><p>###find</p><p>find(name,attrs,recursive,text,**kwargs)</p><p>find返回的匹配结果的第一个元素</p><p>##黑板客爬虫挑战</p><p><img src="https://i.imgur.com/b30v7Ps.png" alt=""></p><p>可以模拟浏览器登录，获得密码</p><pre><code>import urllib.requestfrom bs4 import BeautifulSoupimport requestsurl = &apos;http://www.heibanke.com/lesson/crawler_ex01/&apos;s = &apos;密码错误&apos;for i in range(31):    data = {&apos;username&apos;: &apos;asd&apos;, &apos;password&apos;: i}    html = requests.post(url,data).text    if s not in html:        print(i)</code></pre><p>下面这是爬虫挑战的第三关，先出现了这个页面</p><p><img src="https://i.imgur.com/4cU5snJ.jpg" alt=""></p><p>先注册登录，登录后才进入这个页面：</p><p><img src="https://i.imgur.com/W4lfdim.png" alt=""></p><p>题目说比上一关多了两层保护，我们可以看到顶部有个注销按钮，也就是说首先要先登录才能继续做题。然后我开始观察在登录的时候除了用户名和密码到底还发送了些什么。打开chrome-&gt;右键审查元素-&gt;网络，然后再输入用户名密码登录，看右边面板中的Form Data，也就是我们发送的数据（参数）：</p><p><img src="https://i.imgur.com/t4H6NHv.jpg" alt=""></p><p>图中我们可以看到，除了发送用户名和密码，我们还发送了一个csrfmiddlewaretoken的数据，这个数据是什么呢？正好最近的web安全课里讲过csrf攻击，也就知道点。那这个csrfmiddlewaretoken是怎么来的呢？回到题目的页面，刷新下网页，在Response Headers也就是服务器响应的数据的Set-Cookie里发现有个csrftoken的字段：</p><p><img src="https://i.imgur.com/pqaFrb2.jpg" alt=""></p><p>我们先记住这个值，然后再登录一遍，发现发送的表单数据中的csrfmiddlewaretoken中的值就是这个。也就是说，每次登录的时候还要拿进入这个页面服务器给你的“csrftoken”作为你下次登录时的“csrfmiddlewaretoken”和用户名密码一起传给服务器。</p><p>经过观察还发现，登录“黑板课记账”的时候用的也是相同的方法，这就是题目所说的“两层保护”。<br>所以我们可以写出代码：</p><pre><code>import requestsfrom bs4 import BeautifulSoupurl_1=&apos;http://www.heibanke.com/accounts/login&apos;url_2=&apos;http://www.heibanke.com/lesson/crawler_ex02&apos;data_1={}#手动创建的用户和密码,字典data_1[&apos;username&apos;]=&apos;ybyb520&apos;data_1[&apos;password&apos;]=123456data_1[&apos;csrfmiddlewaretoken&apos;]=&apos;&apos;data_2={}#试探的用户和密码data_2[&apos;username&apos;]=&apos;yb&apos;data_2[&apos;csrfmiddlewaretoken&apos;]=&apos;&apos;data_2[&apos;password&apos;]=0s=requests.Session()#存储特定用户会话所需的信息。这样，当用户在应用程序的 Web 页之间跳转时，存储在 Session 对象中的变量将不会丢失，而是在整个用户会话中一直存在下去s.get(url_1)data_1[&apos;csrfmiddlewaretoken&apos;]=s.cookies[&apos;csrftoken&apos;]#通过发链接获得csrfmiddlewaretoken的值s.post(url_1,data_1)#发送数据data_2[&apos;csrfmiddlewaretoken&apos;]=s.cookies[&apos;csrftoken&apos;]#得到另外一个csrfmiddlewaretoken，csrfmiddlewaretoken不是一直不变的，每次访问值都不同for i in range(0,30):#密码猜测    data_2[&apos;password&apos;]=i    result=s.post(&quot;http://www.heibanke.com/lesson/crawler_ex02/&quot;,data=data_2)    if result.text.find(&apos;错误&apos;) == -1:        print(&apos;密码是：&apos;+str(data_2[&apos;password&apos;]))        break    else:        print(str(data_2[&apos;password&apos;])+&apos;不是密码&apos;)</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;##Python2和Python3中urllib库中urlencode的使用注意事项&lt;/p&gt;
+&lt;p&gt;在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是&lt;br&gt;在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。&lt;/p&gt;
+&lt;p&gt;详细介绍可以参考&lt;a href=&quot;https://cuiqingcai.com/947.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;https://cuiqingcai.com/947.html&lt;/a&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="爬虫" scheme="http://yoursite.com/categories/%E7%88%AC%E8%99%AB/"/>
+    
+    
+      <category term="urlencode，正则表达式，BeautifulSoup，黑板客爬虫" scheme="http://yoursite.com/tags/urlencode%EF%BC%8C%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%EF%BC%8CBeautifulSoup%EF%BC%8C%E9%BB%91%E6%9D%BF%E5%AE%A2%E7%88%AC%E8%99%AB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>爬虫知识点</title>
+    <link href="http://yoursite.com/2018/08/06/ctf%E6%80%BB%E7%BB%93/"/>
+    <id>http://yoursite.com/2018/08/06/ctf总结/</id>
+    <published>2018-08-06T07:13:52.000Z</published>
+    <updated>2018-08-09T01:29:55.646Z</updated>
+    
+    <content type="html"><![CDATA[<p>##文件夹创建与切换</p><p>os.makedirs(os.path.join(“E:\name”, filename))</p><p>在目录E:\name下创建名为filename的文件夹</p><p>os.chdir(“E:\name\“ + filename)</p><p>切换工作路径到E:\name\filename下</p><a id="more"></a><p>##创建目录</p><p>在Python中可以使用os.mkdir()函数创建目录（创建一级目录）。</p><p>　　其原型如下所示：</p><p>　　os.mkdir(path)</p><p>　　其参数path 为要创建目录的路径。</p><p>　　例如要在D盘下创建hello的目录(或在已有的文件夹中创建新的文件夹）</p><pre><code>&gt;&gt;&gt; import os　　&gt;&gt;&gt; os.mkdir(&apos;d:\hello&apos;)&gt;&gt;&gt;os.mkdir(&apos;d:\\hello\\23&apos;)　　</code></pre><p>　　可以使用os.makedirs（）函数创建多级目录。</p><p>　　其原型如下所示：</p><p>　　os.makedirs(path)</p><p>　　其参数path 为要创建目录的路径。</p><p>　　如在D盘下创建books的目录，books目录下在创建book目录</p><pre><code>&gt;&gt;&gt; import os　　&gt;&gt;&gt;os.makedirs(&apos;d:\\books\\book&apos;)　</code></pre><p>##删除目录</p><p>在Python中可以使用os.rmdir()函数删除目录。</p><p>　　其原型如下所示：</p><p>　　os.rmdir(path)</p><p>　　其参数path 为要删除的目录的路径。</p><p>　　例如把D盘下的hmm的目录删除</p><p>　　&gt;&gt;&gt; import os</p><p>　　&gt;&gt;&gt; os.rmdir(‘d:\hmm’) </p><p>删除多级目录</p><p>　　在Python中可以使用os.removedirs()函数删除多级目录。</p><p>　　其原型如下所示：</p><p>　　os.removdirs(path)</p><p>　　其参数path 为要删除的多级目录的路径。</p><p>　　&gt;&gt;&gt; import os</p><p>　　&gt;&gt;&gt; os.removedirs(‘d:\books\book’)</p><p>　　#注意：要删除的目录必须是空目录</p><p>##删除文件</p><p>　　在Python中可以使用os.remove()函数删除文件（注意一定是一个文件）。</p><p>　　其原型如下所示：</p><p>　　os.remov(path)</p><p>　　其参数path 为要删除的文件的路径。</p><p>　　如删除D盘下books目录下book目录中的book.txt的文件</p><p>　　&gt;&gt;&gt; import os</p><p>　　&gt;&gt;&gt;os.remove(‘d:\books\book\book.txt’)　　</p><p>##遍历目录</p><p>　　在Python中可以使用os.walk()函数遍历目录。</p><p>　　其原型如下所示：</p><p>　　os.walk(path)</p><p>　　其参数path 为要遍历的目录，遍历path，返回一个对象，他的每个部分都是一个三元组 (‘目录x’，[目录x下的目录list]，目录x下面的文件) 。如：</p><pre><code>　　&gt;&gt;&gt; a=os.walk(&apos;d:\\books&apos;)　　&gt;&gt;&gt; def  fun():             　　  for i in a:                    　　   print i　　&gt;&gt;&gt; fun()　　(&apos;d:\\books&apos;, [&apos;book&apos;], [&apos;aa.txt&apos;])　　(&apos;d:\\books\\book&apos;, [ ], [ ])</code></pre><p>##判断是否为目录</p><p>　　在Python中可以使用os.path.isdir()函数判断某一路径是否为目录。</p><p>　　其函数原型如下所示：</p><p>　　os.path.isdir(path)</p><p>　　其参数 path为 要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p><p>##判断是否为文件</p><p>　　在Python中可以使用os.path.isfile()函数判断某一路径是否为文件。其函数原型如下所示。</p><p>　　os.path.isfile(path)</p><p>　　其参数path为要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p><p>##获取目标内容</p><p>get_text():获取标签里面的内容，可以获取文本内容，例如：</p><pre><code>html=&apos;&apos;&apos;&lt;div class=&quot;panel&quot;&gt;    &lt;div class=&quot;panel-heading&quot;&gt;        &lt;h4&gt;Hello&lt;/h4&gt;    &lt;/div&gt;    &lt;div class=&quot;panel-body&quot;&gt;        &lt;ul class=&quot;list&quot; id=&quot;list-1&quot;&gt;            &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt;            &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt;            &lt;li class=&quot;element&quot;&gt;Jay&lt;/li&gt;        &lt;/ul&gt;        &lt;ul class=&quot;list list-small&quot; id=&quot;list-2&quot;&gt;            &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt;            &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt;        &lt;/ul&gt;    &lt;/div&gt;&lt;/div&gt;&apos;&apos;&apos;from bs4 import BeautifulSoupsoup = BeautifulSoup(html, &apos;lxml&apos;)for li in soup.select(&apos;li&apos;):    print(li.get_text())</code></pre><p>返回结果为：</p><pre><code>FoortBarJayFooBar</code></pre><p>##sql万能钥匙注入</p><p> 我们登录一个网站的时候会有账户名和密码都要输入进去。这样的方法禁止非法进入网站，它是这样构造SQL语句的，假设填写用户名为marcofly密码为test。因为根据我们提交的用户名和密码被合成到SQL查询语句当中之后是这样的：</p><p>select * from users where username=’marcofly’ and password=md5(‘test’) </p><p>这样如果数据库不存在这样的字段就表示输入错误，无法登陆。正常情况下是如此，但是对于有SQL注入漏洞的网站来说，只要构造个特殊的“字符串”，照样能够成功登录。  比如我们填写用户名为zlq’ or ‘1’=’1’ or ‘1’=’1看看，这样后构造出的SQL语句为</p><p> select * from users where username=’zlq’ or ‘1’=’1’ or ‘1’=’1’ and password=md5(‘test’) //就是替换marcofly这个字符串</p><p>替换之后它是怎么执行的呢，先执行and部分，就是 ‘1’=’1’ and password=md5(‘test’)，这个密码对不上是返回假，就是不正确，然后执行or，<br> ‘zlq’ or ‘1’=’1’这个是或者的意思， ‘zlq’ 为真或者’1’=’1’为真就正确，’1’=’1’肯定为真的，所以正确，我们把代码缩小看看<br>（’zlq’ or ‘1’=’1’ ）or （’1’=’1’ and password=md5(‘test’)  ），这里给出逻辑’zlq’ or ‘1’=’1’ 为真，’1’=’1’ and password=md5(‘test’)为假，（真 ）or （假），即为正确  。你测试要是有万能密码漏洞的页面都能成功，而且很多人用htmlspecialchars过滤也没效果，因为htmlspecialchars需要填写两一个参数才能过滤单引号，默认是不过滤单引号的，所以上面的注入100%成功。</p><p>我们再输入’ or 1=1#看看，把marcofly替换’ or 1=1#</p><p> select * from users where username=’’ or 1=1#’ and password=md5(‘test’) </p><p> 语义分析：“#”在mysql中是注释符，这样井号后面的内容将被mysql视为注释内容，这样就不会去执行了，换句话说，以下的两句sql语句等价： select * from users where username=’’ or 1=1<br>这样1=1永远为真，or那么执行成功 。</p><p>现在我给出解决这个漏洞终极方案，保证天煞都无法入侵成功。是这样的，不知道前面看到没有，password=md5(‘test’)就是说把密码经过MD5加密后再查询SQL，因为经过MD5加密后的字符串是32位的，那么经过加密后的都是一连串的像这样的ac59075b964b0715字符，是不可能办到去转换执行SQL语句的。我们经过改写SQL语句成这样：</p><p>  select * from users where username=md5(‘marcofly’)  and password=md5(‘test’) </p><p>我们再次输入用户名为 zlq’ or ‘1’=’1’ or ‘1’=’1看看，执行的语句已经变为</p><p>select * from users where username=‘6c92bfdc2da722a1’  and password=‘4621d373cade4e83’</p><p>看到了吧，无论你输入什么新型的SQL万能密码注入语句都行，都是转为一个MD5字符串。不要嫌弃经过MD5转换的效率，这里只用MD5加密过滤什么的都不用 ，其实企业中没有一个说嫌过滤牺牲性能的，如果真有这样的站长让我瞧瞧，让我膜拜一下。其实注入攻击难就难在参数性SQL注入，因为你不可能用MD5加密查询一个数据然后用MD5呈现给客户吧，如果有时间我再讲讲SQL注入的强大防御阵营。</p><p>##sql注入常见万能密码</p><pre><code>1：&quot;or &quot;a&quot;=&quot;a2： &apos;)or(&apos;a&apos;=&apos;a3：or 1=1--4：&apos;or 1=1--5：a&apos;or&apos; 1=1--6：&quot;or 1=1--7：&apos;or&apos;a&apos;=&apos;a8：&quot;or&quot;=&quot;a&apos;=&apos;a9：&apos;or&apos;&apos;=&apos;10：&apos;or&apos;=&apos;or&apos;11：1 or &apos;1&apos;=&apos;1&apos;=112：1 or &apos;1&apos;=&apos;1&apos; or 1=113： &apos;OR 1=1%00</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;##文件夹创建与切换&lt;/p&gt;
+&lt;p&gt;os.makedirs(os.path.join(“E:\name”, filename))&lt;/p&gt;
+&lt;p&gt;在目录E:\name下创建名为filename的文件夹&lt;/p&gt;
+&lt;p&gt;os.chdir(“E:\name\“ + filename)&lt;/p&gt;
+&lt;p&gt;切换工作路径到E:\name\filename下&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="爬虫" scheme="http://yoursite.com/categories/%E7%88%AC%E8%99%AB/"/>
+    
+    
+      <category term="爬虫" scheme="http://yoursite.com/tags/%E7%88%AC%E8%99%AB/"/>
+    
+      <category term="sql" scheme="http://yoursite.com/tags/sql/"/>
+    
+  </entry>
   
   <entry>
     <title>python笔记</title>
