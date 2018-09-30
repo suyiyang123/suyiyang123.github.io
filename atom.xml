@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-08-10T01:55:02.023Z</updated>
+  <updated>2018-09-30T12:06:09.739Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,40 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>文件包含</title>
+    <link href="http://yoursite.com/2018/09/30/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
+    <id>http://yoursite.com/2018/09/30/文件包含/</id>
+    <published>2018-09-30T10:33:22.000Z</published>
+    <updated>2018-09-30T12:06:09.739Z</updated>
+    
+    <content type="html"><![CDATA[<p>##南邮文件包含ctf题##</p><p><img src="https://i.imgur.com/5QJFWhR.png" alt=""></p><p><img src="https://i.imgur.com/7vQRioW.png" alt=""></p><p><img src="https://i.imgur.com/gUBH2rU.png" alt=""></p><p>PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，<br>从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。</p><a id="more"></a><p>详细的本地文件包含漏洞介绍： <a href="https://www.cnblogs.com/wh4am1/p/6542398.html" target="_blank" rel="noopener">https://www.cnblogs.com/wh4am1/p/6542398.html</a></p><p>我们从第三幅图中很明显的看出这是个php文件，但是无法通过查看源码得到有效信息，因此尝试使用php://filter获取源码。</p><p>php://filter是PHP中的一个协议，利用这个协议我们可以解决一些ctf的题目，或者挖掘出一些漏洞。</p><pre><code>php:// — 访问各个输入/输出流（I/O streams）php://input 是个可以访问请求的原始数据的只读流。php://filter 是一种设计用来允许过滤器程序在打开时成为流的封装协议。这对于单独具有完整功能的文件函数非常有用，否则就没有机会在读取内容之前将过滤器应用于流之上。该协议语法为：php://filter:/&lt;action&gt;=&lt;name&gt;比如 php://filter:/resource=http://www.baidu.com</code></pre><p>###使用 php://filter 获取网页内容###：</p><pre><code>&lt;?php$url = &apos;http://www.phpfamily.cn&apos;;$data = file_get_contents(&apos;php://filter/resource=&apos; . $url);echo $data;  //输出结果我http://www.phpfamily.cn页面的内容</code></pre><p>###php://filter 的 参数列表###</p><ul><li>resource=&lt;要过滤的数据流&gt;          指定了你要筛选过滤的数据流。     （必选）</li><li>read=&lt;读链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li><li>write=&lt;写链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li><li>&lt;；两个链的筛选列表&gt;     任何没有以 read= 或 write= 作前缀 的筛选器列表会视情况应用于读或写链。</li></ul><p>###read参数值可为###</p><p>string.strip_tags： 将数据流中的所有html标签清除</p><p>string.toupper： 将数据流中的内容转换为大写</p><p>string.tolower： 将数据流中的内容转换为小写</p><p>convert.base64-encode： 将数据流中的内容转换为base64编码</p><p>convert.base64-decode： 与上面对应解码为典型的文件包含漏洞。</p><p>我们可以通过构造含有漏洞的语句，查看想要看的代码： file=php://filter/convert.base64-encode/resource=index.php 。再将得到的base64码解码即可。</p><p>在这道题中，我们就可以通过构造这样的语句查看隐藏的代码，如下网址:</p><p><img src="https://i.imgur.com/5m2c8p5.png" alt=""></p><p>然后在进行base64解码得到flag</p><p>flag:nctf{edulcni_elif_lacol_si_siht}</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;##南邮文件包含ctf题##&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/5QJFWhR.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/7vQRioW.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/gUBH2rU.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，&lt;br&gt;从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="PHP" scheme="http://yoursite.com/categories/PHP/"/>
+    
+    
+      <category term="php" scheme="http://yoursite.com/tags/php/"/>
+    
+      <category term="文件包含" scheme="http://yoursite.com/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/"/>
+    
+      <category term="LFI" scheme="http://yoursite.com/tags/LFI/"/>
+    
+      <category term="CTF" scheme="http://yoursite.com/tags/CTF/"/>
+    
+      <category term="php://filter" scheme="http://yoursite.com/tags/php-filter/"/>
+    
+  </entry>
   
   <entry>
     <title>php</title>

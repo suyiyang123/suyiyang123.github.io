@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[文件包含]]></title>
+    <url>%2F2018%2F09%2F30%2F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%2F</url>
+    <content type="text"><![CDATA[##南邮文件包含ctf题## PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。 详细的本地文件包含漏洞介绍： https://www.cnblogs.com/wh4am1/p/6542398.html 我们从第三幅图中很明显的看出这是个php文件，但是无法通过查看源码得到有效信息，因此尝试使用php://filter获取源码。 php://filter是PHP中的一个协议，利用这个协议我们可以解决一些ctf的题目，或者挖掘出一些漏洞。 php:// — 访问各个输入/输出流（I/O streams）php://input 是个可以访问请求的原始数据的只读流。 php://filter 是一种设计用来允许过滤器程序在打开时成为流的封装协议。这对于单独具有完整功能的文件函数非常有用，否则就没有机会在读取内容之前将过滤器应用于流之上。 该协议语法为：php://filter:/&lt;action&gt;=&lt;name&gt; 比如 php://filter:/resource=http://www.baidu.com ###使用 php://filter 获取网页内容###： &lt;?php$url = &apos;http://www.phpfamily.cn&apos;;$data = file_get_contents(&apos;php://filter/resource=&apos; . $url); echo $data; //输出结果我http://www.phpfamily.cn页面的内容 ###php://filter 的 参数列表### resource=&lt;要过滤的数据流&gt; 指定了你要筛选过滤的数据流。 （必选） read=&lt;读链的筛选列表&gt; 可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选） write=&lt;写链的筛选列表&gt; 可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选） &lt;；两个链的筛选列表&gt; 任何没有以 read= 或 write= 作前缀 的筛选器列表会视情况应用于读或写链。 ###read参数值可为### string.strip_tags： 将数据流中的所有html标签清除 string.toupper： 将数据流中的内容转换为大写 string.tolower： 将数据流中的内容转换为小写 convert.base64-encode： 将数据流中的内容转换为base64编码 convert.base64-decode： 与上面对应解码为典型的文件包含漏洞。 我们可以通过构造含有漏洞的语句，查看想要看的代码： file=php://filter/convert.base64-encode/resource=index.php 。再将得到的base64码解码即可。 在这道题中，我们就可以通过构造这样的语句查看隐藏的代码，如下网址: 然后在进行base64解码得到flag flag:nctf{edulcni_elif_lacol_si_siht}]]></content>
+      <categories>
+        <category>PHP</category>
+      </categories>
+      <tags>
+        <tag>php</tag>
+        <tag>文件包含</tag>
+        <tag>LFI</tag>
+        <tag>CTF</tag>
+        <tag>php://filter</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[php]]></title>
     <url>%2F2018%2F08%2F10%2Fphp%2F</url>
     <content type="text"><![CDATA[php的详细使用可以参考http://php.net/manual/zh/ php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。 0e545993274517709034328855841020 这是一个整数，在php里是理解为0*10^4549…20的意思，那么其值是0 同样 0e342768416822451524974117254469 这是一个整数，在php里是理解为0*10^34..69的意思，那么其值是0，两者就相等了 举一个反面的例子 1e1和1e2 这里1e1=110^1=10，1e2=110^2=100 所以1e1 == 1e2这是false，但是 100 == 1e2 这是true，为什么呢，因为1e2先转为整型，是100 注意，对于e是指幂次。而其他26字符并不具有此能力。 参考： http://php.net/manual/zh/language.operators.comparison.php &lt;?php var_dump(0 == &quot;all&quot;); // 0 == 0 -&gt; true var_dump(&quot;1&quot; == &quot;01&quot;); // 1 == 1 -&gt; true var_dump(&quot;10&quot; == &quot;1e1&quot;); // 10 == 10 -&gt; true var_dump(100 == &quot;1e2&quot;); // 100 == 100 -&gt; true switch (&quot;a&quot;) { case 0: echo &quot;0&quot;; break; case &quot;a&quot;: // never reached because &quot;a&quot; is already matched with 0 echo &quot;a&quot;; break; } ?&gt; 做比较，会先转换类型， all字符串转换成数字类型(int)就是 0 ， 所以中间成立返回真。 var_dump(08==8)这个结果返回是false， var_dump(09==9)这个结果返回也是false， 而var_dump(07===7)返回true（var_dump(07==7)同样返回true。） php手册上有详细说明，整形以0开头的为八进制数，如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略，即09实际上为0，08也同理]]></content>
