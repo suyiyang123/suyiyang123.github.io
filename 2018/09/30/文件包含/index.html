@@ -81,22 +81,22 @@
 
 
 
-<meta name="description" content="##南邮文件包含ctf题##    PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。">
+<meta name="description" content="南邮文件包含ctf题">
 <meta name="keywords" content="php,文件包含,LFI,CTF,php:&#x2F;&#x2F;filter">
 <meta property="og:type" content="article">
 <meta property="og:title" content="文件包含">
 <meta property="og:url" content="http://yoursite.com/2018/09/30/文件包含/index.html">
 <meta property="og:site_name" content="Su.">
-<meta property="og:description" content="##南邮文件包含ctf题##    PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。">
+<meta property="og:description" content="南邮文件包含ctf题">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://i.imgur.com/5QJFWhR.png">
 <meta property="og:image" content="https://i.imgur.com/7vQRioW.png">
 <meta property="og:image" content="https://i.imgur.com/gUBH2rU.png">
 <meta property="og:image" content="https://i.imgur.com/5m2c8p5.png">
-<meta property="og:updated_time" content="2018-09-30T12:06:09.739Z">
+<meta property="og:updated_time" content="2018-10-28T05:16:16.878Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="文件包含">
-<meta name="twitter:description" content="##南邮文件包含ctf题##    PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。">
+<meta name="twitter:description" content="南邮文件包含ctf题">
 <meta name="twitter:image" content="https://i.imgur.com/5QJFWhR.png">
 
 
@@ -406,12 +406,12 @@
       
 
       
-        <p>##南邮文件包含ctf题##</p>
-<p><img src="https://i.imgur.com/5QJFWhR.png" alt=""></p>
+        <h2 id="南邮文件包含ctf题"><a href="#南邮文件包含ctf题" class="headerlink" title="南邮文件包含ctf题"></a>南邮文件包含ctf题</h2><p><img src="https://i.imgur.com/5QJFWhR.png" alt=""></p>
+<a id="more"></a>
+<hr>
 <p><img src="https://i.imgur.com/7vQRioW.png" alt=""></p>
 <p><img src="https://i.imgur.com/gUBH2rU.png" alt=""></p>
 <p>PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，<br>从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。</p>
-<a id="more"></a>
 <p>详细的本地文件包含漏洞介绍： <a href="https://www.cnblogs.com/wh4am1/p/6542398.html" target="_blank" rel="noopener">https://www.cnblogs.com/wh4am1/p/6542398.html</a></p>
 <p>我们从第三幅图中很明显的看出这是个php文件，但是无法通过查看源码得到有效信息，因此尝试使用php://filter获取源码。</p>
 <p>php://filter是PHP中的一个协议，利用这个协议我们可以解决一些ctf的题目，或者挖掘出一些漏洞。</p>
@@ -422,19 +422,16 @@ php://filter 是一种设计用来允许过滤器程序在打开时成为流的�
 该协议语法为：php://filter:/&lt;action&gt;=&lt;name&gt;
 
 比如 php://filter:/resource=http://www.baidu.com
-</code></pre><p>###使用 php://filter 获取网页内容###：</p>
-<pre><code>&lt;?php$url = &apos;http://www.phpfamily.cn&apos;;$data = file_get_contents(&apos;php://filter/resource=&apos; . $url);
+</code></pre><h3 id="使用-php-filter-获取网页内容："><a href="#使用-php-filter-获取网页内容：" class="headerlink" title="使用 php://filter 获取网页内容："></a>使用 php://filter 获取网页内容：</h3><pre><code>&lt;?php$url = &apos;http://www.phpfamily.cn&apos;;$data = file_get_contents(&apos;php://filter/resource=&apos; . $url);
 
 echo $data;  //输出结果我http://www.phpfamily.cn页面的内容
-</code></pre><p>###php://filter 的 参数列表###</p>
-<ul>
+</code></pre><h3 id="php-filter-的参数列表"><a href="#php-filter-的参数列表" class="headerlink" title="php://filter 的参数列表"></a>php://filter 的参数列表</h3><ul>
 <li>resource=&lt;要过滤的数据流&gt;          指定了你要筛选过滤的数据流。     （必选）</li>
 <li>read=&lt;读链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li>
 <li>write=&lt;写链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li>
 <li>&lt;；两个链的筛选列表&gt;     任何没有以 read= 或 write= 作前缀 的筛选器列表会视情况应用于读或写链。</li>
 </ul>
-<p>###read参数值可为###</p>
-<p>string.strip_tags： 将数据流中的所有html标签清除</p>
+<h3 id="read参数值可为"><a href="#read参数值可为" class="headerlink" title="read参数值可为"></a>read参数值可为</h3><p>string.strip_tags： 将数据流中的所有html标签清除</p>
 <p>string.toupper： 将数据流中的内容转换为大写</p>
 <p>string.tolower： 将数据流中的内容转换为小写</p>
 <p>convert.base64-encode： 将数据流中的内容转换为base64编码</p>
@@ -542,8 +539,17 @@ echo $data;  //输出结果我http://www.phpfamily.cn页面的内容
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -614,6 +620,22 @@ echo $data;  //输出结果我http://www.phpfamily.cn页面的内容
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#南邮文件包含ctf题"><span class="nav-number">1.</span> <span class="nav-text">南邮文件包含ctf题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-php-filter-获取网页内容："><span class="nav-number">1.1.</span> <span class="nav-text">使用 php://filter 获取网页内容：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#php-filter-的参数列表"><span class="nav-number">1.2.</span> <span class="nav-text">php://filter 的参数列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#read参数值可为"><span class="nav-number">1.3.</span> <span class="nav-text">read参数值可为</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

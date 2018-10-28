@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="##文件夹创建与切换 os.makedirs(os.path.join(“E:\name”, filename)) 在目录E:\name下创建名为filename的文件夹 os.chdir(“E:\name\“ + filename) 切换工作路径到E:\name\filename下">
+<meta name="description" content="==mark text==文件夹创建与切换os.makedirs(os.path.join(“E:\name”, filename)) 在目录E:\name下创建名为filename的文件夹 os.chdir(“E:\name\“ + filename) 切换工作路径到E:\name\filename下">
 <meta name="keywords" content="爬虫,sql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="爬虫知识点">
 <meta property="og:url" content="http://yoursite.com/2018/08/06/ctf总结/index.html">
 <meta property="og:site_name" content="Su.">
-<meta property="og:description" content="##文件夹创建与切换 os.makedirs(os.path.join(“E:\name”, filename)) 在目录E:\name下创建名为filename的文件夹 os.chdir(“E:\name\“ + filename) 切换工作路径到E:\name\filename下">
+<meta property="og:description" content="==mark text==文件夹创建与切换os.makedirs(os.path.join(“E:\name”, filename)) 在目录E:\name下创建名为filename的文件夹 os.chdir(“E:\name\“ + filename) 切换工作路径到E:\name\filename下">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-08-09T01:29:55.646Z">
+<meta property="og:updated_time" content="2018-10-28T05:12:58.358Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="爬虫知识点">
-<meta name="twitter:description" content="##文件夹创建与切换 os.makedirs(os.path.join(“E:\name”, filename)) 在目录E:\name下创建名为filename的文件夹 os.chdir(“E:\name\“ + filename) 切换工作路径到E:\name\filename下">
+<meta name="twitter:description" content="==mark text==文件夹创建与切换os.makedirs(os.path.join(“E:\name”, filename)) 在目录E:\name下创建名为filename的文件夹 os.chdir(“E:\name\“ + filename) 切换工作路径到E:\name\filename下">
 
 
 
@@ -401,14 +401,12 @@
       
 
       
-        <p>##文件夹创建与切换</p>
-<p>os.makedirs(os.path.join(“E:\name”, filename))</p>
+        <h2 id="mark-text-文件夹创建与切换"><a href="#mark-text-文件夹创建与切换" class="headerlink" title="==mark text==文件夹创建与切换"></a>==mark text==文件夹创建与切换</h2><p>os.makedirs(os.path.join(“E:\name”, filename))</p>
 <p>在目录E:\name下创建名为filename的文件夹</p>
 <p>os.chdir(“E:\name\“ + filename)</p>
 <p>切换工作路径到E:\name\filename下</p>
 <a id="more"></a>
-<p>##创建目录</p>
-<p>在Python中可以使用os.mkdir()函数创建目录（创建一级目录）。</p>
+<h2 id="创建目录"><a href="#创建目录" class="headerlink" title="创建目录"></a>创建目录</h2><p>在Python中可以使用os.mkdir()函数创建目录（创建一级目录）。</p>
 <p>　　其原型如下所示：</p>
 <p>　　os.mkdir(path)</p>
 <p>　　其参数path 为要创建目录的路径。</p>
@@ -428,8 +426,7 @@
 
 　　&gt;&gt;&gt;os.makedirs(&apos;d:\\books\\book&apos;)
 　
-</code></pre><p>##删除目录</p>
-<p>在Python中可以使用os.rmdir()函数删除目录。</p>
+</code></pre><h2 id="删除目录"><a href="#删除目录" class="headerlink" title="删除目录"></a>删除目录</h2><p>在Python中可以使用os.rmdir()函数删除目录。</p>
 <p>　　其原型如下所示：</p>
 <p>　　os.rmdir(path)</p>
 <p>　　其参数path 为要删除的目录的路径。</p>
@@ -444,16 +441,14 @@
 <p>　　&gt;&gt;&gt; import os</p>
 <p>　　&gt;&gt;&gt; os.removedirs(‘d:\books\book’)</p>
 <p>　　#注意：要删除的目录必须是空目录</p>
-<p>##删除文件</p>
-<p>　　在Python中可以使用os.remove()函数删除文件（注意一定是一个文件）。</p>
+<h2 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h2><p>　　在Python中可以使用os.remove()函数删除文件（注意一定是一个文件）。</p>
 <p>　　其原型如下所示：</p>
 <p>　　os.remov(path)</p>
 <p>　　其参数path 为要删除的文件的路径。</p>
 <p>　　如删除D盘下books目录下book目录中的book.txt的文件</p>
 <p>　　&gt;&gt;&gt; import os</p>
 <p>　　&gt;&gt;&gt;os.remove(‘d:\books\book\book.txt’)　　</p>
-<p>##遍历目录</p>
-<p>　　在Python中可以使用os.walk()函数遍历目录。</p>
+<h2 id="遍历目录"><a href="#遍历目录" class="headerlink" title="遍历目录"></a>遍历目录</h2><p>　　在Python中可以使用os.walk()函数遍历目录。</p>
 <p>　　其原型如下所示：</p>
 <p>　　os.walk(path)</p>
 <p>　　其参数path 为要遍历的目录，遍历path，返回一个对象，他的每个部分都是一个三元组 (‘目录x’，[目录x下的目录list]，目录x下面的文件) 。如：</p>
@@ -464,17 +459,14 @@
 　　&gt;&gt;&gt; fun()
 　　(&apos;d:\\books&apos;, [&apos;book&apos;], [&apos;aa.txt&apos;])
 　　(&apos;d:\\books\\book&apos;, [ ], [ ])
-</code></pre><p>##判断是否为目录</p>
-<p>　　在Python中可以使用os.path.isdir()函数判断某一路径是否为目录。</p>
+</code></pre><h2 id="判断是否为目录"><a href="#判断是否为目录" class="headerlink" title="判断是否为目录"></a>判断是否为目录</h2><p>　　在Python中可以使用os.path.isdir()函数判断某一路径是否为目录。</p>
 <p>　　其函数原型如下所示：</p>
 <p>　　os.path.isdir(path)</p>
 <p>　　其参数 path为 要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p>
-<p>##判断是否为文件</p>
-<p>　　在Python中可以使用os.path.isfile()函数判断某一路径是否为文件。其函数原型如下所示。</p>
+<h2 id="判断是否为文件"><a href="#判断是否为文件" class="headerlink" title="判断是否为文件"></a>判断是否为文件</h2><p>　　在Python中可以使用os.path.isfile()函数判断某一路径是否为文件。其函数原型如下所示。</p>
 <p>　　os.path.isfile(path)</p>
 <p>　　其参数path为要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p>
-<p>##获取目标内容</p>
-<p>get_text():获取标签里面的内容，可以获取文本内容，例如：</p>
+<h2 id="获取目标内容"><a href="#获取目标内容" class="headerlink" title="获取目标内容"></a>获取目标内容</h2><p>get_text():获取标签里面的内容，可以获取文本内容，例如：</p>
 <pre><code>html=&apos;&apos;&apos;
 &lt;div class=&quot;panel&quot;&gt;
     &lt;div class=&quot;panel-heading&quot;&gt;
@@ -503,8 +495,7 @@ Bar
 Jay
 Foo
 Bar
-</code></pre><p>##sql万能钥匙注入</p>
-<p> 我们登录一个网站的时候会有账户名和密码都要输入进去。这样的方法禁止非法进入网站，它是这样构造SQL语句的，假设填写用户名为marcofly密码为test。因为根据我们提交的用户名和密码被合成到SQL查询语句当中之后是这样的：</p>
+</code></pre><h2 id="sql万能钥匙注入"><a href="#sql万能钥匙注入" class="headerlink" title="sql万能钥匙注入"></a>sql万能钥匙注入</h2><p> 我们登录一个网站的时候会有账户名和密码都要输入进去。这样的方法禁止非法进入网站，它是这样构造SQL语句的，假设填写用户名为marcofly密码为test。因为根据我们提交的用户名和密码被合成到SQL查询语句当中之后是这样的：</p>
 <p>select * from users where username=’marcofly’ and password=md5(‘test’) </p>
 <p>这样如果数据库不存在这样的字段就表示输入错误，无法登陆。正常情况下是如此，但是对于有SQL注入漏洞的网站来说，只要构造个特殊的“字符串”，照样能够成功登录。  比如我们填写用户名为zlq’ or ‘1’=’1’ or ‘1’=’1看看，这样后构造出的SQL语句为</p>
 <p> select * from users where username=’zlq’ or ‘1’=’1’ or ‘1’=’1’ and password=md5(‘test’) //就是替换marcofly这个字符串</p>
@@ -517,8 +508,7 @@ Bar
 <p>我们再次输入用户名为 zlq’ or ‘1’=’1’ or ‘1’=’1看看，执行的语句已经变为</p>
 <p>select * from users where username=‘6c92bfdc2da722a1’  and password=‘4621d373cade4e83’</p>
 <p>看到了吧，无论你输入什么新型的SQL万能密码注入语句都行，都是转为一个MD5字符串。不要嫌弃经过MD5转换的效率，这里只用MD5加密过滤什么的都不用 ，其实企业中没有一个说嫌过滤牺牲性能的，如果真有这样的站长让我瞧瞧，让我膜拜一下。其实注入攻击难就难在参数性SQL注入，因为你不可能用MD5加密查询一个数据然后用MD5呈现给客户吧，如果有时间我再讲讲SQL注入的强大防御阵营。</p>
-<p>##sql注入常见万能密码</p>
-<pre><code>1：&quot;or &quot;a&quot;=&quot;a
+<h2 id="sql注入常见万能密码"><a href="#sql注入常见万能密码" class="headerlink" title="sql注入常见万能密码"></a>sql注入常见万能密码</h2><pre><code>1：&quot;or &quot;a&quot;=&quot;a
 2： &apos;)or(&apos;a&apos;=&apos;a
 3：or 1=1--
 4：&apos;or 1=1--
@@ -627,8 +617,17 @@ Bar
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -699,6 +698,22 @@ Bar
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#mark-text-文件夹创建与切换"><span class="nav-number">1.</span> <span class="nav-text">==mark text==文件夹创建与切换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建目录"><span class="nav-number">2.</span> <span class="nav-text">创建目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除目录"><span class="nav-number">3.</span> <span class="nav-text">删除目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除文件"><span class="nav-number">4.</span> <span class="nav-text">删除文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#遍历目录"><span class="nav-number">5.</span> <span class="nav-text">遍历目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#判断是否为目录"><span class="nav-number">6.</span> <span class="nav-text">判断是否为目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#判断是否为文件"><span class="nav-number">7.</span> <span class="nav-text">判断是否为文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取目标内容"><span class="nav-number">8.</span> <span class="nav-text">获取目标内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sql万能钥匙注入"><span class="nav-number">9.</span> <span class="nav-text">sql万能钥匙注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sql注入常见万能密码"><span class="nav-number">10.</span> <span class="nav-text">sql注入常见万能密码</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

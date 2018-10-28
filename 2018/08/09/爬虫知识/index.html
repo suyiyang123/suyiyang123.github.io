@@ -81,23 +81,23 @@
 
 
 
-<meta name="description" content="##Python2和Python3中urllib库中urlencode的使用注意事项 在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。 详细介绍可以参考https://cuiqingcai.com/947.html">
+<meta name="description" content="Python2和Python3中urllib库中urlencode的使用注意事项在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。 详细介绍可以参考https://cuiqingcai.com/947.html">
 <meta name="keywords" content="urlencode，正则表达式，BeautifulSoup，黑板客爬虫">
 <meta property="og:type" content="article">
 <meta property="og:title" content="爬虫知识">
 <meta property="og:url" content="http://yoursite.com/2018/08/09/爬虫知识/index.html">
 <meta property="og:site_name" content="Su.">
-<meta property="og:description" content="##Python2和Python3中urllib库中urlencode的使用注意事项 在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。 详细介绍可以参考https://cuiqingcai.com/947.html">
+<meta property="og:description" content="Python2和Python3中urllib库中urlencode的使用注意事项在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。 详细介绍可以参考https://cuiqingcai.com/947.html">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://i.imgur.com/b30v7Ps.png">
 <meta property="og:image" content="https://i.imgur.com/4cU5snJ.jpg">
 <meta property="og:image" content="https://i.imgur.com/W4lfdim.png">
 <meta property="og:image" content="https://i.imgur.com/t4H6NHv.jpg">
 <meta property="og:image" content="https://i.imgur.com/pqaFrb2.jpg">
-<meta property="og:updated_time" content="2018-08-31T11:53:45.141Z">
+<meta property="og:updated_time" content="2018-10-28T05:11:47.118Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="爬虫知识">
-<meta name="twitter:description" content="##Python2和Python3中urllib库中urlencode的使用注意事项 在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。 详细介绍可以参考https://cuiqingcai.com/947.html">
+<meta name="twitter:description" content="Python2和Python3中urllib库中urlencode的使用注意事项在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。 详细介绍可以参考https://cuiqingcai.com/947.html">
 <meta name="twitter:image" content="https://i.imgur.com/b30v7Ps.png">
 
 
@@ -407,12 +407,10 @@
       
 
       
-        <p>##Python2和Python3中urllib库中urlencode的使用注意事项</p>
-<p>在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是<br>在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。</p>
+        <h2 id="Python2和Python3中urllib库中urlencode的使用注意事项"><a href="#Python2和Python3中urllib库中urlencode的使用注意事项" class="headerlink" title="Python2和Python3中urllib库中urlencode的使用注意事项"></a>Python2和Python3中urllib库中urlencode的使用注意事项</h2><p>在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是<br>在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。</p>
 <p>详细介绍可以参考<a href="https://cuiqingcai.com/947.html" target="_blank" rel="noopener">https://cuiqingcai.com/947.html</a></p>
 <a id="more"></a>
-<p>###对于Python2</p>
-<p>Python2中提供了urllib和urllib2两个模块。</p>
+<h3 id="对于Python2"><a href="#对于Python2" class="headerlink" title="对于Python2"></a>对于Python2</h3><p>Python2中提供了urllib和urllib2两个模块。</p>
 <ul>
 <li><p>urlencode方法所在位置为：</p>
 <p>  <code>urllib.urlencode(values)    # 其中values为所需要编码的数据，并且只能为字典</code></p>
@@ -429,8 +427,7 @@ response = urllib2.urlopen(request)
 print response.read()
 </code></pre></li>
 </ul>
-<p>###对于Python3</p>
-<p>Python3中也有urllib和urllib3两个库，其中urllib几乎是Python2中urllib和urllib2两个模块的集合，所以我们最常用的urllib模块，而urllib3则作为一个拓展模块使用。</p>
+<h3 id="对于Python3"><a href="#对于Python3" class="headerlink" title="对于Python3"></a>对于Python3</h3><p>Python3中也有urllib和urllib3两个库，其中urllib几乎是Python2中urllib和urllib2两个模块的集合，所以我们最常用的urllib模块，而urllib3则作为一个拓展模块使用。</p>
 <ul>
 <li><p>urlencode方法所在位置</p>
 <p>  <code>urllib.parse.urlencode(values)</code></p>
@@ -447,8 +444,7 @@ response = urlopen(request)
 print(response.read().decode())
 </code></pre></li>
 </ul>
-<p>##正则表达式</p>
-<p>详细指南可以参考<a href="http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html" target="_blank" rel="noopener">http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html</a></p>
+<h2 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h2><p>详细指南可以参考<a href="http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html" target="_blank" rel="noopener">http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html</a></p>
 <p>findall(string[, pos[, endpos]]) | re.findall(pattern, string[, flags]):</p>
 <p>搜索string，以列表形式返回全部能匹配的子串。 </p>
 <p>例如：</p>
@@ -461,8 +457,7 @@ print p.findall(&apos;one1two2three3four4&apos;)
 ### output ###
 # [&apos;1&apos;, &apos;2&apos;, &apos;3&apos;, &apos;4&apos;]
 </code></pre><p>或:<br>            str = re.findall(r’密码错误’,html)<br>            输出：<br>            [‘密码错误’]</p>
-<p>##Python find()方法</p>
-<p>Python find() 方法检测字符串中是否包含子字符串 str ，如果指定 beg（开始） 和 end（结束） 范围，则检查是否包含在指定范围内，如果包含子字符串返回开始的索引值，否则返回-1。</p>
+<h2 id="Python-find-方法"><a href="#Python-find-方法" class="headerlink" title="Python find()方法"></a>Python find()方法</h2><p>Python find() 方法检测字符串中是否包含子字符串 str ，如果指定 beg（开始） 和 end（结束） 范围，则检查是否包含在指定范围内，如果包含子字符串返回开始的索引值，否则返回-1。</p>
 <p>find()方法语法：</p>
 <pre><code>`str.find(str, beg=0, end=len(string))`
 </code></pre><p>str – 指定检索的字符串</p>
@@ -477,8 +472,7 @@ print p.findall(&apos;one1two2three3four4&apos;)
 &gt;&gt;&gt; print info.find(&apos;3&apos;)    # 查找不到返回-1
 -1
 &gt;&gt;&gt;
-</code></pre><p>##BeautifulSoup</p>
-<p>详细的使用可以参考<a href="https://www.cnblogs.com/zhaof/p/6930955.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhaof/p/6930955.html</a></p>
+</code></pre><h2 id="BeautifulSoup"><a href="#BeautifulSoup" class="headerlink" title="BeautifulSoup"></a>BeautifulSoup</h2><p>详细的使用可以参考<a href="https://www.cnblogs.com/zhaof/p/6930955.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhaof/p/6930955.html</a></p>
 <p>###标签选择器</p>
 <p>print(soup.title)</p>
 <p>print(type(soup.title))</p>
@@ -487,11 +481,9 @@ print p.findall(&apos;one1two2three3four4&apos;)
 <pre><code>print(soup.h3)
 结果为：
 &lt;h3&gt;你需要在网址后输入数字77456&lt;/h3&gt;
-</code></pre><p>###find_all</p>
-<p>find_all(name,attrs,recursive,text,**kwargs)</p>
+</code></pre><h3 id="find-all"><a href="#find-all" class="headerlink" title="find_all"></a>find_all</h3><p>find_all(name,attrs,recursive,text,**kwargs)</p>
 <p>可以根据标签名，属性，内容查找文档，结果返回的是一个列表的方式</p>
-<p>###find</p>
-<p>find(name,attrs,recursive,text,**kwargs)</p>
+<h3 id="find"><a href="#find" class="headerlink" title="find"></a>find</h3><p>find(name,attrs,recursive,text,**kwargs)</p>
 <p>find返回的匹配结果的第一个元素</p>
 <p>##黑板客爬虫挑战</p>
 <p><img src="https://i.imgur.com/b30v7Ps.png" alt=""></p>
@@ -643,8 +635,17 @@ for i in range(0,30):#密码猜测
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -715,6 +716,22 @@ for i in range(0,30):#密码猜测
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Python2和Python3中urllib库中urlencode的使用注意事项"><span class="nav-number">1.</span> <span class="nav-text">Python2和Python3中urllib库中urlencode的使用注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对于Python2"><span class="nav-number">1.1.</span> <span class="nav-text">对于Python2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对于Python3"><span class="nav-number">1.2.</span> <span class="nav-text">对于Python3</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正则表达式"><span class="nav-number">2.</span> <span class="nav-text">正则表达式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-find-方法"><span class="nav-number">3.</span> <span class="nav-text">Python find()方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BeautifulSoup"><span class="nav-number">4.</span> <span class="nav-text">BeautifulSoup</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#find-all"><span class="nav-number">4.1.</span> <span class="nav-text">find_all</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#find"><span class="nav-number">4.2.</span> <span class="nav-text">find</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
