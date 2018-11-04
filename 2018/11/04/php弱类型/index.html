@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="比较操作符php中有两种比较的符号 == 与 === === 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等 == 在进行比较的时候，会先将字符串类型转化成相同，再比较 （如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换成数值并且比较按照数值来进行），例如： 12345671 &amp;lt;?php2 var_dump(&amp;quot;admi">
+<meta name="description" content="比较操作符php中有两种比较的符号 == 与 === === 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等 == 在进行比较的时候，会先将字符串类型转化成相同，再比较">
 <meta name="keywords" content="php弱类型">
 <meta property="og:type" content="article">
 <meta property="og:title" content="php弱类型">
 <meta property="og:url" content="http://yoursite.com/2018/11/04/php弱类型/index.html">
 <meta property="og:site_name" content="Su.">
-<meta property="og:description" content="比较操作符php中有两种比较的符号 == 与 === === 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等 == 在进行比较的时候，会先将字符串类型转化成相同，再比较 （如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换成数值并且比较按照数值来进行），例如： 12345671 &amp;lt;?php2 var_dump(&amp;quot;admi">
+<meta property="og:description" content="比较操作符php中有两种比较的符号 == 与 === === 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等 == 在进行比较的时候，会先将字符串类型转化成相同，再比较">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-11-04T07:15:54.027Z">
+<meta property="og:updated_time" content="2018-11-04T08:05:51.159Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php弱类型">
-<meta name="twitter:description" content="比较操作符php中有两种比较的符号 == 与 === === 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等 == 在进行比较的时候，会先将字符串类型转化成相同，再比较 （如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换成数值并且比较按照数值来进行），例如： 12345671 &amp;lt;?php2 var_dump(&amp;quot;admi">
+<meta name="twitter:description" content="比较操作符php中有两种比较的符号 == 与 === === 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等 == 在进行比较的时候，会先将字符串类型转化成相同，再比较">
 
 
 
@@ -404,6 +404,7 @@
         <h2 id="比较操作符"><a href="#比较操作符" class="headerlink" title="比较操作符"></a>比较操作符</h2><p>php中有两种比较的符号 == 与 ===</p>
 <p>=== 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等</p>
 <p>== 在进行比较的时候，会先将字符串类型转化成相同，再比较</p>
+<a id="more"></a>
 <p>（如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换成数值并且比较按照数值来进行），例如：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 var_dump(&quot;admin&quot;==0);  //true</span><br><span class="line">3 var_dump(&quot;1admin&quot;==1); //true</span><br><span class="line">4 var_dump(&quot;admin1&quot;==1) //false</span><br><span class="line">5 var_dump(&quot;admin1&quot;==0) //true</span><br><span class="line">6 var_dump(&quot;0e123456&quot;==&quot;0e4456789&quot;); //true </span><br><span class="line">7 ?&gt;</span><br></pre></td></tr></table></figure>
 <p>观察上述代码，得到：</p>
