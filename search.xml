@@ -1,42 +1,262 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title><![CDATA[php弱类型]]></title>
-    <url>%2F2018%2F11%2F04%2Fphp%E5%BC%B1%E7%B1%BB%E5%9E%8B%2F</url>
-    <content type="text"><![CDATA[比较操作符php中有两种比较的符号 == 与 === === 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等 == 在进行比较的时候，会先将字符串类型转化成相同，再比较 （如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换成数值并且比较按照数值来进行），例如： 12345671 &lt;?php2 var_dump(&quot;admin&quot;==0); //true3 var_dump(&quot;1admin&quot;==1); //true4 var_dump(&quot;admin1&quot;==1) //false5 var_dump(&quot;admin1&quot;==0) //true6 var_dump(&quot;0e123456&quot;==&quot;0e4456789&quot;); //true 7 ?&gt; 观察上述代码，得到： 1、”admin”==0 比较的时候，会将admin转化成数值，强制转化,由于admin是字符串，转化的结果是0自然和0相等 2、”1admin”==1 比较的时候会将1admin转化成数值,结果为1，而“admin1“==1 却等于错误，也就是”admin1”被转化成了0 3、 “0e123456”==”0e456789”相互比较的时候，会将0e这类字符串识别为科学技术法的数字，0的无论多少次方都是零，所以相等 ==注意 #f44336==： 当一个字符串被当作一个数值来取值，其结果和类型如下: 如果该字符串没有包含’.’,’e’,’E’并且其数值在整形的范围之内，该字符串被当作int来取值，其他所有情况下都被作为float来取值，该字符串的开始部分决定了它的值，如果该字符串以合法的数值开始，则使用该数值，否则其值为0。 例如： 12345671 &lt;?php2 $test=1 + &quot;10.5&quot;; // $test=11.5(float)3 $test=1+&quot;-1.3e3&quot;; //$test=-1299(float)4 $test=1+&quot;bob-1.3e3&quot;;//$test=1(int)5 $test=1+&quot;2admin&quot;;//$test=3(int)6 $test=1+&quot;admin2&quot;;//$test=1(int)7 ?&gt; 所以就解释了”admin1”==1 =&gt;False 的原因 md5绕过(Hash比较缺陷)md5开头是0e的字符串，0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0，md5(‘240610708’) == md5(‘QNKCDZO’)成功绕过，例如： QNKCDZO0e830400451993494058024219903391 s878926199a0e545993274517709034328855841020 s155964671a0e342768416822451524974117254469 s214587387a0e848240448830537924465865611904 s214587387a0e848240448830537924465865611904 s878926199a0e545993274517709034328855841020 s1091221200a0e940624217856561557816327384675 json绕过123456789101112131415&lt;?phpif (isset($_POST[&apos;message&apos;])) &#123; $message = json_decode($_POST[&apos;message&apos;]); $key =&quot;*********&quot;; if ($message-&gt;key == $key) &#123; echo &quot;flag&quot;; &#125; else &#123; echo &quot;fail&quot;; &#125; &#125; else&#123; echo &quot;~~~~&quot;; &#125;?&gt; 输入一个json类型的字符串，json_decode函数解密成一个数组，判断数组中key的值是否等于 $key的值，但是$key的值我们不知道，但是可以利用0==”admin”(字符串)这种形式绕过 最终上传 message={“key”:0} array_search / is_array绕过in_array和array_search会对类型进行强制转换，并且是==进行比较，所以可以绕过。 mixed array_search ( mixed $needle , array $haystack [, bool $strict = false ] ) $needle，$haystack必需，$strict可选 函数判断$haystack中的值是否存在$needle，存在则返回该值的键值 第三个参数默认为false，如果设置为true则会进行严格过滤 123451 &lt;?php2 $a=array(0,1);3 var_dump(array_search(&quot;admin&quot;,$a)); // int(0) =&gt; 返回键值04 var_dump(array_seach(&quot;1admin&quot;,$a)); // int(1) ==&gt;返回键值15 ?&gt; array_search函数 类似于== 也就是$a==”admin” 当然是$a=0 当然如果第三个参数为true则就不能绕过 strcmp漏洞绕过1234567891011 1 &lt;?php 2 $password=&quot;***************&quot; 3 if(isset($_POST[&apos;password&apos;]))&#123; 4 5 if (strcmp($_POST[&apos;password&apos;], $password) == 0) &#123; 6 echo &quot;Right!!!login success&quot;;n 7 exit(); 8 &#125; else &#123; 9 echo &quot;Wrong password..&quot;;10 &#125;11 ?&gt; strcmp是比较两个字符串，如果str1&lt;str2 则返回0 如果两者相等 返回0 我们是不知道$password的值的，题目要求strcmp判断的接受的值和$password必需相等，strcmp传入的期望类型是字符串类型，如果传入的是个数组会怎么样呢 我们传入 password[]=xxx 可以绕过 是因为函数接受到了不符合的类型，将发生错误，但是还是判断相等 empty和isset函数1）变量为：0，”0”,null,’’,false,array()时，使用empty函数，返回的都为true 2）变量未定义或者为null时，isset函数返回的为false,其他都未true 例如： 1234567891011121314151617181920212223242526272829303132$a = null;$b = &apos;&apos;;$c = 0;$d = &quot;0&quot;;$e = false;$f = array();var_dump(empty($a)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(empty($b)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(empty($c)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(empty($d)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(empty($e)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(empty($f)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(isset($a)); //falseecho &apos;&lt;p&gt;&apos;;var_dump(isset($b)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(isset($c)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(isset($d)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(isset($e)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(isset($f)); //trueecho &apos;&lt;p&gt;&apos;;var_dump(isset($g)); //false]]></content>
+    <title>php</title>
+    <url>/2018/08/10/php/</url>
+    <content><![CDATA[<p>php的详细使用可以参考<a href="http://php.net/manual/zh/" target="_blank" rel="noopener">http://php.net/manual/zh/</a></p>
+<p>php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。</p>
+<a id="more"></a>
+<pre><code>0e545993274517709034328855841020
+</code></pre><p>这是一个整数，在php里是理解为0*10^4549…20的意思，那么其值是0</p>
+<p>同样</p>
+<pre><code>0e342768416822451524974117254469
+</code></pre><p>这是一个整数，在php里是理解为0*10^34..69的意思，那么其值是0，两者就相等了</p>
+<p>举一个反面的例子</p>
+<p>1e1和1e2</p>
+<p>这里1e1=1<em>10^1=10，1e2=1</em>10^2=100</p>
+<p>所以1e1 == 1e2这是false，但是</p>
+<p>100 == 1e2 这是true，为什么呢，因为1e2先转为整型，是100</p>
+<p>注意，对于e是指幂次。而其他26字符并不具有此能力。</p>
+<p>参考：</p>
+<p><a href="http://php.net/manual/zh/language.operators.comparison.php" target="_blank" rel="noopener">http://php.net/manual/zh/language.operators.comparison.php</a></p>
+<pre><code>&lt;?php
+var_dump(0 == &quot;all&quot;); // 0 == 0 -&gt; true
+var_dump(&quot;1&quot; == &quot;01&quot;); // 1 == 1 -&gt; true
+var_dump(&quot;10&quot; == &quot;1e1&quot;); // 10 == 10 -&gt; true
+var_dump(100 == &quot;1e2&quot;); // 100 == 100 -&gt; true
+
+switch (&quot;a&quot;) {
+case 0:
+    echo &quot;0&quot;;
+    break;
+case &quot;a&quot;: // never reached because &quot;a&quot; is already matched with 0
+    echo &quot;a&quot;;
+    break;
+}
+?&gt;
+</code></pre><p>做比较，会先转换类型， all字符串转换成数字类型(int)就是 0 ， 所以中间成立返回真。</p>
+<pre><code>var_dump(08==8)这个结果返回是false，
+var_dump(09==9)这个结果返回也是false，
+而var_dump(07===7)返回true（var_dump(07==7)同样返回true。）
+</code></pre><p>php手册上有详细说明，整形以0开头的为八进制数，如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略，即09实际上为0，08也同理</p>
+]]></content>
       <categories>
         <category>php</category>
       </categories>
       <tags>
-        <tag>php弱类型</tag>
+        <tag>php</tag>
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[萌新赛]]></title>
-    <url>%2F2018%2F10%2F29%2F%E8%90%8C%E6%96%B0%E8%B5%9B%2F</url>
-    <content type="text"><![CDATA[一、根本想不到 题目中提示wordpress，不知道所以去百度搜索，搜索查看步骤后发现，可以在网址后面加上wp-login.php进行后台登陆,试了之后发现还是不行，就想着用wp-admin.php进行登陆，结果就可以了，就得到了flag 二、MISC1下载文件后得到一张图片，首先想到的就是改后缀名，把.jpg改为.txt后得到文本，按ctrl+f后搜索flag就找到了flag 三、MISC4下载文件后解压时需要输入密码，所以百度搜索ctf题解压文件需要输入密码，得到很多知识点，查看试验后发现 就想着试试，打开虚拟机里kail的linux后，把压缩文件拉进系统里，再把它提取出来，就得到了flag 四、你必须要跳打开压缩文件后出现-.– — ..- ..–.- … …. — ..- .的格式，就百度搜索，发现这是摩斯密码，就想到了解密，解密之后得到BBAABAAAABAA的格式，再百度之后，发现这是培根密码，解密之后，出现 肯定是要继续解密的，发现这是一段没有规律的组合，然后栅栏密码就是要把加密的明文分成N个一组，然后把每组的第1个字连起来，形成一段无规律的话，就想着用栅栏密码解密栏数从1开始试，发现都不对，然后看到上面的解密是有大小写的，就想着大小写分开解密试试后发现小写解密栏数为4时成功了 五、常用的加解密解压文件后，出现 从第一行中看出，这是用base64加密的图片，就百度搜base64解密成图片，发现了解密工具，网址为http://imgbase64.duoshitong.com/，解密后出现 提交synt{2018_zratkva_pgs}后，显示错误，就想着把synt变成flag，就百度搜synt怎么变成flag，就看到了好多例题，例如 就知道了要用rot13解密，解密之后得到flag{2018_mengxin_ctf} 六、签到题题目中提示关注公众号“中原工学院DROPS攻防训练营”，由于以前关注过了，所以刚开始没有重新关注，就一直没有得到flag，后来取消重新关注后，得到了flag]]></content>
+    <title>爬虫知识点</title>
+    <url>/2018/08/06/ctf%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<h2 id="mark-text-文件夹创建与切换"><a href="#mark-text-文件夹创建与切换" class="headerlink" title="==mark text==文件夹创建与切换"></a>==mark text==文件夹创建与切换</h2><p>os.makedirs(os.path.join(“E:\name”, filename))</p>
+<p>在目录E:\name下创建名为filename的文件夹</p>
+<p>os.chdir(“E:\name\“ + filename)</p>
+<p>切换工作路径到E:\name\filename下</p>
+<a id="more"></a>
+<h2 id="创建目录"><a href="#创建目录" class="headerlink" title="创建目录"></a>创建目录</h2><p>在Python中可以使用os.mkdir()函数创建目录（创建一级目录）。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.mkdir(path)</p>
+<p>　　其参数path 为要创建目录的路径。</p>
+<p>　　例如要在D盘下创建hello的目录(或在已有的文件夹中创建新的文件夹）</p>
+<pre><code>&gt;&gt;&gt; import os
+
+　　&gt;&gt;&gt; os.mkdir(&apos;d:\hello&apos;)
+
+&gt;&gt;&gt;os.mkdir(&apos;d:\\hello\\23&apos;)
+　　
+</code></pre><p>　　可以使用os.makedirs（）函数创建多级目录。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.makedirs(path)</p>
+<p>　　其参数path 为要创建目录的路径。</p>
+<p>　　如在D盘下创建books的目录，books目录下在创建book目录</p>
+<pre><code>&gt;&gt;&gt; import os
+
+　　&gt;&gt;&gt;os.makedirs(&apos;d:\\books\\book&apos;)
+　
+</code></pre><h2 id="删除目录"><a href="#删除目录" class="headerlink" title="删除目录"></a>删除目录</h2><p>在Python中可以使用os.rmdir()函数删除目录。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.rmdir(path)</p>
+<p>　　其参数path 为要删除的目录的路径。</p>
+<p>　　例如把D盘下的hmm的目录删除</p>
+<p>　　&gt;&gt;&gt; import os</p>
+<p>　　&gt;&gt;&gt; os.rmdir(‘d:\hmm’) </p>
+<p>删除多级目录</p>
+<p>　　在Python中可以使用os.removedirs()函数删除多级目录。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.removdirs(path)</p>
+<p>　　其参数path 为要删除的多级目录的路径。</p>
+<p>　　&gt;&gt;&gt; import os</p>
+<p>　　&gt;&gt;&gt; os.removedirs(‘d:\books\book’)</p>
+<p>　　#注意：要删除的目录必须是空目录</p>
+<h2 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h2><p>　　在Python中可以使用os.remove()函数删除文件（注意一定是一个文件）。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.remov(path)</p>
+<p>　　其参数path 为要删除的文件的路径。</p>
+<p>　　如删除D盘下books目录下book目录中的book.txt的文件</p>
+<p>　　&gt;&gt;&gt; import os</p>
+<p>　　&gt;&gt;&gt;os.remove(‘d:\books\book\book.txt’)　　</p>
+<h2 id="遍历目录"><a href="#遍历目录" class="headerlink" title="遍历目录"></a>遍历目录</h2><p>　　在Python中可以使用os.walk()函数遍历目录。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.walk(path)</p>
+<p>　　其参数path 为要遍历的目录，遍历path，返回一个对象，他的每个部分都是一个三元组 (‘目录x’，[目录x下的目录list]，目录x下面的文件) 。如：</p>
+<pre><code>　　&gt;&gt;&gt; a=os.walk(&apos;d:\\books&apos;)
+　　&gt;&gt;&gt; def  fun():
+             　　  for i in a:
+                    　　   print i
+　　&gt;&gt;&gt; fun()
+　　(&apos;d:\\books&apos;, [&apos;book&apos;], [&apos;aa.txt&apos;])
+　　(&apos;d:\\books\\book&apos;, [ ], [ ])
+</code></pre><h2 id="判断是否为目录"><a href="#判断是否为目录" class="headerlink" title="判断是否为目录"></a>判断是否为目录</h2><p>　　在Python中可以使用os.path.isdir()函数判断某一路径是否为目录。</p>
+<p>　　其函数原型如下所示：</p>
+<p>　　os.path.isdir(path)</p>
+<p>　　其参数 path为 要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p>
+<h2 id="判断是否为文件"><a href="#判断是否为文件" class="headerlink" title="判断是否为文件"></a>判断是否为文件</h2><p>　　在Python中可以使用os.path.isfile()函数判断某一路径是否为文件。其函数原型如下所示。</p>
+<p>　　os.path.isfile(path)</p>
+<p>　　其参数path为要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p>
+<h2 id="获取目标内容"><a href="#获取目标内容" class="headerlink" title="获取目标内容"></a>获取目标内容</h2><p>get_text():获取标签里面的内容，可以获取文本内容，例如：</p>
+<pre><code>html=&apos;&apos;&apos;
+&lt;div class=&quot;panel&quot;&gt;
+    &lt;div class=&quot;panel-heading&quot;&gt;
+        &lt;h4&gt;Hello&lt;/h4&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;panel-body&quot;&gt;
+        &lt;ul class=&quot;list&quot; id=&quot;list-1&quot;&gt;
+            &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt;
+            &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt;
+            &lt;li class=&quot;element&quot;&gt;Jay&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;ul class=&quot;list list-small&quot; id=&quot;list-2&quot;&gt;
+            &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt;
+            &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&apos;&apos;&apos;
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html, &apos;lxml&apos;)
+for li in soup.select(&apos;li&apos;):
+    print(li.get_text())
+</code></pre><p>返回结果为：</p>
+<pre><code>Foort
+Bar
+Jay
+Foo
+Bar
+</code></pre><h2 id="sql万能钥匙注入"><a href="#sql万能钥匙注入" class="headerlink" title="sql万能钥匙注入"></a>sql万能钥匙注入</h2><p> 我们登录一个网站的时候会有账户名和密码都要输入进去。这样的方法禁止非法进入网站，它是这样构造SQL语句的，假设填写用户名为marcofly密码为test。因为根据我们提交的用户名和密码被合成到SQL查询语句当中之后是这样的：</p>
+<p>select * from users where username=’marcofly’ and password=md5(‘test’) </p>
+<p>这样如果数据库不存在这样的字段就表示输入错误，无法登陆。正常情况下是如此，但是对于有SQL注入漏洞的网站来说，只要构造个特殊的“字符串”，照样能够成功登录。  比如我们填写用户名为zlq’ or ‘1’=’1’ or ‘1’=’1看看，这样后构造出的SQL语句为</p>
+<p> select * from users where username=’zlq’ or ‘1’=’1’ or ‘1’=’1’ and password=md5(‘test’) //就是替换marcofly这个字符串</p>
+<p>替换之后它是怎么执行的呢，先执行and部分，就是 ‘1’=’1’ and password=md5(‘test’)，这个密码对不上是返回假，就是不正确，然后执行or，<br> ‘zlq’ or ‘1’=’1’这个是或者的意思， ‘zlq’ 为真或者’1’=’1’为真就正确，’1’=’1’肯定为真的，所以正确，我们把代码缩小看看<br>（’zlq’ or ‘1’=’1’ ）or （’1’=’1’ and password=md5(‘test’)  ），这里给出逻辑’zlq’ or ‘1’=’1’ 为真，’1’=’1’ and password=md5(‘test’)为假，（真 ）or （假），即为正确  。你测试要是有万能密码漏洞的页面都能成功，而且很多人用htmlspecialchars过滤也没效果，因为htmlspecialchars需要填写两一个参数才能过滤单引号，默认是不过滤单引号的，所以上面的注入100%成功。</p>
+<p>我们再输入’ or 1=1#看看，把marcofly替换’ or 1=1#</p>
+<p> select * from users where username=’’ or 1=1#’ and password=md5(‘test’) </p>
+<p> 语义分析：“#”在mysql中是注释符，这样井号后面的内容将被mysql视为注释内容，这样就不会去执行了，换句话说，以下的两句sql语句等价： select * from users where username=’’ or 1=1<br>这样1=1永远为真，or那么执行成功 。</p>
+<p>现在我给出解决这个漏洞终极方案，保证天煞都无法入侵成功。是这样的，不知道前面看到没有，password=md5(‘test’)就是说把密码经过MD5加密后再查询SQL，因为经过MD5加密后的字符串是32位的，那么经过加密后的都是一连串的像这样的ac59075b964b0715字符，是不可能办到去转换执行SQL语句的。我们经过改写SQL语句成这样：</p>
+<p>  select * from users where username=md5(‘marcofly’)  and password=md5(‘test’) </p>
+<p>我们再次输入用户名为 zlq’ or ‘1’=’1’ or ‘1’=’1看看，执行的语句已经变为</p>
+<p>select * from users where username=‘6c92bfdc2da722a1’  and password=‘4621d373cade4e83’</p>
+<p>看到了吧，无论你输入什么新型的SQL万能密码注入语句都行，都是转为一个MD5字符串。不要嫌弃经过MD5转换的效率，这里只用MD5加密过滤什么的都不用 ，其实企业中没有一个说嫌过滤牺牲性能的，如果真有这样的站长让我瞧瞧，让我膜拜一下。其实注入攻击难就难在参数性SQL注入，因为你不可能用MD5加密查询一个数据然后用MD5呈现给客户吧，如果有时间我再讲讲SQL注入的强大防御阵营。</p>
+<h2 id="sql注入常见万能密码"><a href="#sql注入常见万能密码" class="headerlink" title="sql注入常见万能密码"></a>sql注入常见万能密码</h2><pre><code>1：&quot;or &quot;a&quot;=&quot;a
+2： &apos;)or(&apos;a&apos;=&apos;a
+3：or 1=1--
+4：&apos;or 1=1--
+5：a&apos;or&apos; 1=1--
+6：&quot;or 1=1--
+7：&apos;or&apos;a&apos;=&apos;a
+8：&quot;or&quot;=&quot;a&apos;=&apos;a
+9：&apos;or&apos;&apos;=&apos;
+10：&apos;or&apos;=&apos;or&apos;
+11：1 or &apos;1&apos;=&apos;1&apos;=1
+12：1 or &apos;1&apos;=&apos;1&apos; or 1=1
+13： &apos;OR 1=1%00
+</code></pre>]]></content>
       <categories>
-        <category>ctf</category>
+        <category>爬虫</category>
       </categories>
       <tags>
-        <tag>后台登陆wordpress,图片隐写,加解密</tag>
+        <tag>爬虫</tag>
+        <tag>sql</tag>
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[知识点]]></title>
-    <url>%2F2018%2F10%2F29%2F%E7%9F%A5%E8%AF%86%E7%82%B9%2F</url>
-    <content type="text"><![CDATA[1. robots.txt协议 robots.txt是一个协议，而不是一个命令。robots.txt是搜索引擎中访问网站的时候要查看的第一个文件。robots.txt文件告诉蜘蛛程序在服务器上什么文件是可以被查看的。当一个搜索蜘蛛访问一个站点时，它会首先检查该站点根目录下是否存在robots.txt，如果存在，搜索机器人就会按照该文件中的内容来确定访问的范围；如果该文件不存在，所有的搜索蜘蛛将能够访问网站上所有没有被口令保护的页面。例如： 一般网站都会有robots.txt文件的，存放可以直接访问的文件子目录 2、正则字符串preg_match — 执行匹配正则表达式 preg_match()返回 pattern 的匹配次数，它的值将是0次（不匹配）或1次，因为preg_match()在第一次匹配后 将会停止搜索 /号之间的内容为正则模式串，后一个/之后的内容标识其它信息，例如这里的i标识大小写不敏感。 {n,m} ：m 和 n 均为非负整数，其中n &lt;= m。最少匹配 n 次且最多匹配 m 次。例如，”o{1,3}” 将匹配 “fooooood” 中的前三个 o。’o{0,1}’ 等价于 ‘o?’。请注意在逗号和两个数之间不能有空格。 . 匹配除换行符 \n 之外的任何单字符。要匹配 . ，请使用 . 。 匹配前面的子表达式零次或多次。要匹配 字符，请使用 *。 [a-z]: 字符范围。匹配指定范围内的任意字符。例如，’[a-z]’ 可以匹配 ‘a’ 到 ‘z’ 范围内的任意小写字母字符。 [[:punct:]]代表任意符号，非字母数字 正则表达式中常用的模式修正符有i、g、m、s、U、x、a、D、e 等。它们之间可以组合搭配使用。 i 不区分(ignore)大小写；例如: /abc/i 可以匹配 abc、aBC、Abc g 全局(global)匹配如果不带g，正则过程中字符串从左到右匹配，找到第一个符合条件的即匹配成功，返回如果带g，则字符串从左到右，找到每个符合条件的都记录下来，知道字符串结尾位置例如: 123var str = 'aaaaaaaa'var reg1 = /a/; str.match(reg1) // 结果为：["a", index: 0, input: "aaaaaaaa"]var reg2 = /a/g; str.match(reg2) // 结果为：["a", "a", "a", "a", "a", "a", "a", "a"] m 多(more)行匹配 若存在换行\n并且有开始^或结束$符的情况下，和g一起使用实现全局匹配,因为存在换行时默认会把换行符作为一个字符任务匹配字符串是个单行，g只匹配第一行，添加m之后实现多行，每个换行符之后就是开始 123var str = "abcggab\nabcoab";var preg1 = /^abc/gm; str.match(preg1) // 结果为：["abc", "abc"]var preg2 = /ab$/gm; str.match(preg2) // 结果为：["ab", "ab"] s 特殊字符圆点 . 中包含换行符默认的圆点 . 是 匹配除换行符 \n 之外的任何单字符，加上s之后, . 中包含换行符 1234$str = "abggab\nacbs";$preg = "/b./s";preg_match_all($preg, $str,$matchs);print_r($matchs);//Array ( [0] =&gt; Array ( [0] =&gt; bg [1] =&gt; b [2] =&gt; bs ) ) U 只匹配最近的一个字符串;不重复匹配; 123456789$mode="/a(.*?)c/";$preg="/a.*c/U";//这两个正则返回相同的值$str="abcabbbcabbbbbc" ;preg_match($mode,$str,$content); echo $content[0];//abcpreg_match($preg,$str,$content); echo $content[0];//abc//修正符:x 将模式中的空白忽略;//修正符:A 强制从目标字符串开头匹配;//修正符:D 如果使用$限制结尾字符,则不允许结尾有换行; //修正符:e 配合函数preg_replace()使用, 可以把匹配来的字符串当作正则表达式执行;]]></content>
+    <title>python笔记</title>
+    <url>/2018/07/31/python%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<font size="4" face="黑体">今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题:</font>
+
+<p>题目要求：</p>
+<p>读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。<br>（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”）</p>
+<a id="more"></a>
+<p>我们可以看到filter.txt中内容为:</p>
+<p><img src="https://i.imgur.com/1OnpSt1.png" alt=""></p>
+<p>我们可以写下如下代码：</p>
+<pre><code>user = input()
+file = open(&apos;filter.txt&apos;,&apos;r&apos;)
+newfile = file.read()
+a = []
+for i in newfile:
+    if i == &apos;\n&apos; or i == &apos;，&apos;:
+        pass
+    else:
+        a.append(i)
+for i in user:
+    for j in a:
+        s = 0
+        if i == j:
+            s += 1
+            print(&apos;*&apos;, end = &apos;&apos;)
+            break
+    if s == 0:
+        print(i,end = &apos;&apos;)
+</code></pre><p>先读取敏感词文本文件filter.txt，把这个文件中的内容根据逗号分成一个一个字符串，再让它与输入的内容一个一个字符进行比较，如果相等，就输出’*’，如果不相等就输出原来的字符。</p>
+]]></content>
       <categories>
-        <category>ctf</category>
+        <category>python</category>
       </categories>
       <tags>
-        <tag>robots协议,正则</tag>
+        <tag>Google编码规范</tag>
+        <tag>python小知识</tag>
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[文件包含]]></title>
-    <url>%2F2018%2F09%2F30%2F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%2F</url>
-    <content type="text"><![CDATA[南邮文件包含ctf题 PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。 详细的本地文件包含漏洞介绍： https://www.cnblogs.com/wh4am1/p/6542398.html 我们从第三幅图中很明显的看出这是个php文件，但是无法通过查看源码得到有效信息，因此尝试使用php://filter获取源码。 php://filter是PHP中的一个协议，利用这个协议我们可以解决一些ctf的题目，或者挖掘出一些漏洞。 php:// — 访问各个输入/输出流（I/O streams）php://input 是个可以访问请求的原始数据的只读流。 php://filter 是一种设计用来允许过滤器程序在打开时成为流的封装协议。这对于单独具有完整功能的文件函数非常有用，否则就没有机会在读取内容之前将过滤器应用于流之上。 该协议语法为：php://filter:/&lt;action&gt;=&lt;name&gt; 比如 php://filter:/resource=http://www.baidu.com 使用 php://filter 获取网页内容：&lt;?php$url = &apos;http://www.phpfamily.cn&apos;;$data = file_get_contents(&apos;php://filter/resource=&apos; . $url); echo $data; //输出结果我http://www.phpfamily.cn页面的内容 php://filter 的参数列表 resource=&lt;要过滤的数据流&gt; 指定了你要筛选过滤的数据流。 （必选） read=&lt;读链的筛选列表&gt; 可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选） write=&lt;写链的筛选列表&gt; 可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选） &lt;；两个链的筛选列表&gt; 任何没有以 read= 或 write= 作前缀 的筛选器列表会视情况应用于读或写链。 read参数值可为string.strip_tags： 将数据流中的所有html标签清除 string.toupper： 将数据流中的内容转换为大写 string.tolower： 将数据流中的内容转换为小写 convert.base64-encode： 将数据流中的内容转换为base64编码 convert.base64-decode： 与上面对应解码为典型的文件包含漏洞。 我们可以通过构造含有漏洞的语句，查看想要看的代码： file=php://filter/convert.base64-encode/resource=index.php 。再将得到的base64码解码即可。 在这道题中，我们就可以通过构造这样的语句查看隐藏的代码，如下网址: 然后在进行base64解码得到flag flag:nctf{edulcni_elif_lacol_si_siht}]]></content>
+    <title>文件包含</title>
+    <url>/2018/09/30/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
+    <content><![CDATA[<h2 id="南邮文件包含ctf题"><a href="#南邮文件包含ctf题" class="headerlink" title="南邮文件包含ctf题"></a>南邮文件包含ctf题</h2><p><img src="https://i.imgur.com/5QJFWhR.png" alt=""></p>
+<a id="more"></a>
+<hr>
+<p><img src="https://i.imgur.com/7vQRioW.png" alt=""></p>
+<p><img src="https://i.imgur.com/gUBH2rU.png" alt=""></p>
+<p>PHP文件包含漏洞的产生原因是在通过PHP的函数引入文件时，由于传入的文件名没有经过合理的校验，<br>从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。最常见的就属于本地文件包含（Local File Inclusion）漏洞了。</p>
+<p>详细的本地文件包含漏洞介绍： <a href="https://www.cnblogs.com/wh4am1/p/6542398.html" target="_blank" rel="noopener">https://www.cnblogs.com/wh4am1/p/6542398.html</a></p>
+<p>我们从第三幅图中很明显的看出这是个php文件，但是无法通过查看源码得到有效信息，因此尝试使用php://filter获取源码。</p>
+<p>php://filter是PHP中的一个协议，利用这个协议我们可以解决一些ctf的题目，或者挖掘出一些漏洞。</p>
+<pre><code>php:// — 访问各个输入/输出流（I/O streams）php://input 是个可以访问请求的原始数据的只读流。
+
+php://filter 是一种设计用来允许过滤器程序在打开时成为流的封装协议。这对于单独具有完整功能的文件函数非常有用，否则就没有机会在读取内容之前将过滤器应用于流之上。
+
+该协议语法为：php://filter:/&lt;action&gt;=&lt;name&gt;
+
+比如 php://filter:/resource=http://www.baidu.com
+</code></pre><h3 id="使用-php-filter-获取网页内容："><a href="#使用-php-filter-获取网页内容：" class="headerlink" title="使用 php://filter 获取网页内容："></a>使用 php://filter 获取网页内容：</h3><pre><code>&lt;?php$url = &apos;http://www.phpfamily.cn&apos;;$data = file_get_contents(&apos;php://filter/resource=&apos; . $url);
+
+echo $data;  //输出结果我http://www.phpfamily.cn页面的内容
+</code></pre><h3 id="php-filter-的参数列表"><a href="#php-filter-的参数列表" class="headerlink" title="php://filter 的参数列表"></a>php://filter 的参数列表</h3><ul>
+<li>resource=&lt;要过滤的数据流&gt;          指定了你要筛选过滤的数据流。     （必选）</li>
+<li>read=&lt;读链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li>
+<li>write=&lt;写链的筛选列表&gt;     可以设定一个或多个过滤器名称，以管道符（|）分隔。 （可选）</li>
+<li>&lt;；两个链的筛选列表&gt;     任何没有以 read= 或 write= 作前缀 的筛选器列表会视情况应用于读或写链。</li>
+</ul>
+<h3 id="read参数值可为"><a href="#read参数值可为" class="headerlink" title="read参数值可为"></a>read参数值可为</h3><p>string.strip_tags： 将数据流中的所有html标签清除</p>
+<p>string.toupper： 将数据流中的内容转换为大写</p>
+<p>string.tolower： 将数据流中的内容转换为小写</p>
+<p>convert.base64-encode： 将数据流中的内容转换为base64编码</p>
+<p>convert.base64-decode： 与上面对应解码为典型的文件包含漏洞。</p>
+<p>我们可以通过构造含有漏洞的语句，查看想要看的代码： file=php://filter/convert.base64-encode/resource=index.php 。再将得到的base64码解码即可。</p>
+<p>在这道题中，我们就可以通过构造这样的语句查看隐藏的代码，如下网址:</p>
+<p><img src="https://i.imgur.com/5m2c8p5.png" alt=""></p>
+<p>然后在进行base64解码得到flag</p>
+<p>flag:nctf{edulcni_elif_lacol_si_siht}</p>
+]]></content>
       <categories>
         <category>PHP</category>
       </categories>
@@ -49,20 +269,249 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[php]]></title>
-    <url>%2F2018%2F08%2F10%2Fphp%2F</url>
-    <content type="text"><![CDATA[php的详细使用可以参考http://php.net/manual/zh/ php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。 0e545993274517709034328855841020 这是一个整数，在php里是理解为0*10^4549…20的意思，那么其值是0 同样 0e342768416822451524974117254469 这是一个整数，在php里是理解为0*10^34..69的意思，那么其值是0，两者就相等了 举一个反面的例子 1e1和1e2 这里1e1=110^1=10，1e2=110^2=100 所以1e1 == 1e2这是false，但是 100 == 1e2 这是true，为什么呢，因为1e2先转为整型，是100 注意，对于e是指幂次。而其他26字符并不具有此能力。 参考： http://php.net/manual/zh/language.operators.comparison.php &lt;?php var_dump(0 == &quot;all&quot;); // 0 == 0 -&gt; true var_dump(&quot;1&quot; == &quot;01&quot;); // 1 == 1 -&gt; true var_dump(&quot;10&quot; == &quot;1e1&quot;); // 10 == 10 -&gt; true var_dump(100 == &quot;1e2&quot;); // 100 == 100 -&gt; true switch (&quot;a&quot;) { case 0: echo &quot;0&quot;; break; case &quot;a&quot;: // never reached because &quot;a&quot; is already matched with 0 echo &quot;a&quot;; break; } ?&gt; 做比较，会先转换类型， all字符串转换成数字类型(int)就是 0 ， 所以中间成立返回真。 var_dump(08==8)这个结果返回是false， var_dump(09==9)这个结果返回也是false， 而var_dump(07===7)返回true（var_dump(07==7)同样返回true。） php手册上有详细说明，整形以0开头的为八进制数，如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略，即09实际上为0，08也同理]]></content>
+    <title>php弱类型</title>
+    <url>/2018/11/04/php%E5%BC%B1%E7%B1%BB%E5%9E%8B/</url>
+    <content><![CDATA[<h2 id="比较操作符"><a href="#比较操作符" class="headerlink" title="比较操作符"></a>比较操作符</h2><p>php中有两种比较的符号 == 与 ===</p>
+<p>=== 在进行比较的时候，会先判断两种字符串的类型是否相等，再比较，如果类型不同直接返回不相等</p>
+<p>== 在进行比较的时候，会先将字符串类型转化成相同，再比较</p>
+<a id="more"></a>
+<p>（如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换成数值并且比较按照数值来进行），例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 var_dump(&quot;admin&quot;==0);  //true</span><br><span class="line">3 var_dump(&quot;1admin&quot;==1); //true</span><br><span class="line">4 var_dump(&quot;admin1&quot;==1) //false</span><br><span class="line">5 var_dump(&quot;admin1&quot;==0) //true</span><br><span class="line">6 var_dump(&quot;0e123456&quot;==&quot;0e4456789&quot;); //true </span><br><span class="line">7 ?&gt;</span><br></pre></td></tr></table></figure>
+<p>观察上述代码，得到：</p>
+<p>1、”admin”==0 比较的时候，会将admin转化成数值，强制转化,由于admin是字符串，转化的结果是0自然和0相等</p>
+<p>2、”1admin”==1 比较的时候会将1admin转化成数值,结果为1，而“admin1“==1 却等于错误，也就是”admin1”被转化成了0</p>
+<p>3、 “0e123456”==”0e456789”相互比较的时候，会将0e这类字符串识别为科学技术法的数字，0的无论多少次方都是零，所以相等</p>
+<p>==注意 #f44336==：</p>
+<p>当一个字符串被当作一个数值来取值，其结果和类型如下:</p>
+<p>如果该字符串没有包含’.’,’e’,’E’并且其数值在整形的范围之内，该字符串被当作int来取值，其他所有情况下都被作为float来取值，该字符串的开始部分决定了它的值，如果该字符串以合法的数值开始，则使用该数值，否则其值为0。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 $test=1 + &quot;10.5&quot;; // $test=11.5(float)</span><br><span class="line">3 $test=1+&quot;-1.3e3&quot;; //$test=-1299(float)</span><br><span class="line">4 $test=1+&quot;bob-1.3e3&quot;;//$test=1(int)</span><br><span class="line">5 $test=1+&quot;2admin&quot;;//$test=3(int)</span><br><span class="line">6 $test=1+&quot;admin2&quot;;//$test=1(int)</span><br><span class="line">7 ?&gt;</span><br></pre></td></tr></table></figure>
+<p>所以就解释了”admin1”==1 =&gt;False 的原因</p>
+<h2 id="md5绕过-Hash比较缺陷"><a href="#md5绕过-Hash比较缺陷" class="headerlink" title="md5绕过(Hash比较缺陷)"></a>md5绕过(Hash比较缺陷)</h2><p>md5开头是0e的字符串，0e在比较的时候会将其视作为科学计数法，所以无论0e后面是什么，0的多少次方还是0，md5(‘240610708’) == md5(‘QNKCDZO’)成功绕过，例如：</p>
+<p>QNKCDZO<br>0e830400451993494058024219903391</p>
+<p>s878926199a<br>0e545993274517709034328855841020</p>
+<p>s155964671a<br>0e342768416822451524974117254469</p>
+<p>s214587387a<br>0e848240448830537924465865611904</p>
+<p>s214587387a<br>0e848240448830537924465865611904</p>
+<p>s878926199a<br>0e545993274517709034328855841020</p>
+<p>s1091221200a<br>0e940624217856561557816327384675</p>
+<h2 id="json绕过"><a href="#json绕过" class="headerlink" title="json绕过"></a>json绕过</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">if (isset($_POST[&apos;message&apos;])) &#123;</span><br><span class="line">    $message = json_decode($_POST[&apos;message&apos;]);</span><br><span class="line">    $key =&quot;*********&quot;;</span><br><span class="line">    if ($message-&gt;key == $key) &#123;</span><br><span class="line">        echo &quot;flag&quot;;</span><br><span class="line">    &#125; </span><br><span class="line">    else &#123;</span><br><span class="line">        echo &quot;fail&quot;;</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> else&#123;</span><br><span class="line">     echo &quot;~~~~&quot;;</span><br><span class="line"> &#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>输入一个json类型的字符串，json_decode函数解密成一个数组，判断数组中key的值是否等于 $key的值，但是$key的值我们不知道，但是可以利用0==”admin”(字符串)这种形式绕过</p>
+<p>最终上传 message={“key”:0}</p>
+<h2 id="array-search-is-array绕过"><a href="#array-search-is-array绕过" class="headerlink" title="array_search / is_array绕过"></a>array_search / is_array绕过</h2><p>in_array和array_search会对类型进行强制转换，并且是==进行比较，所以可以绕过。</p>
+<p>mixed array_search ( mixed $needle , array $haystack [, bool $strict = false ] )</p>
+<p>$needle，$haystack必需，$strict可选  函数判断$haystack中的值是否存在$needle，存在则返回该值的键值 第三个参数默认为false，如果设置为true则会进行严格过滤</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1 &lt;?php</span><br><span class="line">2 $a=array(0,1);</span><br><span class="line">3 var_dump(array_search(&quot;admin&quot;,$a)); // int(0) =&gt; 返回键值0</span><br><span class="line">4 var_dump(array_seach(&quot;1admin&quot;,$a));  // int(1) ==&gt;返回键值1</span><br><span class="line">5 ?&gt;</span><br></pre></td></tr></table></figure>
+<p>array_search函数 类似于== 也就是$a==”admin” 当然是$a=0  当然如果第三个参数为true则就不能绕过</p>
+<h2 id="strcmp漏洞绕过"><a href="#strcmp漏洞绕过" class="headerlink" title="strcmp漏洞绕过"></a>strcmp漏洞绕过</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> 1 &lt;?php</span><br><span class="line"> 2     $password=&quot;***************&quot;</span><br><span class="line"> 3      if(isset($_POST[&apos;password&apos;]))&#123;</span><br><span class="line"> 4 </span><br><span class="line"> 5         if (strcmp($_POST[&apos;password&apos;], $password) == 0) &#123;</span><br><span class="line"> 6             echo &quot;Right!!!login success&quot;;n</span><br><span class="line"> 7             exit();</span><br><span class="line"> 8         &#125; else &#123;</span><br><span class="line"> 9             echo &quot;Wrong password..&quot;;</span><br><span class="line">10         &#125;</span><br><span class="line">11 ?&gt;</span><br></pre></td></tr></table></figure>
+<p>strcmp是比较两个字符串，如果str1&lt;str2 则返回<0 如果str1大于str2返回="">0 如果两者相等 返回0</0></p>
+<p>我们是不知道$password的值的，题目要求strcmp判断的接受的值和$password必需相等，strcmp传入的期望类型是字符串类型，如果传入的是个数组会怎么样呢</p>
+<p>我们传入 password[]=xxx 可以绕过 是因为函数接受到了不符合的类型，将发生错误，但是还是判断相等</p>
+<h2 id="empty和isset函数"><a href="#empty和isset函数" class="headerlink" title="empty和isset函数"></a>empty和isset函数</h2><p>1）变量为：0，”0”,null,’’,false,array()时，使用empty函数，返回的都为true</p>
+<p>2）变量未定义或者为null时，isset函数返回的为false,其他都未true</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$a = null;</span><br><span class="line">$b = &apos;&apos;;</span><br><span class="line">$c = 0;</span><br><span class="line">$d = &quot;0&quot;;</span><br><span class="line">$e = false;</span><br><span class="line">$f = array();</span><br><span class="line">var_dump(empty($a));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($b));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($c));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($d));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($e));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(empty($f));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line"></span><br><span class="line">var_dump(isset($a));   //false</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($b));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($c));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($d));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($e));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($f));   //true</span><br><span class="line">echo &apos;&lt;p&gt;&apos;;</span><br><span class="line">var_dump(isset($g));   //false</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>php</category>
       </categories>
       <tags>
-        <tag>php</tag>
+        <tag>php弱类型</tag>
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[爬虫知识]]></title>
-    <url>%2F2018%2F08%2F09%2F%E7%88%AC%E8%99%AB%E7%9F%A5%E8%AF%86%2F</url>
-    <content type="text"><![CDATA[Python2和Python3中urllib库中urlencode的使用注意事项在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。 详细介绍可以参考https://cuiqingcai.com/947.html 对于Python2Python2中提供了urllib和urllib2两个模块。 urlencode方法所在位置为： urllib.urlencode(values) # 其中values为所需要编码的数据，并且只能为字典 例如模拟登陆CSDN网站，示例程序如下： import urllib2 values = {&quot;username&quot;:&quot;962457839@qq.com&quot;,&quot;password&quot;:&quot;XXXX&quot;} data = urllib.urlencode(values) url = &quot;https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&quot; request = urllib2.Request(url,data) response = urllib2.urlopen(request) print response.read() 对于Python3Python3中也有urllib和urllib3两个库，其中urllib几乎是Python2中urllib和urllib2两个模块的集合，所以我们最常用的urllib模块，而urllib3则作为一个拓展模块使用。 urlencode方法所在位置 urllib.parse.urlencode(values) 例如模拟登陆CSDN网站，示例程序如下: from urllib import request from urllib import parse from urllib.request import urlopen values = {&apos;username&apos;: &apos;962457839@qq.com&apos;, &apos;password&apos;: &apos;XXXX&apos;} data = parse.urlencode(values).encode(&apos;utf-8&apos;) # 提交类型不能为str，需要为byte类型 url = &apos;https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&apos; request = request.Request(url, data) response = urlopen(request) print(response.read().decode()) 正则表达式详细指南可以参考http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html findall(string[, pos[, endpos]]) | re.findall(pattern, string[, flags]): 搜索string，以列表形式返回全部能匹配的子串。 例如： import re p = re.compile(r&apos;\d+&apos;) # 使用Pattern匹配文本，获得匹配结果，无法匹配时将返回None print p.findall(&apos;one1two2three3four4&apos;) ### output ### # [&apos;1&apos;, &apos;2&apos;, &apos;3&apos;, &apos;4&apos;] 或: str = re.findall(r’密码错误’,html) 输出： [‘密码错误’] Python find()方法Python find() 方法检测字符串中是否包含子字符串 str ，如果指定 beg（开始） 和 end（结束） 范围，则检查是否包含在指定范围内，如果包含子字符串返回开始的索引值，否则返回-1。 find()方法语法： `str.find(str, beg=0, end=len(string))` str – 指定检索的字符串 beg – 开始索引，默认为0。 end – 结束索引，默认为字符串的长度。 ###实例 &gt;&gt;&gt;info = &apos;abca&apos; &gt;&gt;&gt; print info.find(&apos;a&apos;) # 从下标0开始，查找在字符串里第一个出现的子串，返回结果：0 0 &gt;&gt;&gt; print info.find(&apos;a&apos;,1) # 从下标1开始，查找在字符串里第一个出现的子串：返回结果3 3 &gt;&gt;&gt; print info.find(&apos;3&apos;) # 查找不到返回-1 -1 &gt;&gt;&gt; BeautifulSoup详细的使用可以参考https://www.cnblogs.com/zhaof/p/6930955.html ###标签选择器 print(soup.title) print(type(soup.title)) 通过这种soup.标签名 我们就可以获得这个标签的内容 这里有个问题需要注意，通过这种方式获取标签，如果文档中有多个这样的标签，返回的结果是第一个标签的内容，如上面我们通过soup.p获取p标签，而文档中有多个p标签，但是只返回了第一个p标签内容，例如： print(soup.h3) 结果为： &lt;h3&gt;你需要在网址后输入数字77456&lt;/h3&gt; find_allfind_all(name,attrs,recursive,text,**kwargs) 可以根据标签名，属性，内容查找文档，结果返回的是一个列表的方式 findfind(name,attrs,recursive,text,**kwargs) find返回的匹配结果的第一个元素 ##黑板客爬虫挑战 可以模拟浏览器登录，获得密码 import urllib.request from bs4 import BeautifulSoup import requests url = &apos;http://www.heibanke.com/lesson/crawler_ex01/&apos; s = &apos;密码错误&apos; for i in range(31): data = {&apos;username&apos;: &apos;asd&apos;, &apos;password&apos;: i} html = requests.post(url,data).text if s not in html: print(i) 下面这是爬虫挑战的第三关，先出现了这个页面 先注册登录，登录后才进入这个页面： 题目说比上一关多了两层保护，我们可以看到顶部有个注销按钮，也就是说首先要先登录才能继续做题。然后我开始观察在登录的时候除了用户名和密码到底还发送了些什么。打开chrome-&gt;右键审查元素-&gt;网络，然后再输入用户名密码登录，看右边面板中的Form Data，也就是我们发送的数据（参数）： 图中我们可以看到，除了发送用户名和密码，我们还发送了一个csrfmiddlewaretoken的数据，这个数据是什么呢？正好最近的web安全课里讲过csrf攻击，也就知道点。那这个csrfmiddlewaretoken是怎么来的呢？回到题目的页面，刷新下网页，在Response Headers也就是服务器响应的数据的Set-Cookie里发现有个csrftoken的字段： 我们先记住这个值，然后再登录一遍，发现发送的表单数据中的csrfmiddlewaretoken中的值就是这个。也就是说，每次登录的时候还要拿进入这个页面服务器给你的“csrftoken”作为你下次登录时的“csrfmiddlewaretoken”和用户名密码一起传给服务器。 经过观察还发现，登录“黑板课记账”的时候用的也是相同的方法，这就是题目所说的“两层保护”。所以我们可以写出代码： import requests from bs4 import BeautifulSoup url_1=&apos;http://www.heibanke.com/accounts/login&apos; url_2=&apos;http://www.heibanke.com/lesson/crawler_ex02&apos; data_1={}#手动创建的用户和密码,字典 data_1[&apos;username&apos;]=&apos;ybyb520&apos; data_1[&apos;password&apos;]=123456 data_1[&apos;csrfmiddlewaretoken&apos;]=&apos;&apos; data_2={}#试探的用户和密码 data_2[&apos;username&apos;]=&apos;yb&apos; data_2[&apos;csrfmiddlewaretoken&apos;]=&apos;&apos; data_2[&apos;password&apos;]=0 s=requests.Session()#存储特定用户会话所需的信息。这样，当用户在应用程序的 Web 页之间跳转时，存储在 Session 对象中的变量将不会丢失，而是在整个用户会话中一直存在下去 s.get(url_1) data_1[&apos;csrfmiddlewaretoken&apos;]=s.cookies[&apos;csrftoken&apos;]#通过发链接获得csrfmiddlewaretoken的值 s.post(url_1,data_1)#发送数据 data_2[&apos;csrfmiddlewaretoken&apos;]=s.cookies[&apos;csrftoken&apos;]#得到另外一个csrfmiddlewaretoken，csrfmiddlewaretoken不是一直不变的，每次访问值都不同 for i in range(0,30):#密码猜测 data_2[&apos;password&apos;]=i result=s.post(&quot;http://www.heibanke.com/lesson/crawler_ex02/&quot;,data=data_2) if result.text.find(&apos;错误&apos;) == -1: print(&apos;密码是：&apos;+str(data_2[&apos;password&apos;])) break else: print(str(data_2[&apos;password&apos;])+&apos;不是密码&apos;)]]></content>
+    <title>搭建博客</title>
+    <url>/2018/07/31/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接：</p>
+<p><a href="https://blog.csdn.net/u012150360/article/details/72793482" target="_blank" rel="noopener">https://blog.csdn.net/u012150360/article/details/72793482</a></p>
+<a id="more"></a>
+<hr>
+<p><a href="https://www.cnblogs.com/fengxiongZz/p/7707219.html" target="_blank" rel="noopener">https://www.cnblogs.com/fengxiongZz/p/7707219.html</a></p>
+<p><a href="https://www.jianshu.com/p/863f3f2d1733" target="_blank" rel="noopener">https://www.jianshu.com/p/863f3f2d1733</a></p>
+<p>还有<a href="https://blog.csdn.net/qq_33699981/article/details/72716951" title="hexo的next主题个性化教程：打造炫酷网站" target="_blank" rel="noopener">hexo的next主题个性化教程：打造炫酷网站</a></p>
+<p>根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。</p>
+<p>就是在ssh-key配置时总是失败，经常会报这样的错误：</p>
+<pre><code>The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established.
+
+RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 
+</code></pre><p>Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件：</p>
+<p>  <code>Are you sure you want to continue connecting (yes/no)? //输入yes，回车</code></p>
+]]></content>
+      <tags>
+        <tag>搭建博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>知识点</title>
+    <url>/2018/10/29/%E7%9F%A5%E8%AF%86%E7%82%B9/</url>
+    <content><![CDATA[<h3 id="1-robots-txt协议"><a href="#1-robots-txt协议" class="headerlink" title="1. robots.txt协议"></a>1. robots.txt协议</h3><a id="more"></a>
+<p>robots.txt是一个协议，而不是一个命令。robots.txt是搜索引擎中访问网站的时候要查看的第一个文件。robots.txt文件告诉蜘蛛程序在服务器上什么文件是可以被查看的。<br>当一个搜索蜘蛛访问一个站点时，它会首先检查该站点根目录下是否存在robots.txt，如果存在，搜索机器人就会按照该文件中的内容来确定访问的范围；如果该文件不存在，所有的搜索蜘蛛将能够访问网站上所有没有被口令保护的页面。<br>例如：</p>
+<p><img src="./images/Image.png" alt="enter description here" title="Image"></p>
+<p>一般网站都会有robots.txt文件的，存放可以直接访问的文件子目录</p>
+<h3 id="2、正则字符串"><a href="#2、正则字符串" class="headerlink" title="2、正则字符串"></a>2、正则字符串</h3><p>preg_match — 执行匹配正则表达式</p>
+<p>preg_match()返回 pattern 的匹配次数，它的值将是0次（不匹配）或1次，因为preg_match()在第一次匹配后 将会停止搜索</p>
+<p>/号之间的内容为正则模式串，后一个/之后的内容标识其它信息，例如这里的i标识大小写不敏感。</p>
+<p>{n,m} ：m 和 n 均为非负整数，其中n &lt;= m。最少匹配 n 次且最多匹配 m 次。例如，”o{1,3}” 将匹配 “fooooood” 中的前三个 o。’o{0,1}’ 等价于 ‘o?’。请注意在逗号和两个数之间不能有空格。</p>
+<p>.   匹配除换行符 \n 之外的任何单字符。要匹配 . ，请使用 . 。</p>
+<p><em>匹配前面的子表达式零次或多次。要匹配 </em> 字符，请使用 *。</p>
+<p>[a-z]:  字符范围。匹配指定范围内的任意字符。例如，’[a-z]’ 可以匹配 ‘a’ 到 ‘z’ 范围内的任意小写字母字符。</p>
+<p>[[:punct:]]代表任意符号，非字母数字</p>
+<p>正则表达式中常用的模式修正符有i、g、m、s、U、x、a、D、e 等。它们之间可以组合搭配使用。</p>
+<p>i 不区分(ignore)大小写；<br>例如: /abc/i 可以匹配 abc、aBC、Abc</p>
+<p>g 全局(global)匹配<br>如果不带g，正则过程中字符串从左到右匹配，找到第一个符合条件的即匹配成功，返回<br>如果带g，则字符串从左到右，找到每个符合条件的都记录下来，知道字符串结尾位置<br>例如:</p>
+<figure class="highlight smalltalk"><table><tr><td class="code"><pre><span class="line">var str = <span class="string">'aaaaaaaa'</span></span><br><span class="line">var reg1 = /a/; str.match(reg1) // 结果为：[<span class="comment">"a"</span>, index: <span class="number">0</span>, input: <span class="comment">"aaaaaaaa"</span>]</span><br><span class="line">var reg2 = /a/g; str.match(reg2) // 结果为：[<span class="comment">"a"</span>, <span class="comment">"a"</span>, <span class="comment">"a"</span>, <span class="comment">"a"</span>, <span class="comment">"a"</span>, <span class="comment">"a"</span>, <span class="comment">"a"</span>, <span class="comment">"a"</span>]</span><br></pre></td></tr></table></figure>
+<p>m 多(more)行匹配</p>
+<p>若存在换行\n并且有开始^或结束$符的情况下，和g一起使用实现全局匹配,<br>因为存在换行时默认会把换行符作为一个字符任务匹配字符串是个单行，<br>g只匹配第一行，添加m之后实现多行，每个换行符之后就是开始</p>
+<figure class="highlight golo"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str = <span class="string">"abcggab\nabcoab"</span>;</span><br><span class="line"><span class="keyword">var</span> preg1 = /^abc/gm; str.<span class="keyword">match</span>(preg1) // 结果为：[<span class="string">"abc"</span>, <span class="string">"abc"</span>]</span><br><span class="line"><span class="keyword">var</span> preg2 = /ab$/gm; str.<span class="keyword">match</span>(preg2) // 结果为：[<span class="string">"ab"</span>, <span class="string">"ab"</span>]</span><br></pre></td></tr></table></figure>
+<p>s 特殊字符圆点 . 中包含换行符<br>默认的圆点 . 是 匹配除换行符 \n 之外的任何单字符，加上s之后, . 中包含换行符</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span>str = "abggab\nacbs";</span><br><span class="line"><span class="meta">$</span>preg = "/b./s";</span><br><span class="line"><span class="meta">preg_match_all($</span>preg, $str,$matchs);</span><br><span class="line"><span class="meta">print_r($</span>matchs);//Array ( [0] =&gt; Array ( [0] =&gt; bg [1] =&gt; b [2] =&gt; bs ) )</span><br></pre></td></tr></table></figure>
+<p>U 只匹配最近的一个字符串;不重复匹配;</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">$mode=<span class="string">"/a(.*?)c/"</span>;</span><br><span class="line">$preg=<span class="string">"/a.*c/U"</span>;<span class="comment">//这两个正则返回相同的值</span></span><br><span class="line">$str=<span class="string">"abcabbbcabbbbbc"</span> ;</span><br><span class="line">preg_match($mode,$str,$content); <span class="keyword">echo</span> $content[<span class="number">0</span>];<span class="comment">//abc</span></span><br><span class="line">preg_match($preg,$str,$content); <span class="keyword">echo</span> $content[<span class="number">0</span>];<span class="comment">//abc</span></span><br><span class="line"><span class="comment">//修正符:x 将模式中的空白忽略;</span></span><br><span class="line"><span class="comment">//修正符:A 强制从目标字符串开头匹配;</span></span><br><span class="line"><span class="comment">//修正符:D 如果使用$限制结尾字符,则不允许结尾有换行; </span></span><br><span class="line"><span class="comment">//修正符:e 配合函数preg_replace()使用, 可以把匹配来的字符串当作正则表达式执行;</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>ctf</category>
+      </categories>
+      <tags>
+        <tag>robots协议,正则</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>爬虫知识</title>
+    <url>/2018/08/09/%E7%88%AC%E8%99%AB%E7%9F%A5%E8%AF%86/</url>
+    <content><![CDATA[<h2 id="Python2和Python3中urllib库中urlencode的使用注意事项"><a href="#Python2和Python3中urllib库中urlencode的使用注意事项" class="headerlink" title="Python2和Python3中urllib库中urlencode的使用注意事项"></a>Python2和Python3中urllib库中urlencode的使用注意事项</h2><p>在Python中，我们通常使用urllib中的urlencode方法将字典编码，用于提交数据给url等操作，但是<br>在Python2和Python3中urllib模块中所提供的urlencode的包位置有些不同。</p>
+<p>详细介绍可以参考<a href="https://cuiqingcai.com/947.html" target="_blank" rel="noopener">https://cuiqingcai.com/947.html</a></p>
+<a id="more"></a>
+<h3 id="对于Python2"><a href="#对于Python2" class="headerlink" title="对于Python2"></a>对于Python2</h3><p>Python2中提供了urllib和urllib2两个模块。</p>
+<ul>
+<li><p>urlencode方法所在位置为：</p>
+<p>  <code>urllib.urlencode(values)    # 其中values为所需要编码的数据，并且只能为字典</code></p>
+</li>
+</ul>
+<ul>
+<li><p>例如模拟登陆CSDN网站，示例程序如下：</p>
+<pre><code>import urllib2
+values = {&quot;username&quot;:&quot;962457839@qq.com&quot;,&quot;password&quot;:&quot;XXXX&quot;}
+data = urllib.urlencode(values) 
+url = &quot;https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&quot;
+request = urllib2.Request(url,data)
+response = urllib2.urlopen(request)
+print response.read()
+</code></pre></li>
+</ul>
+<h3 id="对于Python3"><a href="#对于Python3" class="headerlink" title="对于Python3"></a>对于Python3</h3><p>Python3中也有urllib和urllib3两个库，其中urllib几乎是Python2中urllib和urllib2两个模块的集合，所以我们最常用的urllib模块，而urllib3则作为一个拓展模块使用。</p>
+<ul>
+<li><p>urlencode方法所在位置</p>
+<p>  <code>urllib.parse.urlencode(values)</code></p>
+</li>
+<li><p>例如模拟登陆CSDN网站，示例程序如下:</p>
+<pre><code>from urllib import request
+from urllib import parse
+from urllib.request import urlopen
+values = {&apos;username&apos;: &apos;962457839@qq.com&apos;, &apos;password&apos;: &apos;XXXX&apos;}
+data = parse.urlencode(values).encode(&apos;utf-8&apos;)  # 提交类型不能为str，需要为byte类型
+url = &apos;https://passport.csdn.net/account/login?from=http://my.csdn.net/my/mycsdn&apos;
+request = request.Request(url, data)
+response = urlopen(request)
+print(response.read().decode())
+</code></pre></li>
+</ul>
+<h2 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h2><p>详细指南可以参考<a href="http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html" target="_blank" rel="noopener">http://www.cnblogs.com/huxi/archive/2010/07/04/1771073.html</a></p>
+<p>findall(string[, pos[, endpos]]) | re.findall(pattern, string[, flags]):</p>
+<p>搜索string，以列表形式返回全部能匹配的子串。 </p>
+<p>例如：</p>
+<pre><code>import re
+
+p = re.compile(r&apos;\d+&apos;)
+# 使用Pattern匹配文本，获得匹配结果，无法匹配时将返回None
+print p.findall(&apos;one1two2three3four4&apos;)
+
+### output ###
+# [&apos;1&apos;, &apos;2&apos;, &apos;3&apos;, &apos;4&apos;]
+</code></pre><p>或:<br>            str = re.findall(r’密码错误’,html)<br>            输出：<br>            [‘密码错误’]</p>
+<h2 id="Python-find-方法"><a href="#Python-find-方法" class="headerlink" title="Python find()方法"></a>Python find()方法</h2><p>Python find() 方法检测字符串中是否包含子字符串 str ，如果指定 beg（开始） 和 end（结束） 范围，则检查是否包含在指定范围内，如果包含子字符串返回开始的索引值，否则返回-1。</p>
+<p>find()方法语法：</p>
+<pre><code>`str.find(str, beg=0, end=len(string))`
+</code></pre><p>str – 指定检索的字符串</p>
+<p>beg – 开始索引，默认为0。</p>
+<p>end – 结束索引，默认为字符串的长度。</p>
+<p>###实例</p>
+<pre><code>&gt;&gt;&gt;info = &apos;abca&apos;
+&gt;&gt;&gt; print info.find(&apos;a&apos;)    # 从下标0开始，查找在字符串里第一个出现的子串，返回结果：0
+0
+&gt;&gt;&gt; print info.find(&apos;a&apos;,1)  # 从下标1开始，查找在字符串里第一个出现的子串：返回结果3
+3
+&gt;&gt;&gt; print info.find(&apos;3&apos;)    # 查找不到返回-1
+-1
+&gt;&gt;&gt;
+</code></pre><h2 id="BeautifulSoup"><a href="#BeautifulSoup" class="headerlink" title="BeautifulSoup"></a>BeautifulSoup</h2><p>详细的使用可以参考<a href="https://www.cnblogs.com/zhaof/p/6930955.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhaof/p/6930955.html</a></p>
+<p>###标签选择器</p>
+<p>print(soup.title)</p>
+<p>print(type(soup.title))</p>
+<p>通过这种soup.标签名 我们就可以获得这个标签的内容</p>
+<p>这里有个问题需要注意，通过这种方式获取标签，如果文档中有多个这样的标签，返回的结果是第一个标签的内容，如上面我们通过soup.p获取p标签，而文档中有多个p标签，但是只返回了第一个p标签内容，例如：</p>
+<pre><code>print(soup.h3)
+结果为：
+&lt;h3&gt;你需要在网址后输入数字77456&lt;/h3&gt;
+</code></pre><h3 id="find-all"><a href="#find-all" class="headerlink" title="find_all"></a>find_all</h3><p>find_all(name,attrs,recursive,text,**kwargs)</p>
+<p>可以根据标签名，属性，内容查找文档，结果返回的是一个列表的方式</p>
+<h3 id="find"><a href="#find" class="headerlink" title="find"></a>find</h3><p>find(name,attrs,recursive,text,**kwargs)</p>
+<p>find返回的匹配结果的第一个元素</p>
+<p>##黑板客爬虫挑战</p>
+<p><img src="https://i.imgur.com/b30v7Ps.png" alt=""></p>
+<p>可以模拟浏览器登录，获得密码</p>
+<pre><code>import urllib.request
+from bs4 import BeautifulSoup
+import requests
+url = &apos;http://www.heibanke.com/lesson/crawler_ex01/&apos;
+s = &apos;密码错误&apos;
+for i in range(31):
+    data = {&apos;username&apos;: &apos;asd&apos;, &apos;password&apos;: i}
+    html = requests.post(url,data).text
+    if s not in html:
+        print(i)
+</code></pre><p>下面这是爬虫挑战的第三关，先出现了这个页面</p>
+<p><img src="https://i.imgur.com/4cU5snJ.jpg" alt=""></p>
+<p>先注册登录，登录后才进入这个页面：</p>
+<p><img src="https://i.imgur.com/W4lfdim.png" alt=""></p>
+<p>题目说比上一关多了两层保护，我们可以看到顶部有个注销按钮，也就是说首先要先登录才能继续做题。然后我开始观察在登录的时候除了用户名和密码到底还发送了些什么。打开chrome-&gt;右键审查元素-&gt;网络，然后再输入用户名密码登录，看右边面板中的Form Data，也就是我们发送的数据（参数）：</p>
+<p><img src="https://i.imgur.com/t4H6NHv.jpg" alt=""></p>
+<p>图中我们可以看到，除了发送用户名和密码，我们还发送了一个csrfmiddlewaretoken的数据，这个数据是什么呢？正好最近的web安全课里讲过csrf攻击，也就知道点。那这个csrfmiddlewaretoken是怎么来的呢？回到题目的页面，刷新下网页，在Response Headers也就是服务器响应的数据的Set-Cookie里发现有个csrftoken的字段：</p>
+<p><img src="https://i.imgur.com/pqaFrb2.jpg" alt=""></p>
+<p>我们先记住这个值，然后再登录一遍，发现发送的表单数据中的csrfmiddlewaretoken中的值就是这个。也就是说，每次登录的时候还要拿进入这个页面服务器给你的“csrftoken”作为你下次登录时的“csrfmiddlewaretoken”和用户名密码一起传给服务器。</p>
+<p>经过观察还发现，登录“黑板课记账”的时候用的也是相同的方法，这就是题目所说的“两层保护”。<br>所以我们可以写出代码：</p>
+<pre><code>import requests
+from bs4 import BeautifulSoup
+
+url_1=&apos;http://www.heibanke.com/accounts/login&apos;
+url_2=&apos;http://www.heibanke.com/lesson/crawler_ex02&apos;
+
+data_1={}#手动创建的用户和密码,字典
+data_1[&apos;username&apos;]=&apos;ybyb520&apos;
+data_1[&apos;password&apos;]=123456
+data_1[&apos;csrfmiddlewaretoken&apos;]=&apos;&apos;
+
+
+data_2={}#试探的用户和密码
+data_2[&apos;username&apos;]=&apos;yb&apos;
+data_2[&apos;csrfmiddlewaretoken&apos;]=&apos;&apos;
+data_2[&apos;password&apos;]=0
+
+s=requests.Session()#存储特定用户会话所需的信息。这样，当用户在应用程序的 Web 页之间跳转时，存储在 Session 对象中的变量将不会丢失，而是在整个用户会话中一直存在下去
+
+s.get(url_1)
+data_1[&apos;csrfmiddlewaretoken&apos;]=s.cookies[&apos;csrftoken&apos;]#通过发链接获得csrfmiddlewaretoken的值
+
+s.post(url_1,data_1)#发送数据
+data_2[&apos;csrfmiddlewaretoken&apos;]=s.cookies[&apos;csrftoken&apos;]#得到另外一个csrfmiddlewaretoken，csrfmiddlewaretoken不是一直不变的，每次访问值都不同
+
+for i in range(0,30):#密码猜测
+    data_2[&apos;password&apos;]=i
+    result=s.post(&quot;http://www.heibanke.com/lesson/crawler_ex02/&quot;,data=data_2)
+    if result.text.find(&apos;错误&apos;) == -1:
+        print(&apos;密码是：&apos;+str(data_2[&apos;password&apos;]))
+        break
+    else:
+        print(str(data_2[&apos;password&apos;])+&apos;不是密码&apos;)
+</code></pre>]]></content>
       <categories>
         <category>爬虫</category>
       </categories>
@@ -71,9 +520,129 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[爬虫知识点]]></title>
-    <url>%2F2018%2F08%2F06%2Fctf%E6%80%BB%E7%BB%93%2F</url>
-    <content type="text"><![CDATA[==mark text==文件夹创建与切换os.makedirs(os.path.join(“E:\name”, filename)) 在目录E:\name下创建名为filename的文件夹 os.chdir(“E:\name\“ + filename) 切换工作路径到E:\name\filename下 创建目录在Python中可以使用os.mkdir()函数创建目录（创建一级目录）。 其原型如下所示： os.mkdir(path) 其参数path 为要创建目录的路径。 例如要在D盘下创建hello的目录(或在已有的文件夹中创建新的文件夹） &gt;&gt;&gt; import os &gt;&gt;&gt; os.mkdir(&apos;d:\hello&apos;) &gt;&gt;&gt;os.mkdir(&apos;d:\\hello\\23&apos;) 可以使用os.makedirs（）函数创建多级目录。 其原型如下所示： os.makedirs(path) 其参数path 为要创建目录的路径。 如在D盘下创建books的目录，books目录下在创建book目录 &gt;&gt;&gt; import os &gt;&gt;&gt;os.makedirs(&apos;d:\\books\\book&apos;) 删除目录在Python中可以使用os.rmdir()函数删除目录。 其原型如下所示： os.rmdir(path) 其参数path 为要删除的目录的路径。 例如把D盘下的hmm的目录删除 &gt;&gt;&gt; import os &gt;&gt;&gt; os.rmdir(‘d:\hmm’) 删除多级目录 在Python中可以使用os.removedirs()函数删除多级目录。 其原型如下所示： os.removdirs(path) 其参数path 为要删除的多级目录的路径。 &gt;&gt;&gt; import os &gt;&gt;&gt; os.removedirs(‘d:\books\book’) #注意：要删除的目录必须是空目录 删除文件 在Python中可以使用os.remove()函数删除文件（注意一定是一个文件）。 其原型如下所示： os.remov(path) 其参数path 为要删除的文件的路径。 如删除D盘下books目录下book目录中的book.txt的文件 &gt;&gt;&gt; import os &gt;&gt;&gt;os.remove(‘d:\books\book\book.txt’) 遍历目录 在Python中可以使用os.walk()函数遍历目录。 其原型如下所示： os.walk(path) 其参数path 为要遍历的目录，遍历path，返回一个对象，他的每个部分都是一个三元组 (‘目录x’，[目录x下的目录list]，目录x下面的文件) 。如： &gt;&gt;&gt; a=os.walk(&apos;d:\\books&apos;) &gt;&gt;&gt; def fun(): for i in a: print i &gt;&gt;&gt; fun() (&apos;d:\\books&apos;, [&apos;book&apos;], [&apos;aa.txt&apos;]) (&apos;d:\\books\\book&apos;, [ ], [ ]) 判断是否为目录 在Python中可以使用os.path.isdir()函数判断某一路径是否为目录。 其函数原型如下所示： os.path.isdir(path) 其参数 path为 要进行判断的路径。如果是则返回TRUE,否则返回FALSE。 判断是否为文件 在Python中可以使用os.path.isfile()函数判断某一路径是否为文件。其函数原型如下所示。 os.path.isfile(path) 其参数path为要进行判断的路径。如果是则返回TRUE,否则返回FALSE。 获取目标内容get_text():获取标签里面的内容，可以获取文本内容，例如： html=&apos;&apos;&apos; &lt;div class=&quot;panel&quot;&gt; &lt;div class=&quot;panel-heading&quot;&gt; &lt;h4&gt;Hello&lt;/h4&gt; &lt;/div&gt; &lt;div class=&quot;panel-body&quot;&gt; &lt;ul class=&quot;list&quot; id=&quot;list-1&quot;&gt; &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt; &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt; &lt;li class=&quot;element&quot;&gt;Jay&lt;/li&gt; &lt;/ul&gt; &lt;ul class=&quot;list list-small&quot; id=&quot;list-2&quot;&gt; &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt; &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt; &lt;/ul&gt; &lt;/div&gt; &lt;/div&gt; &apos;&apos;&apos; from bs4 import BeautifulSoup soup = BeautifulSoup(html, &apos;lxml&apos;) for li in soup.select(&apos;li&apos;): print(li.get_text()) 返回结果为： Foort Bar Jay Foo Bar sql万能钥匙注入 我们登录一个网站的时候会有账户名和密码都要输入进去。这样的方法禁止非法进入网站，它是这样构造SQL语句的，假设填写用户名为marcofly密码为test。因为根据我们提交的用户名和密码被合成到SQL查询语句当中之后是这样的： select * from users where username=’marcofly’ and password=md5(‘test’) 这样如果数据库不存在这样的字段就表示输入错误，无法登陆。正常情况下是如此，但是对于有SQL注入漏洞的网站来说，只要构造个特殊的“字符串”，照样能够成功登录。 比如我们填写用户名为zlq’ or ‘1’=’1’ or ‘1’=’1看看，这样后构造出的SQL语句为 select * from users where username=’zlq’ or ‘1’=’1’ or ‘1’=’1’ and password=md5(‘test’) //就是替换marcofly这个字符串 替换之后它是怎么执行的呢，先执行and部分，就是 ‘1’=’1’ and password=md5(‘test’)，这个密码对不上是返回假，就是不正确，然后执行or， ‘zlq’ or ‘1’=’1’这个是或者的意思， ‘zlq’ 为真或者’1’=’1’为真就正确，’1’=’1’肯定为真的，所以正确，我们把代码缩小看看（’zlq’ or ‘1’=’1’ ）or （’1’=’1’ and password=md5(‘test’) ），这里给出逻辑’zlq’ or ‘1’=’1’ 为真，’1’=’1’ and password=md5(‘test’)为假，（真 ）or （假），即为正确 。你测试要是有万能密码漏洞的页面都能成功，而且很多人用htmlspecialchars过滤也没效果，因为htmlspecialchars需要填写两一个参数才能过滤单引号，默认是不过滤单引号的，所以上面的注入100%成功。 我们再输入’ or 1=1#看看，把marcofly替换’ or 1=1# select * from users where username=’’ or 1=1#’ and password=md5(‘test’) 语义分析：“#”在mysql中是注释符，这样井号后面的内容将被mysql视为注释内容，这样就不会去执行了，换句话说，以下的两句sql语句等价： select * from users where username=’’ or 1=1这样1=1永远为真，or那么执行成功 。 现在我给出解决这个漏洞终极方案，保证天煞都无法入侵成功。是这样的，不知道前面看到没有，password=md5(‘test’)就是说把密码经过MD5加密后再查询SQL，因为经过MD5加密后的字符串是32位的，那么经过加密后的都是一连串的像这样的ac59075b964b0715字符，是不可能办到去转换执行SQL语句的。我们经过改写SQL语句成这样： select * from users where username=md5(‘marcofly’) and password=md5(‘test’) 我们再次输入用户名为 zlq’ or ‘1’=’1’ or ‘1’=’1看看，执行的语句已经变为 select * from users where username=‘6c92bfdc2da722a1’ and password=‘4621d373cade4e83’ 看到了吧，无论你输入什么新型的SQL万能密码注入语句都行，都是转为一个MD5字符串。不要嫌弃经过MD5转换的效率，这里只用MD5加密过滤什么的都不用 ，其实企业中没有一个说嫌过滤牺牲性能的，如果真有这样的站长让我瞧瞧，让我膜拜一下。其实注入攻击难就难在参数性SQL注入，因为你不可能用MD5加密查询一个数据然后用MD5呈现给客户吧，如果有时间我再讲讲SQL注入的强大防御阵营。 sql注入常见万能密码1：&quot;or &quot;a&quot;=&quot;a 2： &apos;)or(&apos;a&apos;=&apos;a 3：or 1=1-- 4：&apos;or 1=1-- 5：a&apos;or&apos; 1=1-- 6：&quot;or 1=1-- 7：&apos;or&apos;a&apos;=&apos;a 8：&quot;or&quot;=&quot;a&apos;=&apos;a 9：&apos;or&apos;&apos;=&apos; 10：&apos;or&apos;=&apos;or&apos; 11：1 or &apos;1&apos;=&apos;1&apos;=1 12：1 or &apos;1&apos;=&apos;1&apos; or 1=1 13： &apos;OR 1=1%00]]></content>
+    <title>2023年11月</title>
+    <url>/2018/08/06/ctf%E6%80%BB%E7%BB%93%20-%20%E5%89%AF%E6%9C%AC/</url>
+    <content><![CDATA[<h2 id="mark-text-文件夹创建与切换"><a href="#mark-text-文件夹创建与切换" class="headerlink" title="==mark text==文件夹创建与切换"></a>==mark text==文件夹创建与切换</h2><p>os.makedirs(os.path.join(“E:\name”, filename))</p>
+<p>在目录E:\name下创建名为filename的文件夹</p>
+<p>os.chdir(“E:\name\“ + filename)</p>
+<p>切换工作路径到E:\name\filename下</p>
+<a id="more"></a>
+<h2 id="创建目录"><a href="#创建目录" class="headerlink" title="创建目录"></a>创建目录</h2><p>在Python中可以使用os.mkdir()函数创建目录（创建一级目录）。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.mkdir(path)</p>
+<p>　　其参数path 为要创建目录的路径。</p>
+<p>　　例如要在D盘下创建hello的目录(或在已有的文件夹中创建新的文件夹）</p>
+<pre><code>&gt;&gt;&gt; import os
+
+　　&gt;&gt;&gt; os.mkdir(&apos;d:\hello&apos;)
+
+&gt;&gt;&gt;os.mkdir(&apos;d:\\hello\\23&apos;)
+　　
+</code></pre><p>　　可以使用os.makedirs（）函数创建多级目录。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.makedirs(path)</p>
+<p>　　其参数path 为要创建目录的路径。</p>
+<p>　　如在D盘下创建books的目录，books目录下在创建book目录</p>
+<pre><code>&gt;&gt;&gt; import os
+
+　　&gt;&gt;&gt;os.makedirs(&apos;d:\\books\\book&apos;)
+　
+</code></pre><h2 id="删除目录"><a href="#删除目录" class="headerlink" title="删除目录"></a>删除目录</h2><p>在Python中可以使用os.rmdir()函数删除目录。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.rmdir(path)</p>
+<p>　　其参数path 为要删除的目录的路径。</p>
+<p>　　例如把D盘下的hmm的目录删除</p>
+<p>　　&gt;&gt;&gt; import os</p>
+<p>　　&gt;&gt;&gt; os.rmdir(‘d:\hmm’) </p>
+<p>删除多级目录</p>
+<p>　　在Python中可以使用os.removedirs()函数删除多级目录。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.removdirs(path)</p>
+<p>　　其参数path 为要删除的多级目录的路径。</p>
+<p>　　&gt;&gt;&gt; import os</p>
+<p>　　&gt;&gt;&gt; os.removedirs(‘d:\books\book’)</p>
+<p>　　#注意：要删除的目录必须是空目录</p>
+<h2 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h2><p>　　在Python中可以使用os.remove()函数删除文件（注意一定是一个文件）。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.remov(path)</p>
+<p>　　其参数path 为要删除的文件的路径。</p>
+<p>　　如删除D盘下books目录下book目录中的book.txt的文件</p>
+<p>　　&gt;&gt;&gt; import os</p>
+<p>　　&gt;&gt;&gt;os.remove(‘d:\books\book\book.txt’)　　</p>
+<h2 id="遍历目录"><a href="#遍历目录" class="headerlink" title="遍历目录"></a>遍历目录</h2><p>　　在Python中可以使用os.walk()函数遍历目录。</p>
+<p>　　其原型如下所示：</p>
+<p>　　os.walk(path)</p>
+<p>　　其参数path 为要遍历的目录，遍历path，返回一个对象，他的每个部分都是一个三元组 (‘目录x’，[目录x下的目录list]，目录x下面的文件) 。如：</p>
+<pre><code>　　&gt;&gt;&gt; a=os.walk(&apos;d:\\books&apos;)
+　　&gt;&gt;&gt; def  fun():
+             　　  for i in a:
+                    　　   print i
+　　&gt;&gt;&gt; fun()
+　　(&apos;d:\\books&apos;, [&apos;book&apos;], [&apos;aa.txt&apos;])
+　　(&apos;d:\\books\\book&apos;, [ ], [ ])
+</code></pre><h2 id="判断是否为目录"><a href="#判断是否为目录" class="headerlink" title="判断是否为目录"></a>判断是否为目录</h2><p>　　在Python中可以使用os.path.isdir()函数判断某一路径是否为目录。</p>
+<p>　　其函数原型如下所示：</p>
+<p>　　os.path.isdir(path)</p>
+<p>　　其参数 path为 要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p>
+<h2 id="判断是否为文件"><a href="#判断是否为文件" class="headerlink" title="判断是否为文件"></a>判断是否为文件</h2><p>　　在Python中可以使用os.path.isfile()函数判断某一路径是否为文件。其函数原型如下所示。</p>
+<p>　　os.path.isfile(path)</p>
+<p>　　其参数path为要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p>
+<h2 id="获取目标内容"><a href="#获取目标内容" class="headerlink" title="获取目标内容"></a>获取目标内容</h2><p>get_text():获取标签里面的内容，可以获取文本内容，例如：</p>
+<pre><code>html=&apos;&apos;&apos;
+&lt;div class=&quot;panel&quot;&gt;
+    &lt;div class=&quot;panel-heading&quot;&gt;
+        &lt;h4&gt;Hello&lt;/h4&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;panel-body&quot;&gt;
+        &lt;ul class=&quot;list&quot; id=&quot;list-1&quot;&gt;
+            &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt;
+            &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt;
+            &lt;li class=&quot;element&quot;&gt;Jay&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;ul class=&quot;list list-small&quot; id=&quot;list-2&quot;&gt;
+            &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt;
+            &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&apos;&apos;&apos;
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html, &apos;lxml&apos;)
+for li in soup.select(&apos;li&apos;):
+    print(li.get_text())
+</code></pre><p>返回结果为：</p>
+<pre><code>Foort
+Bar
+Jay
+Foo
+Bar
+</code></pre><h2 id="sql万能钥匙注入"><a href="#sql万能钥匙注入" class="headerlink" title="sql万能钥匙注入"></a>sql万能钥匙注入</h2><p> 我们登录一个网站的时候会有账户名和密码都要输入进去。这样的方法禁止非法进入网站，它是这样构造SQL语句的，假设填写用户名为marcofly密码为test。因为根据我们提交的用户名和密码被合成到SQL查询语句当中之后是这样的：</p>
+<p>select * from users where username=’marcofly’ and password=md5(‘test’) </p>
+<p>这样如果数据库不存在这样的字段就表示输入错误，无法登陆。正常情况下是如此，但是对于有SQL注入漏洞的网站来说，只要构造个特殊的“字符串”，照样能够成功登录。  比如我们填写用户名为zlq’ or ‘1’=’1’ or ‘1’=’1看看，这样后构造出的SQL语句为</p>
+<p> select * from users where username=’zlq’ or ‘1’=’1’ or ‘1’=’1’ and password=md5(‘test’) //就是替换marcofly这个字符串</p>
+<p>替换之后它是怎么执行的呢，先执行and部分，就是 ‘1’=’1’ and password=md5(‘test’)，这个密码对不上是返回假，就是不正确，然后执行or，<br> ‘zlq’ or ‘1’=’1’这个是或者的意思， ‘zlq’ 为真或者’1’=’1’为真就正确，’1’=’1’肯定为真的，所以正确，我们把代码缩小看看<br>（’zlq’ or ‘1’=’1’ ）or （’1’=’1’ and password=md5(‘test’)  ），这里给出逻辑’zlq’ or ‘1’=’1’ 为真，’1’=’1’ and password=md5(‘test’)为假，（真 ）or （假），即为正确  。你测试要是有万能密码漏洞的页面都能成功，而且很多人用htmlspecialchars过滤也没效果，因为htmlspecialchars需要填写两一个参数才能过滤单引号，默认是不过滤单引号的，所以上面的注入100%成功。</p>
+<p>我们再输入’ or 1=1#看看，把marcofly替换’ or 1=1#</p>
+<p> select * from users where username=’’ or 1=1#’ and password=md5(‘test’) </p>
+<p> 语义分析：“#”在mysql中是注释符，这样井号后面的内容将被mysql视为注释内容，这样就不会去执行了，换句话说，以下的两句sql语句等价： select * from users where username=’’ or 1=1<br>这样1=1永远为真，or那么执行成功 。</p>
+<p>现在我给出解决这个漏洞终极方案，保证天煞都无法入侵成功。是这样的，不知道前面看到没有，password=md5(‘test’)就是说把密码经过MD5加密后再查询SQL，因为经过MD5加密后的字符串是32位的，那么经过加密后的都是一连串的像这样的ac59075b964b0715字符，是不可能办到去转换执行SQL语句的。我们经过改写SQL语句成这样：</p>
+<p>  select * from users where username=md5(‘marcofly’)  and password=md5(‘test’) </p>
+<p>我们再次输入用户名为 zlq’ or ‘1’=’1’ or ‘1’=’1看看，执行的语句已经变为</p>
+<p>select * from users where username=‘6c92bfdc2da722a1’  and password=‘4621d373cade4e83’</p>
+<p>看到了吧，无论你输入什么新型的SQL万能密码注入语句都行，都是转为一个MD5字符串。不要嫌弃经过MD5转换的效率，这里只用MD5加密过滤什么的都不用 ，其实企业中没有一个说嫌过滤牺牲性能的，如果真有这样的站长让我瞧瞧，让我膜拜一下。其实注入攻击难就难在参数性SQL注入，因为你不可能用MD5加密查询一个数据然后用MD5呈现给客户吧，如果有时间我再讲讲SQL注入的强大防御阵营。</p>
+<h2 id="sql注入常见万能密码"><a href="#sql注入常见万能密码" class="headerlink" title="sql注入常见万能密码"></a>sql注入常见万能密码</h2><pre><code>1：&quot;or &quot;a&quot;=&quot;a
+2： &apos;)or(&apos;a&apos;=&apos;a
+3：or 1=1--
+4：&apos;or 1=1--
+5：a&apos;or&apos; 1=1--
+6：&quot;or 1=1--
+7：&apos;or&apos;a&apos;=&apos;a
+8：&quot;or&quot;=&quot;a&apos;=&apos;a
+9：&apos;or&apos;&apos;=&apos;
+10：&apos;or&apos;=&apos;or&apos;
+11：1 or &apos;1&apos;=&apos;1&apos;=1
+12：1 or &apos;1&apos;=&apos;1&apos; or 1=1
+13： &apos;OR 1=1%00
+</code></pre>]]></content>
       <categories>
         <category>爬虫</category>
       </categories>
@@ -83,23 +652,35 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[python笔记]]></title>
-    <url>%2F2018%2F07%2F31%2Fpython%E7%AC%94%E8%AE%B0%2F</url>
-    <content type="text"><![CDATA[今天做了一道过滤敏感词的python编程题，真是异常的纠结，现在给大家分享一下这道题: 题目要求： 读取敏感词文本文件filter.txt,里面存在敏感词，当你输入一段话如果包含敏感字，则用*代替敏感字。（例：“我创建一个网站，其中我注入了挖矿脚本”，“我创建一个网站，其中我注入了**脚本”） 我们可以看到filter.txt中内容为: 我们可以写下如下代码： user = input() file = open(&apos;filter.txt&apos;,&apos;r&apos;) newfile = file.read() a = [] for i in newfile: if i == &apos;\n&apos; or i == &apos;，&apos;: pass else: a.append(i) for i in user: for j in a: s = 0 if i == j: s += 1 print(&apos;*&apos;, end = &apos;&apos;) break if s == 0: print(i,end = &apos;&apos;) 先读取敏感词文本文件filter.txt，把这个文件中的内容根据逗号分成一个一个字符串，再让它与输入的内容一个一个字符进行比较，如果相等，就输出’*’，如果不相等就输出原来的字符。]]></content>
+    <title>萌新赛</title>
+    <url>/2018/10/29/%E8%90%8C%E6%96%B0%E8%B5%9B/</url>
+    <content><![CDATA[<h3 id="一、根本想不到"><a href="#一、根本想不到" class="headerlink" title="一、根本想不到"></a>一、根本想不到</h3><p><img src="./images/1540816951270.png" alt="enter description here"></p>
+<a id="more"></a>
+<p>题目中提示wordpress，不知道所以去百度搜索，搜索查看步骤后发现，可以在网址后面加上wp-login.php进行后台登陆,试了之后发现还是不行，就想着用wp-admin.php进行登陆，结果就可以了，就得到了flag</p>
+<p><img src="./images/1540817528867.png" alt="enter description here"></p>
+<h3 id="二、MISC1"><a href="#二、MISC1" class="headerlink" title="二、MISC1"></a>二、MISC1</h3><p>下载文件后得到一张图片，首先想到的就是改后缀名，把.jpg改为.txt后得到文本，按ctrl+f后搜索flag就找到了flag</p>
+<h3 id="三、MISC4"><a href="#三、MISC4" class="headerlink" title="三、MISC4"></a>三、MISC4</h3><p>下载文件后解压时需要输入密码，所以百度搜索ctf题解压文件需要输入密码，得到很多知识点，查看试验后发现</p>
+<p><img src="./images/1540817562170.png" alt="enter description here"></p>
+<p>就想着试试，打开虚拟机里kail的linux后，把压缩文件拉进系统里，再把它提取出来，就得到了flag</p>
+<p><img src="./images/1540817582403.png" alt="enter description here"></p>
+<h3 id="四、你必须要跳"><a href="#四、你必须要跳" class="headerlink" title="四、你必须要跳"></a>四、你必须要跳</h3><p>打开压缩文件后出现-.– — ..- ..–.- … …. — ..- .的格式，就百度搜索，发现这是摩斯密码，就想到了解密，解密之后得到BBAABAAAABAA的格式，再百度之后，发现这是培根密码，解密之后，出现</p>
+<p><img src="./images/1540817602546.png" alt="enter description here"></p>
+<p>肯定是要继续解密的，发现这是一段没有规律的组合，然后栅栏密码就是要把加密的明文分成N个一组，然后把每组的第1个字连起来，形成一段无规律的话，就想着用栅栏密码解密<br>栏数从1开始试，发现都不对，然后看到上面的解密是有大小写的，就想着大小写分开解密<br>试试后发现小写解密栏数为4时成功了</p>
+<p><img src="./images/1540817619192.png" alt="enter description here"></p>
+<h3 id="五、常用的加解密"><a href="#五、常用的加解密" class="headerlink" title="五、常用的加解密"></a>五、常用的加解密</h3><p>解压文件后，出现</p>
+<p><img src="./images/1540817921095.png" alt="enter description here"></p>
+<p>从第一行中看出，这是用base64加密的图片，就百度搜base64解密成图片，发现了解密工具，网址为<a href="http://imgbase64.duoshitong.com/，解密后出现" target="_blank" rel="noopener">http://imgbase64.duoshitong.com/，解密后出现</a></p>
+<p><img src="./images/1540817965039.png" alt="enter description here"></p>
+<p>提交synt{2018_zratkva_pgs}后，显示错误，就想着把synt变成flag，就百度搜synt怎么变成flag，就看到了好多例题，例如</p>
+<p><img src="./images/1540818041721.png" alt="enter description here"></p>
+<p>就知道了要用rot13解密，解密之后得到flag{2018_mengxin_ctf}</p>
+<h3 id="六、签到题"><a href="#六、签到题" class="headerlink" title="六、签到题"></a>六、签到题</h3><p>题目中提示关注公众号“中原工学院DROPS攻防训练营”，由于以前关注过了，所以刚开始没有重新关注，就一直没有得到flag，后来取消重新关注后，得到了flag</p>
+]]></content>
       <categories>
-        <category>python</category>
+        <category>ctf</category>
       </categories>
       <tags>
-        <tag>Google编码规范</tag>
-        <tag>python小知识</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[搭建博客]]></title>
-    <url>%2F2018%2F07%2F31%2F%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%2F</url>
-    <content type="text"><![CDATA[历经千辛万苦终于建立了自己的博客，心情自然是很高兴的，在此总结一下建立博客过程中遇到的问题。也分享一下一些搭建博客的教程链接： https://blog.csdn.net/u012150360/article/details/72793482 https://www.cnblogs.com/fengxiongZz/p/7707219.html https://www.jianshu.com/p/863f3f2d1733 还有hexo的next主题个性化教程：打造炫酷网站 根据上面的三个教程基本就可以清楚地搭建自己的博客了，可能过程中还会遇到几个坑，下面是我搭建过程中遇到的坑，希望会有所帮助。 就是在ssh-key配置时总是失败，经常会报这样的错误： The authenticity of host &apos;github.com (192.30.255.112)&apos; can&apos;t be established. RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 Google之后明白，少了一个known_hosts文件，本来密钥文件应该是三个，现在是两个，便报了这样的错误，此时选择yes回车之后，便可以了，同时生成了缺少的known_hosts文件： Are you sure you want to continue connecting (yes/no)? //输入yes，回车]]></content>
-      <tags>
-        <tag>搭建博客</tag>
+        <tag>后台登陆wordpress,图片隐写,加解密</tag>
       </tags>
   </entry>
 </search>

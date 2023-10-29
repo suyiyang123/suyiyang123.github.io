@@ -171,10 +171,37 @@
     
     <summary type="html">
     
-      &lt;h2 id=&quot;mark-text-文件夹创建与切换&quot;&gt;&lt;a href=&quot;#mark-text-文件夹创建与切换&quot; class=&quot;headerlink&quot; title=&quot;==mark text==文件夹创建与切换&quot;&gt;&lt;/a&gt;==mark text==文件夹创建与切换&lt;/h2&gt;&lt;p&gt;os.makedirs(os.path.join(“E:\name”, filename))&lt;/p&gt;
-&lt;p&gt;在目录E:\name下创建名为filename的文件夹&lt;/p&gt;
-&lt;p&gt;os.chdir(“E:\name\“ + filename)&lt;/p&gt;
-&lt;p&gt;切换工作路径到E:\name\filename下&lt;/p&gt;
+      &lt;h2 id=&quot;mark-text-文件夹创建与切换&quot;&gt;&lt;a href=&quot;#mark-text-文件夹创建与切换&quot; class=&quot;headerlink&quot; title=&quot;==mark text==文件夹创建与切换&quot;&gt;&lt;/a&gt;==mark text==文件夹创建与切换&lt;/h2&gt;&lt;p&gt;os.makedirs(os.path.join(“E:&#92;name”, filename))&lt;/p&gt;
+&lt;p&gt;在目录E:&#92;name下创建名为filename的文件夹&lt;/p&gt;
+&lt;p&gt;os.chdir(“E:&#92;name&#92;“ + filename)&lt;/p&gt;
+&lt;p&gt;切换工作路径到E:&#92;name&#92;filename下&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="爬虫" scheme="http://yoursite.com/categories/%E7%88%AC%E8%99%AB/"/>
+    
+    
+      <category term="爬虫" scheme="http://yoursite.com/tags/%E7%88%AC%E8%99%AB/"/>
+    
+      <category term="sql" scheme="http://yoursite.com/tags/sql/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>2023年11月</title>
+    <link href="http://yoursite.com/2018/08/06/ctf%E6%80%BB%E7%BB%93%20-%20%E5%89%AF%E6%9C%AC/"/>
+    <id>http://yoursite.com/2018/08/06/ctf总结 - 副本/</id>
+    <published>2018-08-06T07:13:52.000Z</published>
+    <updated>2023-10-27T08:35:21.578Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="mark-text-文件夹创建与切换"><a href="#mark-text-文件夹创建与切换" class="headerlink" title="==mark text==文件夹创建与切换"></a>==mark text==文件夹创建与切换</h2><p>os.makedirs(os.path.join(“E:\name”, filename))</p><p>在目录E:\name下创建名为filename的文件夹</p><p>os.chdir(“E:\name\“ + filename)</p><p>切换工作路径到E:\name\filename下</p><a id="more"></a><h2 id="创建目录"><a href="#创建目录" class="headerlink" title="创建目录"></a>创建目录</h2><p>在Python中可以使用os.mkdir()函数创建目录（创建一级目录）。</p><p>　　其原型如下所示：</p><p>　　os.mkdir(path)</p><p>　　其参数path 为要创建目录的路径。</p><p>　　例如要在D盘下创建hello的目录(或在已有的文件夹中创建新的文件夹）</p><pre><code>&gt;&gt;&gt; import os　　&gt;&gt;&gt; os.mkdir(&apos;d:\hello&apos;)&gt;&gt;&gt;os.mkdir(&apos;d:\\hello\\23&apos;)　　</code></pre><p>　　可以使用os.makedirs（）函数创建多级目录。</p><p>　　其原型如下所示：</p><p>　　os.makedirs(path)</p><p>　　其参数path 为要创建目录的路径。</p><p>　　如在D盘下创建books的目录，books目录下在创建book目录</p><pre><code>&gt;&gt;&gt; import os　　&gt;&gt;&gt;os.makedirs(&apos;d:\\books\\book&apos;)　</code></pre><h2 id="删除目录"><a href="#删除目录" class="headerlink" title="删除目录"></a>删除目录</h2><p>在Python中可以使用os.rmdir()函数删除目录。</p><p>　　其原型如下所示：</p><p>　　os.rmdir(path)</p><p>　　其参数path 为要删除的目录的路径。</p><p>　　例如把D盘下的hmm的目录删除</p><p>　　&gt;&gt;&gt; import os</p><p>　　&gt;&gt;&gt; os.rmdir(‘d:\hmm’) </p><p>删除多级目录</p><p>　　在Python中可以使用os.removedirs()函数删除多级目录。</p><p>　　其原型如下所示：</p><p>　　os.removdirs(path)</p><p>　　其参数path 为要删除的多级目录的路径。</p><p>　　&gt;&gt;&gt; import os</p><p>　　&gt;&gt;&gt; os.removedirs(‘d:\books\book’)</p><p>　　#注意：要删除的目录必须是空目录</p><h2 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h2><p>　　在Python中可以使用os.remove()函数删除文件（注意一定是一个文件）。</p><p>　　其原型如下所示：</p><p>　　os.remov(path)</p><p>　　其参数path 为要删除的文件的路径。</p><p>　　如删除D盘下books目录下book目录中的book.txt的文件</p><p>　　&gt;&gt;&gt; import os</p><p>　　&gt;&gt;&gt;os.remove(‘d:\books\book\book.txt’)　　</p><h2 id="遍历目录"><a href="#遍历目录" class="headerlink" title="遍历目录"></a>遍历目录</h2><p>　　在Python中可以使用os.walk()函数遍历目录。</p><p>　　其原型如下所示：</p><p>　　os.walk(path)</p><p>　　其参数path 为要遍历的目录，遍历path，返回一个对象，他的每个部分都是一个三元组 (‘目录x’，[目录x下的目录list]，目录x下面的文件) 。如：</p><pre><code>　　&gt;&gt;&gt; a=os.walk(&apos;d:\\books&apos;)　　&gt;&gt;&gt; def  fun():             　　  for i in a:                    　　   print i　　&gt;&gt;&gt; fun()　　(&apos;d:\\books&apos;, [&apos;book&apos;], [&apos;aa.txt&apos;])　　(&apos;d:\\books\\book&apos;, [ ], [ ])</code></pre><h2 id="判断是否为目录"><a href="#判断是否为目录" class="headerlink" title="判断是否为目录"></a>判断是否为目录</h2><p>　　在Python中可以使用os.path.isdir()函数判断某一路径是否为目录。</p><p>　　其函数原型如下所示：</p><p>　　os.path.isdir(path)</p><p>　　其参数 path为 要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p><h2 id="判断是否为文件"><a href="#判断是否为文件" class="headerlink" title="判断是否为文件"></a>判断是否为文件</h2><p>　　在Python中可以使用os.path.isfile()函数判断某一路径是否为文件。其函数原型如下所示。</p><p>　　os.path.isfile(path)</p><p>　　其参数path为要进行判断的路径。如果是则返回TRUE,否则返回FALSE。</p><h2 id="获取目标内容"><a href="#获取目标内容" class="headerlink" title="获取目标内容"></a>获取目标内容</h2><p>get_text():获取标签里面的内容，可以获取文本内容，例如：</p><pre><code>html=&apos;&apos;&apos;&lt;div class=&quot;panel&quot;&gt;    &lt;div class=&quot;panel-heading&quot;&gt;        &lt;h4&gt;Hello&lt;/h4&gt;    &lt;/div&gt;    &lt;div class=&quot;panel-body&quot;&gt;        &lt;ul class=&quot;list&quot; id=&quot;list-1&quot;&gt;            &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt;            &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt;            &lt;li class=&quot;element&quot;&gt;Jay&lt;/li&gt;        &lt;/ul&gt;        &lt;ul class=&quot;list list-small&quot; id=&quot;list-2&quot;&gt;            &lt;li class=&quot;element&quot;&gt;Foo&lt;/li&gt;            &lt;li class=&quot;element&quot;&gt;Bar&lt;/li&gt;        &lt;/ul&gt;    &lt;/div&gt;&lt;/div&gt;&apos;&apos;&apos;from bs4 import BeautifulSoupsoup = BeautifulSoup(html, &apos;lxml&apos;)for li in soup.select(&apos;li&apos;):    print(li.get_text())</code></pre><p>返回结果为：</p><pre><code>FoortBarJayFooBar</code></pre><h2 id="sql万能钥匙注入"><a href="#sql万能钥匙注入" class="headerlink" title="sql万能钥匙注入"></a>sql万能钥匙注入</h2><p> 我们登录一个网站的时候会有账户名和密码都要输入进去。这样的方法禁止非法进入网站，它是这样构造SQL语句的，假设填写用户名为marcofly密码为test。因为根据我们提交的用户名和密码被合成到SQL查询语句当中之后是这样的：</p><p>select * from users where username=’marcofly’ and password=md5(‘test’) </p><p>这样如果数据库不存在这样的字段就表示输入错误，无法登陆。正常情况下是如此，但是对于有SQL注入漏洞的网站来说，只要构造个特殊的“字符串”，照样能够成功登录。  比如我们填写用户名为zlq’ or ‘1’=’1’ or ‘1’=’1看看，这样后构造出的SQL语句为</p><p> select * from users where username=’zlq’ or ‘1’=’1’ or ‘1’=’1’ and password=md5(‘test’) //就是替换marcofly这个字符串</p><p>替换之后它是怎么执行的呢，先执行and部分，就是 ‘1’=’1’ and password=md5(‘test’)，这个密码对不上是返回假，就是不正确，然后执行or，<br> ‘zlq’ or ‘1’=’1’这个是或者的意思， ‘zlq’ 为真或者’1’=’1’为真就正确，’1’=’1’肯定为真的，所以正确，我们把代码缩小看看<br>（’zlq’ or ‘1’=’1’ ）or （’1’=’1’ and password=md5(‘test’)  ），这里给出逻辑’zlq’ or ‘1’=’1’ 为真，’1’=’1’ and password=md5(‘test’)为假，（真 ）or （假），即为正确  。你测试要是有万能密码漏洞的页面都能成功，而且很多人用htmlspecialchars过滤也没效果，因为htmlspecialchars需要填写两一个参数才能过滤单引号，默认是不过滤单引号的，所以上面的注入100%成功。</p><p>我们再输入’ or 1=1#看看，把marcofly替换’ or 1=1#</p><p> select * from users where username=’’ or 1=1#’ and password=md5(‘test’) </p><p> 语义分析：“#”在mysql中是注释符，这样井号后面的内容将被mysql视为注释内容，这样就不会去执行了，换句话说，以下的两句sql语句等价： select * from users where username=’’ or 1=1<br>这样1=1永远为真，or那么执行成功 。</p><p>现在我给出解决这个漏洞终极方案，保证天煞都无法入侵成功。是这样的，不知道前面看到没有，password=md5(‘test’)就是说把密码经过MD5加密后再查询SQL，因为经过MD5加密后的字符串是32位的，那么经过加密后的都是一连串的像这样的ac59075b964b0715字符，是不可能办到去转换执行SQL语句的。我们经过改写SQL语句成这样：</p><p>  select * from users where username=md5(‘marcofly’)  and password=md5(‘test’) </p><p>我们再次输入用户名为 zlq’ or ‘1’=’1’ or ‘1’=’1看看，执行的语句已经变为</p><p>select * from users where username=‘6c92bfdc2da722a1’  and password=‘4621d373cade4e83’</p><p>看到了吧，无论你输入什么新型的SQL万能密码注入语句都行，都是转为一个MD5字符串。不要嫌弃经过MD5转换的效率，这里只用MD5加密过滤什么的都不用 ，其实企业中没有一个说嫌过滤牺牲性能的，如果真有这样的站长让我瞧瞧，让我膜拜一下。其实注入攻击难就难在参数性SQL注入，因为你不可能用MD5加密查询一个数据然后用MD5呈现给客户吧，如果有时间我再讲讲SQL注入的强大防御阵营。</p><h2 id="sql注入常见万能密码"><a href="#sql注入常见万能密码" class="headerlink" title="sql注入常见万能密码"></a>sql注入常见万能密码</h2><pre><code>1：&quot;or &quot;a&quot;=&quot;a2： &apos;)or(&apos;a&apos;=&apos;a3：or 1=1--4：&apos;or 1=1--5：a&apos;or&apos; 1=1--6：&quot;or 1=1--7：&apos;or&apos;a&apos;=&apos;a8：&quot;or&quot;=&quot;a&apos;=&apos;a9：&apos;or&apos;&apos;=&apos;10：&apos;or&apos;=&apos;or&apos;11：1 or &apos;1&apos;=&apos;1&apos;=112：1 or &apos;1&apos;=&apos;1&apos; or 1=113： &apos;OR 1=1%00</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;mark-text-文件夹创建与切换&quot;&gt;&lt;a href=&quot;#mark-text-文件夹创建与切换&quot; class=&quot;headerlink&quot; title=&quot;==mark text==文件夹创建与切换&quot;&gt;&lt;/a&gt;==mark text==文件夹创建与切换&lt;/h2&gt;&lt;p&gt;os.makedirs(os.path.join(“E:&#92;name”, filename))&lt;/p&gt;
+&lt;p&gt;在目录E:&#92;name下创建名为filename的文件夹&lt;/p&gt;
+&lt;p&gt;os.chdir(“E:&#92;name&#92;“ + filename)&lt;/p&gt;
+&lt;p&gt;切换工作路径到E:&#92;name&#92;filename下&lt;/p&gt;
     
     </summary>
     
