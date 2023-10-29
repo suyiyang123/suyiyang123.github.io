@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>php</title>
+    <title>php  1</title>
     <url>/2018/08/10/php/</url>
     <content><![CDATA[<p>php的详细使用可以参考<a href="http://php.net/manual/zh/" target="_blank" rel="noopener">http://php.net/manual/zh/</a></p>
 <p>php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。</p>

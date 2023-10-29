@@ -115,11 +115,11 @@
   </entry>
   
   <entry>
-    <title>php</title>
+    <title>php  1</title>
     <link href="http://yoursite.com/2018/08/10/php/"/>
     <id>http://yoursite.com/2018/08/10/php/</id>
     <published>2018-08-10T01:31:50.000Z</published>
-    <updated>2018-08-10T01:55:02.023Z</updated>
+    <updated>2023-10-29T11:13:23.410Z</updated>
     
     <content type="html"><![CDATA[<p>php的详细使用可以参考<a href="http://php.net/manual/zh/" target="_blank" rel="noopener">http://php.net/manual/zh/</a></p><p>php关于==号是这样处理的，如果一边是整型，另一边也需要是整型。</p><a id="more"></a><pre><code>0e545993274517709034328855841020</code></pre><p>这是一个整数，在php里是理解为0*10^4549…20的意思，那么其值是0</p><p>同样</p><pre><code>0e342768416822451524974117254469</code></pre><p>这是一个整数，在php里是理解为0*10^34..69的意思，那么其值是0，两者就相等了</p><p>举一个反面的例子</p><p>1e1和1e2</p><p>这里1e1=1<em>10^1=10，1e2=1</em>10^2=100</p><p>所以1e1 == 1e2这是false，但是</p><p>100 == 1e2 这是true，为什么呢，因为1e2先转为整型，是100</p><p>注意，对于e是指幂次。而其他26字符并不具有此能力。</p><p>参考：</p><p><a href="http://php.net/manual/zh/language.operators.comparison.php" target="_blank" rel="noopener">http://php.net/manual/zh/language.operators.comparison.php</a></p><pre><code>&lt;?phpvar_dump(0 == &quot;all&quot;); // 0 == 0 -&gt; truevar_dump(&quot;1&quot; == &quot;01&quot;); // 1 == 1 -&gt; truevar_dump(&quot;10&quot; == &quot;1e1&quot;); // 10 == 10 -&gt; truevar_dump(100 == &quot;1e2&quot;); // 100 == 100 -&gt; trueswitch (&quot;a&quot;) {case 0:    echo &quot;0&quot;;    break;case &quot;a&quot;: // never reached because &quot;a&quot; is already matched with 0    echo &quot;a&quot;;    break;}?&gt;</code></pre><p>做比较，会先转换类型， all字符串转换成数字类型(int)就是 0 ， 所以中间成立返回真。</p><pre><code>var_dump(08==8)这个结果返回是false，var_dump(09==9)这个结果返回也是false，而var_dump(07===7)返回true（var_dump(07==7)同样返回true。）</code></pre><p>php手册上有详细说明，整形以0开头的为八进制数，如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略，即09实际上为0，08也同理</p>]]></content>
     
